@@ -82,7 +82,7 @@
         <li id="dashboard">
             <a  href="{{ route('dashboard') }}">
                 <i class="ti-panel"></i>
-                <p>Checklist</p>asd
+                <p>Checklist</p>
             </a>
         </li>
         <li id="employee">
