@@ -208,10 +208,10 @@ iframe {
 .login100-more {
   width: 50%;
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: auto;
   background-position: center;
   position: relative;
-  z-index: 1;
+  /* z-index: 1; */
 }
 
 .login100-more::before {
@@ -219,7 +219,7 @@ iframe {
   display: block;
   position: absolute;
   z-index: -1;
-  width: 100%;
+  width: 110%;
   height: 100%;
   top: 0;
   left: 0;
