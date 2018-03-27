@@ -7,6 +7,7 @@
         </a>
 
     </div>
+          {{{ Auth::user()  }}}
     @if (Auth::user()->role_id === 1)
     <ul class="nav">
         <li id="dashboard">
@@ -24,24 +25,24 @@
         <li id="department">
             <a href="{{ route('department') }}">
                 <i class="ti-view-list-alt"></i>
-                <p>Department</p>
+                <p>Departments</p>
             </a>
         </li>
         <li id="building">
             <a href="{{ route('building') }}">
-                <i class="ti-layout-grid3"></i>
-                <p>Building</p>
+                <i class="ti-map-alt"></i>
+                <p>Buildings</p>
             </a>
         </li>
         <li id="courses">
             <a href="{{ route('courses') }}">
-                <i class="ti-layout-grid3"></i>
+                <i class="ti-menu-alt"></i>
                 <p>Courses</p>
             </a>
         </li>
         <li id="curriculumlist">
             <a href="{{ route('curriculumlist') }}">
-                <i class="ti-layout-grid3"></i>
+                <i class="ti-folder"></i>
                 <p>Curriculums</p>
             </a>
         </li>
@@ -82,15 +83,16 @@
         <li id="dashboard">
             <a  href="{{ route('dashboard') }}">
                 <i class="ti-panel"></i>
+                <p>Dashboard</p>
+            </a>
+        </li>
+         <li id="checklist">
+            <a  href="{{ route('student/checklist') }}">
+                <i class="ti-panel"></i>
                 <p>Checklist</p>
             </a>
         </li>
-        <li id="employee">
-            <a  href="{{ route('employee') }}">
-                <i class="ti-user"></i>
-                <p>Certificate of Grades</p>
-            </a>
-        </li>
+      
       
         
       

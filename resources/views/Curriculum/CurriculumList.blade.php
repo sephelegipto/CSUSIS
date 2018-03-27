@@ -9,7 +9,7 @@
                     <h4 class="title">Curriculums</h4>
                     <p class="category"></p>
                 </div>
-                <div class="content ">
+                <div class="content content table-responsive ">
                  <table id="example" class="ui celled table">
                     <thead>
                        <th>Curriculum Code</th>

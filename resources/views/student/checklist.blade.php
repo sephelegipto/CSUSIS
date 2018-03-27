@@ -7,12 +7,13 @@
      <div class="col-md-12">
         <div class="card">
             <div class="header">
-                <h4 class="title">Checklist - {{ $title }} - {{ $major }}</h4>
+              
                 <p class="category"></p>
             </div>
             <div class="content ">
                 <div class="panel-group" id="accordion">
-                    @for ($i = 0; $i < $years; $i++)
+                  4
+                    @for ($i = 0; $i < 4  ; $i++)
 
                     <div class="panel panel-default">
                         <div class="panel-heading">
@@ -22,7 +23,7 @@
                         </h4>
                     </div>
                     <div id="collapse{{ $i }}" class="panel-collapse collapse out">
-                      <div class="panel-body content table-responsive">
+                      <div class="panel-body">
 
                          @for ($z = 0; $z < 3; $z++)
 
@@ -50,7 +51,7 @@
 
                             {{ $sem[$z] }}
                         </h4>
-                        <table  class="table table-striped">
+                        <table  class="ui celled table">
                             <thead>
                                 <th>SubjectCode</th>
                                 <th>SubjectDescription</th>
@@ -111,7 +112,7 @@
 
 </div>
 <script>
-    document.getElementById("curriculumlist").className += " active";
+    // document.getElementById("curriculumlist").className += " active";
 
 </script>
 @endsection

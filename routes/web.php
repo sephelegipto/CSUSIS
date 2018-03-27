@@ -59,6 +59,12 @@ Route::group(['middleware'=>['authen','roles'],'roles'=>['admin']],function(){
 	
 });
 
+Route::group(['middleware'=>['authen','roles'],'roles'=>['student']],function(){
+	Route::get('/student/checklist', ['as'=>'student/checklist', 'uses'=>'StudentController@Checklist']);
+
+	
+});
+
 Route::get('/noPermission',function(){
 	return "403 Forbidden or No Permission to Access";
 });
