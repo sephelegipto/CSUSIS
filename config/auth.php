@@ -48,6 +48,16 @@ return [
         'admin'=>[
             'driver' => 'session',
             'provider' => 'users',
+        ],
+        
+
+        'tuser' => [
+            'driver' => 'session',
+            'provider' => 'tusers',
+        ],
+        'api-tuser' => [
+            'driver' => 'token',
+            'provider' => 'tusers',
         ]
     ],
 
@@ -74,10 +84,11 @@ return [
             'model' => App\User::class,
         ],
 
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        'tusers' => [
+            'driver' => 'eloquent',
+            'model' => App\tuser::class,
+
+        ]
     ],
 
     /*
@@ -100,6 +111,11 @@ return [
             'provider' => 'users',
             'table' => 'password_resets',
             'expire' => 60,
+        ],
+        'tusers' => [
+            'provider' => 'tusers',
+            'table' => 'password_resets',
+            'expire' => 15,
         ],
     ],
 

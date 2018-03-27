@@ -1,4 +1,7 @@
 <?php
+
+
+Auth::routes();
 Route::get('/', ['as'=>'/', 'uses'=>'LoginController@getLogin']);
 Route::post('/login',['as'=>'login','uses'=>'LoginController@postLogin']);
 Route::get('/read', function () {

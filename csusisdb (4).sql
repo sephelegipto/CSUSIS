@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 23, 2018 at 07:43 AM
+-- Generation Time: Mar 27, 2018 at 10:15 AM
 -- Server version: 5.7.21-log
 -- PHP Version: 7.2.2
 
@@ -27,26 +27,9 @@ DELIMITER $$
 -- Procedures
 --
 CREATE DEFINER=`root`@`192.168.1.177` PROCEDURE `spCheckListAddOREdit` (`AESwitch` INT(11), `CID` INT(11), `SID` INT(11), `LBU` VARCHAR(20), `LCU` VARCHAR(20), `LBH` VARCHAR(20), `LCH` VARCHAR(20), `SYI` INT(11), `STI` INT(11), `ST` VARCHAR(20))  BEGIN
-IF (AESwitch = 0) then
-	IF (SELECT COUNT(ID) FROM tChecklists WHERE CurriculumID=CID 
-		AND SubjectID = SID ) = 0 THEN
-		INSERT INTO tChecklists(CurriculumID,SubjectID,LabUnits,LecUnits,LabHours,LecHours,SubjectYearID,SubjectTermID,SubjectType)
-        VALUES (CID,SID,LBU,LCU,LBH,LCH,SYI,STI,ST);
-	END IF;
-else
-	IF (SELECT COUNT(ID) FROM tChecklists WHERE CurriculumID=CID 
-		AND SubjectID = SID 
-		AND Labunits=LBU 
-		AND LecUnits=LCU 
-		AND LabHours=LBH 
-		AND LecHours=LCH 
-		AND SubjectYearID=SYI 
-		AND SubjectTermID=STI 
-		AND SubjectType=ST) = 0 THEN
-		Update tChecklists SET CurriculumID=CID,SubjectID=SID,LabUnits=LBU,LecUnits=LCU,LabHours=LBH,LecHours=LCH,SubjectYearID=SYI,SubjectTermID=STI,SubjectType=ST
-        WHERE ID=AeSwitch;
-	END IF;
-END IF;
+	DELETE from tChecklists WHERE ID=AESwitch;
+    INSERT INTO tChecklists(CurriculumID,SubjectID,LabUnits,LecUnits,LabHours,LecHours,SubjectYearID,SubjectTermID,SubjectType)
+	VALUES (CID,SID,LBU,LCU,LBH,LCH,SYI,STI,ST);
 END$$
 
 CREATE DEFINER=`root`@`192.168.1.177` PROCEDURE `spChecklistsViewAllORSearch` (`LibraryToLoad` VARCHAR(50), `SearchText` VARCHAR(50), `SearchCode` VARCHAR(50), `SubjectYear` VARCHAR(20), `TD` VARCHAR(20))  BEGIN
@@ -316,6 +299,11 @@ CREATE DEFINER=`root`@`192.168.1.177` PROCEDURE `spLibraryDeletebyID` (`IDToDele
 			DELETE from tColleges WHERE ID = IDToDelete;
 		WHEN 'Curriculums' THEN
 			DELETE from tCurriculums WHERE ID = IDToDelete;
+		WHEN 'Subject Details' THEN
+			DELETE from tCheckLists WHERE ID = IDToDelete;
+            DELETE from tCheckListPrerequisite WHERE CheckListID=IDToDelete;
+		WHEN 'Periods' THEN
+			DELETE from tPeriods WHERE ID = IDToDelete;
 END CASE;
 END$$
 
@@ -460,16 +448,106 @@ CREATE DEFINER=`root`@`192.168.1.177` PROCEDURE `spLibraryViewAllORSearch` (`Lib
     
 END$$
 
-CREATE DEFINER=`root`@`192.168.1.177` PROCEDURE `spPreRequisiteAddOREdit` (`AESwitch` INT(11), `CID` INT(11), `SID` INT(11))  BEGIN
-IF (AESwitch = 0) then
+CREATE DEFINER=`root`@`192.168.1.177` PROCEDURE `spPeriodCoursesAddOREdit` (`AESwitch` INT(11), `PID` INT(11), `CID` INT(11), `SY` INT(11), `COST` DECIMAL(10,2))  BEGIN
+	IF AESwitch= 0 THEN
+		IF (SELECT COUNT(ID) FROM tperiodcourses WHERE
+			PeriodID=PID AND
+            COURSEID=CID AND
+            STUDENTYEAR=SY AND
+            COSTPERUNIT=COST)=0 THEN
+            INSERT INTO tperiodcourses(PeriodID,COURSEID,STUDENTYEAR,COSTPERUNIT)
+            VALUES (PID,CID,SY,COST);
+		END IF;
+    else
+		IF (SELECT COUNT(ID) FROM tperiodcourses WHERE
+			PeriodID=PID AND
+            COURSEID=CID AND
+            STUDENTYEAR=SY AND
+            COSTPERUNIT=COST)=0 THEN
+            UPDATE tperiodcourses SET PeriodID=PID,COURSEID=CID,STUDENTYEAR=SY,COSTPERUNIT=COST
+            WHERE ID=AESwitch;
+		END IF;
+    END IF;
+END$$
+
+CREATE DEFINER=`root`@`192.168.1.177` PROCEDURE `spPeriodCoursesViewAllORSearch` (`SearchText` VARCHAR(50), `PeriodToLoad` VARCHAR(50))  BEGIN
+		SELECT * FROM vPeriodCourses WHERE PeriodCode=PeriodToLoad AND (SearchText = '' 
+		or CourseCode LIKE  CONCAT('%',SearchText , '%')
+        or CourseTitle LIKE  CONCAT('%',SearchText , '%')
+        or NoOfYears LIKE  CONCAT('%',SearchText , '%')
+		or StudentYear LIKE  CONCAT('%',SearchText , '%')
+		or StudentYearDescription LIKE  CONCAT('%',SearchText , '%')
+        or CostPerUnit LIKE  CONCAT('%',SearchText , '%'))
+        ORDER BY ID DESC;
+END$$
+
+CREATE DEFINER=`root`@`192.168.1.177` PROCEDURE `spPeriodsAddOREdit` (`AESwitch` INT(11), `PCode` VARCHAR(50), `PTerm` INT(11), `PStart` DATE, `PEnd` DATE, `EStart` DATE, `EEnd` DATE, `ExPrelim` DATE, `ExMidterm` DATE, `ExFinals` DATE, `GStart` DATE, `GEnd` DATE)  BEGIN
+	IF AESwitch= 0 THEN
+		IF (SELECT COUNT(ID) FROM TPERIODS WHERE
+			PERIODCODE=PCODE AND
+            TERMID=PTERM AND
+            STARTDATE=PSTART AND
+            ENDDATE=PEND AND
+            ENROLLMENTSTARTDATE=ESTART AND
+            ENROLLMENTENDDATE=EEND AND
+            PRELIMDATE=EXPRELIM AND
+            MIDTERMDATE=EXMIDTERM AND
+            FINALSDATE=EXFINALS AND
+            GRADEINPUTSTART=GSTART AND
+            GRADEINPUTEND=GEND)=0 THEN
+            INSERT INTO TPERIODS(PERIODCODE,TERMID,STARTDATE,ENDDATE,ENROLLMENTSTARTDATE,ENROLLMENTENDDATE,PRELIMDATE,MIDTERMDATE,FINALSDATE,GRADEINPUTSTART,GRADEINPUTEND)
+            VALUES (PCODE,PTERM,PSTART,PEND,ESTART,EEND,EXPRELIM,EXMIDTERM,EXFINALS,GSTART,GEND);
+		END IF;
+    else
+		IF (SELECT COUNT(ID) FROM TPERIODS WHERE
+			PERIODCODE=PCODE AND
+            TERMID=PTERM AND
+            STARTDATE=PSTART AND
+            ENDDATE=PEND AND
+            ENROLLMENTSTARTDATE=ESTART AND
+            ENROLLMENTENDDATE=EEND AND
+            PRELIMDATE=EXPRELIM AND
+            MIDTERMDATE=EXMIDTERM AND
+            FINALSDATE=EXFINALS AND
+            GRADEINPUTSTART=GSTART AND
+            GRADEINPUTEND=GEND)=0 THEN
+            UPDATE TPERIODS SET 
+			PERIODCODE=PCODE,
+            TERMID=PTERM,
+            STARTDATE=PSTART,
+            ENDDATE=PEND,
+            ENROLLMENTSTARTDATE=ESTART,
+            ENROLLMENTENDDATE=EEND,
+            PRELIMDATE=EXPRELIM,
+            MIDTERMDATE=EXMIDTERM,
+            FINALSDATE=EXFINALS,
+            GRADEINPUTSTART=GSTART,
+            GRADEINPUTEND=GEND
+            WHERE ID=AESWITCH;
+		END IF;
+    END IF;
+END$$
+
+CREATE DEFINER=`root`@`192.168.1.177` PROCEDURE `spPeriodsViewAllORSearch` (`SearchText` VARCHAR(50))  BEGIN
+		SELECT * FROM vPeriods WHERE SearchText = ''
+		or CODE LIKE  CONCAT('%',SearchText , '%')
+        or TERM LIKE  CONCAT('%',SearchText , '%')
+        or STARTDATE LIKE  CONCAT('%',SearchText , '%')
+		or ENDDATE LIKE  CONCAT('%',SearchText , '%')
+		or ENROLLMENTSTARTDATE LIKE  CONCAT('%',SearchText , '%')
+        or ENROLLMENTENDDATE LIKE  CONCAT('%',SearchText , '%')
+        or PRELIMDATE LIKE  CONCAT('%',SearchText , '%')
+        or MIDTERMDATE LIKE  CONCAT('%',SearchText , '%')
+        or FINALSDATE LIKE  CONCAT('%',SearchText , '%')
+        or GRADEINPUTSTART LIKE  CONCAT('%',SearchText , '%')
+        or GRADEINPUTEND LIKE  CONCAT('%',SearchText , '%')
+        ORDER BY ID DESC;
+END$$
+
+CREATE DEFINER=`root`@`192.168.1.177` PROCEDURE `spPreRequisiteAddOREdit` (`AESwitch` INT(11), `SID` INT(11))  BEGIN
+		DELETE from tChecklistPreRequisite WHERE CheckListID=AESwitch;
 		INSERT INTO tChecklistPreRequisite(CheckListID,SubjectID)
         VALUES ((Select MAX(ID) from tCheckLists),SID);
-else
-	IF (SELECT COUNT(ID) FROM tCheckListPreRequisite WHERE CheckListID=CID AND SubjectID=SID)=0 THEN
-		UPDATE tChecklistPreRequisite SET CheckListID = CID,SubjectID=SID
-        WHERE ID=AWSwitch;
-	END IF;
-END IF;
 END$$
 
 CREATE DEFINER=`root`@`192.168.1.177` PROCEDURE `spRoomsAddOREdit` (`AESwitch` INT(11), `LibraryToAddEdit` VARCHAR(45), `ParamCode` VARCHAR(50), `ParamDescription` VARCHAR(100), `ParamType` VARCHAR(50), `BID` INT(11), `DID` INT(11))  BEGIN
@@ -521,6 +599,25 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `migrations`
+--
+
+CREATE TABLE `migrations` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `migration` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `batch` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `migrations`
+--
+
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
+(1, '2018_03_27_073028_create_tusers_table', 1);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `roles`
 --
 
@@ -538,7 +635,7 @@ CREATE TABLE `roles` (
 INSERT INTO `roles` (`role_id`, `name`, `created_at`, `updated_at`) VALUES
 (1, 'admin', NULL, NULL),
 (2, 'teacher', NULL, NULL),
-(3, 'student\r\n', NULL, NULL);
+(3, 'student', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -627,12 +724,60 @@ CREATE TABLE `tchecklistprerequisite` (
 --
 
 INSERT INTO `tchecklistprerequisite` (`ID`, `ChecklistID`, `SubjectID`) VALUES
-(1, '9', '268'),
-(2, '9', '269'),
-(7, '103', '65'),
-(8, '104', '67'),
-(9, '105', '3'),
-(10, '105', '3');
+(42, '65', '271'),
+(43, '66', '273'),
+(44, '67', '274'),
+(45, '68', '275'),
+(47, '70', '270'),
+(50, '73', '277'),
+(51, '74', '282'),
+(53, '76', '276'),
+(54, '77', '286'),
+(59, '81', '268'),
+(60, '81', '269'),
+(63, '84', '268'),
+(64, '84', '269'),
+(65, '89', '268'),
+(66, '90', '268'),
+(67, '90', '269'),
+(68, '92', '270'),
+(69, '93', '276'),
+(70, '94', '282'),
+(71, '95', '270'),
+(72, '96', '270'),
+(73, '97', '276'),
+(74, '98', '301'),
+(75, '100', '276'),
+(76, '101', '303'),
+(77, '102', '303'),
+(78, '106', '297'),
+(79, '107', '300'),
+(80, '116', '225'),
+(81, '116', '269'),
+(82, '117', '269'),
+(83, '117', '225'),
+(84, '118', '270'),
+(85, '119', '271'),
+(86, '121', '273'),
+(87, '122', '274'),
+(88, '123', '275'),
+(89, '124', '270'),
+(90, '125', '270'),
+(91, '126', '276'),
+(92, '127', '276'),
+(93, '132', '282'),
+(94, '133', '276'),
+(95, '134', '276'),
+(96, '135', '295'),
+(97, '137', '300'),
+(98, '139', '270'),
+(99, '140', '301'),
+(100, '141', '303'),
+(101, '144', '308'),
+(102, '148', '297'),
+(103, '161', '268'),
+(104, '163', '268'),
+(105, '163', '269');
 
 -- --------------------------------------------------------
 
@@ -658,68 +803,113 @@ CREATE TABLE `tchecklists` (
 --
 
 INSERT INTO `tchecklists` (`ID`, `CurriculumID`, `SubjectID`, `LabUnits`, `LecUnits`, `LabHours`, `LecHours`, `SubjectYearID`, `SubjectTermID`, `SubjectType`) VALUES
-(1, 10, 268, '3', '2', '3', '2', 1, 1, NULL),
-(2, 10, 269, '3', '2', '3', '2', 1, 1, NULL),
-(3, 10, 270, '', '3', '', '3', 1, 1, NULL),
-(4, 10, 271, '', '3', '', '3', 1, 1, NULL),
-(5, 10, 272, '', '3', '', '3', 1, 1, NULL),
-(6, 10, 273, '', '3', '', '3', 1, 1, NULL),
-(7, 10, 274, '', '2', '', '2', 1, 1, NULL),
-(8, 10, 275, '3', '3', '3', '3', 1, 1, NULL),
-(9, 10, 276, '', '2', '', '2', 1, 2, NULL),
-(10, 10, 277, '3', '2', '3', '2', 1, 2, NULL),
-(11, 10, 278, '', '3', '', '3', 1, 2, NULL),
-(12, 10, 279, '', '3', '', '3', 1, 2, NULL),
-(13, 10, 280, '', '3', '', '3', 1, 2, NULL),
-(14, 10, 281, NULL, '3', '', '3', 1, 2, NULL),
-(15, 10, 282, NULL, '3', '', '3', 1, 2, NULL),
-(42, 10, 283, '3', '2', '3', '2', 1, 2, NULL),
-(43, 10, 293, '3', '3', '3', '3', 2, 1, NULL),
-(44, 10, 294, '3', '2', '3', '2', 2, 1, NULL),
-(45, 10, 295, NULL, '3', '', '3', 2, 1, NULL),
-(46, 10, 296, '3', '2', '3', '2', 2, 1, NULL),
-(47, 10, 297, NULL, '3', '', '3', 2, 1, NULL),
-(48, 10, 298, '', '2', '', '2', 2, 1, NULL),
-(49, 10, 299, NULL, '3', '', '3', 2, 1, NULL),
-(50, 10, 300, NULL, '3', '', '3', 2, 1, NULL),
-(51, 10, 301, NULL, '3', '', '3', 2, 1, NULL),
-(52, 10, 302, '3', '2', '3', '2', 2, 2, NULL),
-(53, 10, 303, '3', '2', '3', '2', 2, 2, NULL),
-(54, 10, 304, '3', '2', '3', '2', 2, 2, NULL),
-(55, 10, 305, '3', '2', '3', '2', 2, 2, NULL),
-(56, 10, 306, ' ', '3', '', '3', 2, 2, NULL),
-(57, 10, 307, '', '3', '', '3', 2, 2, NULL),
-(58, 10, 308, '', '3', '', '3', 2, 2, NULL),
-(59, 10, 309, NULL, '3', '', '3', 2, 2, NULL),
-(60, 10, 310, NULL, '2', '', '2', 3, 1, NULL),
-(61, 10, 311, '3', '3', '2', '2', 3, 1, NULL),
-(62, 10, 312, '2', '2', '2', '2', 3, 1, NULL),
-(63, 10, 313, NULL, '3', '', '3', 3, 1, NULL),
-(64, 10, 314, NULL, '3', '', '3', 3, 1, NULL),
-(65, 10, 315, NULL, '3', '', '3', 3, 1, NULL),
-(66, 10, 316, NULL, '3', '', '3', 3, 1, NULL),
-(67, 10, 317, NULL, '3', '', '3', 3, 2, NULL),
-(68, 10, 318, '3', '2', '3', '2', 3, 2, NULL),
-(69, 10, 319, NULL, '3', '', '3', 3, 2, NULL),
-(70, 10, 320, NULL, '3', '', '3', 3, 2, NULL),
-(71, 10, 321, '3', '2', '3', '2', 3, 2, NULL),
-(72, 10, 322, NULL, '3', NULL, '3', 3, 2, NULL),
-(73, 10, 323, NULL, '3', NULL, '3', 3, 2, NULL),
-(86, 10, 324, NULL, '3', NULL, '3', 4, 1, NULL),
-(87, 10, 325, '3', '2', '3', '2', 4, 1, NULL),
-(88, 10, 326, NULL, '3', NULL, '3', 4, 1, NULL),
-(89, 10, 327, '3', '2', '3', '2', 4, 1, NULL),
-(90, 10, 328, '3', '2', '3', '2', 4, 1, NULL),
-(91, 10, 329, '3', '3', '3', '3', 4, 2, NULL),
-(98, 12, 22, '0', '1', '0', '1', 1, 1, 'Core'),
-(99, 13, 22, '0', '0', '0', '0', 1, 1, 'Core'),
-(100, 13, 284, '1', '3', '2', '4', 1, 1, 'Core'),
-(101, 13, 31, '', '', '', '', 1, 1, 'Core'),
-(102, 13, 241, '', '', '', '', 4, 2, 'Core'),
-(103, 13, 65, '3', '', '3', '', 5, 6, 'Core'),
-(104, 13, 67, '3', '', '3', '', 2, 2, 'Core'),
-(105, 13, 3, '3', '', '3', '', 2, 2, 'Core'),
-(106, 13, 22, '', '', '', '', 1, 1, 'Core');
+(4, 15, 268, '2', '1', '3', '2', 1, 1, 'Basic 1'),
+(5, 15, 269, '2', '1', '3', '2', 1, 1, 'Basic 1'),
+(7, 15, 270, '', '3', '', '3', 1, 1, 'Basic 1'),
+(9, 15, 271, '', '3', '', '3', 1, 1, 'Basic 1'),
+(11, 15, 272, '', '3', '', '3', 1, 1, 'Basic 1'),
+(13, 15, 273, '', '3', '', '3', 1, 1, 'Basic 1'),
+(14, 15, 280, '', '3', '', '3', 1, 2, 'Basic 1'),
+(16, 15, 275, '', '3', '', '3', 1, 1, 'Basic 1'),
+(25, 15, 0, '2', '1', '3', '2', 2, 2, 'Basic 1'),
+(26, 15, 305, '', '3', '', '3', 2, 2, 'Basic 1'),
+(29, 15, 298, '', '3', '', '3', 2, 1, 'Basic 1'),
+(30, 15, 307, '', '3', '', '3', 2, 2, 'Basic 1'),
+(31, 15, 299, '', '3', '', '3', 2, 1, 'Basic 1'),
+(39, 15, 318, '', '3', '', '3', 3, 2, 'Basic 1'),
+(40, 15, 311, '3', '3', '3', '2', 3, 1, 'Basic 1'),
+(41, 15, 319, '', '3', '', '3', 3, 2, 'Basic 1'),
+(42, 15, 312, '', '3', '', '3', 3, 1, 'Basic 1'),
+(43, 15, 320, '2', '1', '3', '2', 3, 2, 'Basic 1'),
+(44, 15, 313, '', '3', '', '3', 3, 1, 'Basic 1'),
+(45, 15, 321, '2', '1', '3', '2', 3, 2, 'Basic 1'),
+(46, 15, 314, '', '3', '', '3', 3, 1, 'Basic 1'),
+(47, 15, 322, '', '3', '', '3', 3, 2, 'Basic 1'),
+(48, 15, 315, '', '3', '', '3', 3, 1, 'Basic 1'),
+(49, 15, 323, '', '3', '', '3', 3, 2, 'Basic 1'),
+(50, 15, 316, '', '3', '', '3', 3, 1, 'Basic 1'),
+(51, 15, 329, '', '', '500', '', 4, 2, 'Basic 1'),
+(54, 15, 327, '2', '1', '3', '2', 4, 1, 'Basic 1'),
+(55, 15, 328, '', '3', '', '3', 4, 1, 'Basic 1'),
+(56, 15, 326, '3', '1', '2', '2', 4, 1, 'Basic 1'),
+(59, 15, 274, '0', '2', '0', '2', 1, 1, 'Basic 1'),
+(65, 15, 279, '', '3', '', '3', 1, 2, 'Basic 1'),
+(66, 15, 281, '', '3', '', '3', 1, 2, 'Basic 1'),
+(67, 15, 282, '', '2', '', '2', 1, 2, 'Basic 1'),
+(68, 15, 283, '', '3', '', '3', 1, 2, 'Basic 1'),
+(70, 15, 285, '', '3', '', '2', 2, 1, 'Basic 1'),
+(73, 15, 297, '3', '3', '3', '2', 2, 1, 'Basic 1'),
+(76, 15, 303, '2', '1', '3', '2', 2, 2, 'Basic 1'),
+(77, 15, 304, '2', '1', '3', '2', 2, 2, 'Major'),
+(81, 15, 276, '2', '1', '3', '2', 1, 2, 'Basic 1'),
+(92, 15, 278, '', '3', '', '3', 1, 2, 'Basic 1'),
+(93, 15, 296, '', '3', '', '3', 2, 1, 'Basic 1'),
+(94, 15, 301, '', '2', '', '2', 2, 1, 'Basic 1'),
+(95, 15, 308, '', '3', '', '3', 2, 2, 'Basic 1'),
+(96, 15, 284, '', '3', '3', '2', 2, 1, 'Basic 1'),
+(97, 15, 286, '3', '3', '3', '2', 2, 1, 'Basic 1'),
+(98, 15, 309, '', '2', '', '2', 2, 2, 'Basic 1'),
+(99, 15, 300, '', '4', '', '3', 2, 1, 'Basic 1'),
+(100, 15, 302, '2', '1', '3', '2', 2, 2, 'Basic 1'),
+(101, 15, 310, '3', '3', '3', '2', 3, 1, 'Basic 1'),
+(104, 15, 325, '', '1', '', '2', 4, 1, 'Basic 1'),
+(105, 15, 324, '3', '1', '3', '2', 4, 1, 'Basic 1'),
+(106, 15, 317, '2', '1', '3', '2', 3, 2, 'Basic 1'),
+(107, 15, 306, '2', '2', '3', '2', 2, 2, 'Basic 1'),
+(108, 16, 225, '2', '1', '3', '2', 1, 1, ''),
+(109, 16, 269, '2', '1', '3', '2', 1, 1, ''),
+(110, 16, 270, '', '3', '', '3', 1, 1, ''),
+(111, 16, 271, '', '3', '', '3', 1, 1, ''),
+(112, 16, 272, '', '3', '', '3', 1, 1, ''),
+(113, 16, 273, '', '3', '', '3', 1, 1, ''),
+(114, 16, 274, '', '2', '', '2', 1, 1, ''),
+(115, 16, 275, '', '3', '', '3', 1, 1, ''),
+(116, 16, 276, '2', '1', '3', '2', 1, 2, ''),
+(117, 16, 277, '2', '1', '3', '2', 1, 2, ''),
+(118, 16, 278, '', '3', '', '3', 1, 2, ''),
+(119, 16, 279, '', '3', '', '3', 1, 2, ''),
+(120, 16, 280, '', '3', '', '3', 1, 2, ''),
+(121, 16, 281, '', '3', '', '3', 1, 2, ''),
+(122, 16, 282, '', '2', '', '2', 1, 2, ''),
+(123, 16, 283, '', '3', '', '3', 1, 2, ''),
+(124, 16, 284, '', '3', '', '3', 2, 1, ''),
+(125, 16, 285, '', '3', '', '3', 2, 1, ''),
+(126, 16, 295, '2', '1', '3', '2', 2, 1, ''),
+(127, 16, 296, '', '3', '', '3', 2, 1, ''),
+(128, 16, 297, '', '3', '', '3', 2, 1, ''),
+(129, 16, 298, '', '3', '', '3', 2, 1, ''),
+(130, 16, 299, '', '3', '', '3', 2, 1, ''),
+(131, 16, 300, '2', '2', '3', '3', 2, 1, ''),
+(132, 16, 301, '', '2', '', '2', 2, 1, ''),
+(133, 16, 302, '2', '1', '3', '1', 2, 2, ''),
+(134, 16, 303, '2', '1', '3', '2', 2, 2, ''),
+(135, 16, 304, '2', '1', '3', '2', 2, 2, ''),
+(136, 16, 305, '', '3', '', '3', 2, 2, ''),
+(137, 16, 306, '2', '2', '3', '3', 2, 2, ''),
+(138, 16, 307, '', '3', '', '3', 2, 2, ''),
+(139, 16, 308, '', '3', '', '3', 2, 2, ''),
+(140, 16, 309, '', '2', '', '2', 2, 2, ''),
+(141, 16, 310, '2', '1', '3', '2', 3, 1, ''),
+(142, 16, 311, '2', '1', '3', '2', 3, 1, ''),
+(143, 16, 312, '', '3', '', '3', 3, 1, ''),
+(144, 16, 313, '', '3', '', '3', 3, 1, ''),
+(145, 16, 314, '', '3', '', '3', 3, 1, ''),
+(146, 16, 315, '', '3', '', '3', 3, 1, ''),
+(147, 16, 316, '', '3', '', '3', 3, 1, ''),
+(148, 16, 317, '2', '1', '3', '2', 3, 2, ''),
+(149, 16, 318, '', '3', '', '3', 3, 2, ''),
+(150, 16, 319, '', '3', '', '3', 3, 2, ''),
+(151, 16, 320, '2', '1', '3', '2', 3, 2, ''),
+(152, 16, 321, '', '3', '', '3', 3, 2, ''),
+(153, 16, 322, '', '3', '', '3', 3, 2, ''),
+(154, 16, 323, '', '3', '', '3', 3, 2, ''),
+(155, 16, 324, '2', '1', '3', '2', 4, 1, ''),
+(156, 16, 325, '', '3', '', '3', 4, 1, ''),
+(157, 16, 326, '2', '1', '3', '2', 4, 1, ''),
+(158, 16, 327, '2', '1', '3', '2', 4, 1, ''),
+(159, 16, 328, '', '3', '', '3', 4, 1, ''),
+(160, 16, 329, '', '9', '', '500', 4, 2, ''),
+(163, 15, 277, '2', '1', '3', '2', 1, 2, 'Major');
 
 -- --------------------------------------------------------
 
@@ -782,7 +972,7 @@ INSERT INTO `tcolleges` (`ID`, `CollegeCode`, `CollegeDescription`, `CollegeHead
 (10, 'CHIM', 'COLLEGE OF HOSPITALITY INDUSTRY MANAGEMENT', NULL),
 (11, 'CVETMED', 'COLLEGE OF VETERINARY MEDICINE', NULL),
 (12, 'COL ', 'COLLEGE OFLAW', NULL),
-(13, 'ALL', 'All Colleges', 0);
+(13, 'ALL', 'ALL COLLEGES', 0);
 
 -- --------------------------------------------------------
 
@@ -867,10 +1057,8 @@ CREATE TABLE `tcurriculums` (
 --
 
 INSERT INTO `tcurriculums` (`ID`, `CurriculumCode`, `CourseID`, `EntryYear`) VALUES
-(10, 'BSIT-WEBPROG2018', 67, 2018),
-(11, 'BSIT-INFOTECH2013-2013', 68, 2013),
-(12, 'BSCS-COMSCI2013-2013', 70, 2013),
-(13, 'BSCE-DRAFT2013-2013', 86, 2013);
+(15, 'BSIT-INFOTECH2013-2013', 68, 2013),
+(16, 'BSIT-WEBPROG2018-2018', 67, 2018);
 
 -- --------------------------------------------------------
 
@@ -892,7 +1080,7 @@ CREATE TABLE `tdepartments` (
 INSERT INTO `tdepartments` (`ID`, `DepartmentCode`, `DepartmentDescription`, `DepartmentHead`) VALUES
 (1, 'REG', 'REGISTRAR', 31),
 (3, 'LAN', 'LOCAL AREA NETWORK', NULL),
-(25, 'OSSW', 'Office of the Student Social Welfare', 0);
+(25, 'OSSW', 'OFFICE OF THE STUDENT SOCIAL WELFARE', 0);
 
 -- --------------------------------------------------------
 
@@ -1160,6 +1348,56 @@ INSERT INTO `tnationalities` (`ID`, `NationalityCode`, `NationalityDescription`)
 (18, 'ARAB', 'ARABIAN'),
 (19, 'JAM', 'JAMAICAN'),
 (20, 'NOR', 'NORWEDIAN');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tperiodcourses`
+--
+
+CREATE TABLE `tperiodcourses` (
+  `ID` int(11) NOT NULL,
+  `PeriodID` int(11) DEFAULT NULL,
+  `CourseID` int(11) DEFAULT NULL,
+  `StudentYear` int(11) DEFAULT NULL,
+  `CostPerUnit` decimal(10,2) DEFAULT '0.00'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `tperiodcourses`
+--
+
+INSERT INTO `tperiodcourses` (`ID`, `PeriodID`, `CourseID`, `StudentYear`, `CostPerUnit`) VALUES
+(1, 11, 67, 1, '1410.00'),
+(2, 11, 68, 4, '39.00');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tperiods`
+--
+
+CREATE TABLE `tperiods` (
+  `ID` int(11) NOT NULL,
+  `PeriodCode` varchar(45) DEFAULT NULL,
+  `TermID` int(11) DEFAULT NULL,
+  `StartDate` date DEFAULT NULL,
+  `EndDate` date DEFAULT NULL,
+  `EnrollmentStartDate` date DEFAULT NULL,
+  `EnrollmentEndDate` date DEFAULT NULL,
+  `PrelimDate` date DEFAULT NULL,
+  `MidtermDate` date DEFAULT NULL,
+  `FinalsDate` date DEFAULT NULL,
+  `GradeInputStart` date DEFAULT NULL,
+  `GradeInputEnd` date DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `tperiods`
+--
+
+INSERT INTO `tperiods` (`ID`, `PeriodCode`, `TermID`, `StartDate`, `EndDate`, `EnrollmentStartDate`, `EnrollmentEndDate`, `PrelimDate`, `MidtermDate`, `FinalsDate`, `GradeInputStart`, `GradeInputEnd`) VALUES
+(11, 'FS-32018-72018', 1, '2018-03-27', '2018-07-27', '2018-03-13', '2018-03-27', '2018-04-27', '2018-05-27', '2018-06-27', '2018-06-27', '2018-08-27');
 
 -- --------------------------------------------------------
 
@@ -1857,7 +2095,7 @@ INSERT INTO `tsubjects` (`ID`, `SubjectCode`, `SubjectDescription`, `Level`, `Un
 (299, 'LIT 11', 'LITERATURES OF THE PHILIPPINES', 'COLLEGE', 3, 'NO'),
 (300, 'PHY 13', 'GENERAL PHYSICS 1', 'COLLEGE', 3, 'NO'),
 (301, 'PE 13 ', 'INDIVIDUAL AND DUAL SPORTS GAMES', 'COLLEGE', 2, 'NO'),
-(302, 'IT 206', 'MULTIMEDIA SYSTEMES', 'COLLEGE', 3, 'NO'),
+(302, 'IT 206', 'MULTIMEDIA SYSTEMS', 'College', 3, 'NO'),
 (303, 'IT 207', 'OBJECT-ORIENTED PROGRAMMING', 'COLLEGE', 3, 'NO'),
 (304, 'IT 208', 'WEB DEVELOPMENT', 'COLLEGE', 3, 'NO'),
 (305, 'LIT 12', 'LITERATURE OF THE WORLD', 'COLLEGE', 3, 'NO'),
@@ -1886,7 +2124,11 @@ INSERT INTO `tsubjects` (`ID`, `SubjectCode`, `SubjectDescription`, `Level`, `Un
 (328, 'IT 405', 'IT PROFESSIONAL ETHICS', 'COLLEGE', 3, 'NO'),
 (329, 'IT 406', 'INTERNSHIP/OJT/PRACTICUM ', 'COLLEGE', 9, 'NO'),
 (330, 'Eng 18', 'Business Communication', 'COLLEGE', 3, 'NO'),
-(331, 'SAM', 'SAMPLE', 'College', 0, 'NO');
+(331, 'SAM', 'SAMPLE', 'College', 0, 'NO'),
+(332, 'CO-REQ', 'CO REQUISITE', 'College', 0, 'NO'),
+(333, 'JS', 'JUNIOR STANDING', 'College', 0, 'NO'),
+(334, 'SS', 'SENIOR STANDING', 'College', 0, 'NO'),
+(335, 'SS W/ ZD', 'SENIOR STANDING WITH ZERO DEFICIENCY', 'College', 0, 'NO');
 
 -- --------------------------------------------------------
 
@@ -1941,6 +2183,52 @@ INSERT INTO `tsubjectyears` (`ID`, `SubjectYearDescription`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `tusers`
+--
+
+CREATE TABLE `tusers` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `UserID` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `LoginID` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `role_id` int(11) NOT NULL,
+  `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `tusers`
+--
+
+INSERT INTO `tusers` (`id`, `UserID`, `LoginID`, `password`, `role_id`, `remember_token`, `created_at`, `updated_at`) VALUES
+(1, 'admin', 'admin', 'secret', 1, 'GtJtN47LJo1BDS5xJKU7SKV7liD8CvLWLkKYdveu3qcLUGs0RfSDwDp0AAwR', NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tusertypes`
+--
+
+CREATE TABLE `tusertypes` (
+  `ID` int(11) NOT NULL,
+  `Description` varchar(45) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `tusertypes`
+--
+
+INSERT INTO `tusertypes` (`ID`, `Description`) VALUES
+(1, 'Admin'),
+(2, 'Faculty'),
+(3, 'Student'),
+(4, 'College Head'),
+(5, 'Department Head');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `users`
 --
 
@@ -1966,9 +2254,9 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `school_id`, `curriculum_id`, `l_name`, `f_name`, `m_name`, `email`, `password`, `course_id`, `role_id`, `remember_token`, `created_at`, `updated_at`) VALUES
 (1, 'ZXCZXCZX', 0, 'Test', 'Test', 'Test', 'test', '$2y$10$KGIG5upJ.GlYqY.O/IOaKOJcz54uanpqb5kSeiUjjLxH77QpjmnZW', 1, 1, 'SrpWMtYdboPt6sih2gkPnbDmWHfrR79BP8xupVDUYvIy45HR4iGANOMvJVsC', NULL, '2017-11-20 02:33:13'),
-(2, '', 1, 'admin', 'admin', 'admin', 'admin', 'secret', 0, 1, 'kiNBQL3hjyKZEOOna6p31Kzy5tGuJFLt4hsOxeVcJDhVsFlcgPc4FE5fdol5', NULL, NULL),
-(28, 'TEST', 1, 'Test', 'Test', 'Test', 'student', 'secret', 1, 3, 'EynobIIYvObvhAMxj1yfD11Sut0d2Bk8H7PlabdtWYhqIcE5bwSDTv8sxLjO', NULL, NULL),
-(29, 'TEST', 1, 'sephel', 'Test', 'Test', 'teacher', 'secret', 1, 2, 'LIH6SNdYvJasXPQ2r9MBljVle19ooJVlnhBBLE8nxyhFhtth8Tbk38AeJjS2', NULL, NULL);
+(2, '', 1, 'admin', 'admin', 'admin', 'admin', 'secret', 0, 1, 'NqexItBdrEpBFxyFrz5kUsjlecQ3eZb2rj5U6Umfrfv0oghTT91levvaocM9', NULL, NULL),
+(28, 'TEST', 15, 'Test', 'Test', 'Test', 'student', 'secret', 1, 3, 'osXG3Z4DAa8UzrWeyObBSDdErPMA4Yeq9mXY6V7LEuaflGwBwnmPPha0Y5GP', NULL, NULL),
+(29, 'TEST', 1, 'sephel', 'Test', 'Test', 'teacher', 'secret', 1, 2, '6G0HJeEx5kRfCHDpnAL6InfIdtwio3DpO806fcnY3g95HQRxoPOoIdNE4oYD', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -2131,6 +2419,46 @@ CREATE TABLE `vemployeesgender` (
 -- --------------------------------------------------------
 
 --
+-- Stand-in structure for view `vperiodcourses`
+-- (See below for the actual view)
+--
+CREATE TABLE `vperiodcourses` (
+`ID` int(11)
+,`PeriodID` int(11)
+,`PeriodCode` varchar(45)
+,`CourseID` int(11)
+,`CourseCode` varchar(45)
+,`CourseTitle` varchar(100)
+,`NoOfYears` int(11)
+,`StudentYear` int(11)
+,`StudentYearDescription` varchar(45)
+,`CostPerUnit` decimal(10,2)
+);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `vperiods`
+-- (See below for the actual view)
+--
+CREATE TABLE `vperiods` (
+`ID` int(11)
+,`Code` varchar(45)
+,`Term` varchar(50)
+,`StartDate` date
+,`EndDate` date
+,`EnrollmentStartDate` date
+,`EnrollmentEndDate` date
+,`PrelimDate` date
+,`MidtermDate` date
+,`FinalsDate` date
+,`GradeInputStart` date
+,`GradeInputEnd` date
+);
+
+-- --------------------------------------------------------
+
+--
 -- Stand-in structure for view `vrooms`
 -- (See below for the actual view)
 --
@@ -2231,6 +2559,24 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`192.168.1.177` SQL SECURITY DEFINER V
 -- --------------------------------------------------------
 
 --
+-- Structure for view `vperiodcourses`
+--
+DROP TABLE IF EXISTS `vperiodcourses`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`192.168.1.177` SQL SECURITY DEFINER VIEW `vperiodcourses`  AS  select `tperiodcourses`.`ID` AS `ID`,`tperiodcourses`.`PeriodID` AS `PeriodID`,`vperiods`.`Code` AS `PeriodCode`,`tperiodcourses`.`CourseID` AS `CourseID`,`vcourses`.`CourseCode` AS `CourseCode`,`vcourses`.`CourseTitle` AS `CourseTitle`,`vcourses`.`NoOfYears` AS `NoOfYears`,`tperiodcourses`.`StudentYear` AS `StudentYear`,`tsubjectyears`.`SubjectYearDescription` AS `StudentYearDescription`,`tperiodcourses`.`CostPerUnit` AS `CostPerUnit` from (((`tperiodcourses` join `vperiods` on((`vperiods`.`ID` = `tperiodcourses`.`PeriodID`))) join `vcourses` on((`vcourses`.`ID` = `tperiodcourses`.`CourseID`))) join `tsubjectyears` on((`tsubjectyears`.`ID` = `tperiodcourses`.`StudentYear`))) ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `vperiods`
+--
+DROP TABLE IF EXISTS `vperiods`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`192.168.1.177` SQL SECURITY DEFINER VIEW `vperiods`  AS  select `tperiods`.`ID` AS `ID`,`tperiods`.`PeriodCode` AS `Code`,`tsubjectterm`.`TermDescription` AS `Term`,`tperiods`.`StartDate` AS `StartDate`,`tperiods`.`EndDate` AS `EndDate`,`tperiods`.`EnrollmentStartDate` AS `EnrollmentStartDate`,`tperiods`.`EnrollmentEndDate` AS `EnrollmentEndDate`,`tperiods`.`PrelimDate` AS `PrelimDate`,`tperiods`.`MidtermDate` AS `MidtermDate`,`tperiods`.`FinalsDate` AS `FinalsDate`,`tperiods`.`GradeInputStart` AS `GradeInputStart`,`tperiods`.`GradeInputEnd` AS `GradeInputEnd` from (`tperiods` join `tsubjectterm` on((`tsubjectterm`.`ID` = `tperiods`.`TermID`))) ;
+
+-- --------------------------------------------------------
+
+--
 -- Structure for view `vrooms`
 --
 DROP TABLE IF EXISTS `vrooms`;
@@ -2249,6 +2595,12 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`192.168.1.177` SQL SECURITY DEFINER V
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `migrations`
+--
+ALTER TABLE `migrations`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `roles`
@@ -2353,6 +2705,18 @@ ALTER TABLE `tnationalities`
   ADD PRIMARY KEY (`ID`);
 
 --
+-- Indexes for table `tperiodcourses`
+--
+ALTER TABLE `tperiodcourses`
+  ADD PRIMARY KEY (`ID`);
+
+--
+-- Indexes for table `tperiods`
+--
+ALTER TABLE `tperiods`
+  ADD PRIMARY KEY (`ID`);
+
+--
 -- Indexes for table `tpositions`
 --
 ALTER TABLE `tpositions`
@@ -2419,6 +2783,18 @@ ALTER TABLE `tsubjectyears`
   ADD PRIMARY KEY (`ID`);
 
 --
+-- Indexes for table `tusers`
+--
+ALTER TABLE `tusers`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `tusertypes`
+--
+ALTER TABLE `tusertypes`
+  ADD PRIMARY KEY (`ID`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -2427,6 +2803,12 @@ ALTER TABLE `users`
 --
 -- AUTO_INCREMENT for dumped tables
 --
+
+--
+-- AUTO_INCREMENT for table `migrations`
+--
+ALTER TABLE `migrations`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `roles`
@@ -2438,7 +2820,7 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT for table `samle`
 --
 ALTER TABLE `samle`
-  MODIFY `idsamle` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `idsamle` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `tbuildings`
@@ -2450,13 +2832,13 @@ ALTER TABLE `tbuildings`
 -- AUTO_INCREMENT for table `tchecklistprerequisite`
 --
 ALTER TABLE `tchecklistprerequisite`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=106;
 
 --
 -- AUTO_INCREMENT for table `tchecklists`
 --
 ALTER TABLE `tchecklists`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=107;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=164;
 
 --
 -- AUTO_INCREMENT for table `tcities`
@@ -2486,7 +2868,7 @@ ALTER TABLE `tcourses`
 -- AUTO_INCREMENT for table `tcurriculums`
 --
 ALTER TABLE `tcurriculums`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `tdepartments`
@@ -2529,6 +2911,18 @@ ALTER TABLE `tmajors`
 --
 ALTER TABLE `tnationalities`
   MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+
+--
+-- AUTO_INCREMENT for table `tperiodcourses`
+--
+ALTER TABLE `tperiodcourses`
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `tperiods`
+--
+ALTER TABLE `tperiods`
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `tpositions`
@@ -2582,7 +2976,7 @@ ALTER TABLE `tstudgrades`
 -- AUTO_INCREMENT for table `tsubjects`
 --
 ALTER TABLE `tsubjects`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=332;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=336;
 
 --
 -- AUTO_INCREMENT for table `tsubjectterm`
@@ -2595,6 +2989,18 @@ ALTER TABLE `tsubjectterm`
 --
 ALTER TABLE `tsubjectyears`
   MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- AUTO_INCREMENT for table `tusers`
+--
+ALTER TABLE `tusers`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `tusertypes`
+--
+ALTER TABLE `tusertypes`
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `users`

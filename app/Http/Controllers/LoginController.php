@@ -5,7 +5,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\User;
+use App\tuser;
 
 
 
@@ -17,6 +17,8 @@ class LoginController extends Controller
     protected $username = 'username';
     protected $redirectTo = '/admin';
     protected $guard = 'web';
+
+
 
     public function getLogin()
     {
@@ -35,7 +37,7 @@ class LoginController extends Controller
         }
         public function postLogin(Request $request)
         {
-           $user = User::where('email', $request->username)
+           $user = tuser::where('LoginID', $request->username)
            ->where('password', $request->password)
            ->first();
            if(empty($user)){
