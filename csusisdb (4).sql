@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 27, 2018 at 10:15 AM
+-- Generation Time: Mar 28, 2018 at 05:59 AM
 -- Server version: 5.7.21-log
 -- PHP Version: 7.2.2
 
@@ -569,6 +569,14 @@ else
 END IF;
 END$$
 
+CREATE DEFINER=`root`@`192.168.1.177` PROCEDURE `spStudentChecklistsViewAllORSearch` (`LibraryToLoad` VARCHAR(50), `CurriculumID` VARCHAR(50), `StudentID` VARCHAR(20))  BEGIN
+CASE LibraryToLoad
+	WHEN "Student Checklist" THEN
+		SELECT * FROM vStudentChecklists WHERE CurriculumID=SearchCode AND StudentID=StudentID;
+	
+END CASE;
+END$$
+
 CREATE DEFINER=`root`@`192.168.1.177` PROCEDURE `spSubjectsAddOREdit` (`AESwitch` INT(11), `LibraryToAddEdit` VARCHAR(45), `ParamCode` VARCHAR(50), `ParamDescription` VARCHAR(100), `ParamLevel` VARCHAR(50), `ParamUnits` VARCHAR(50), `ParamImported` VARCHAR(50))  BEGIN
 IF (AESwitch = 0) then
 	CASE LibraryToAddEdit
@@ -595,47 +603,6 @@ END IF;
 END$$
 
 DELIMITER ;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `migrations`
---
-
-CREATE TABLE `migrations` (
-  `id` int(10) UNSIGNED NOT NULL,
-  `migration` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `batch` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `migrations`
---
-
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
-(1, '2018_03_27_073028_create_tusers_table', 1);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `roles`
---
-
-CREATE TABLE `roles` (
-  `role_id` int(10) UNSIGNED NOT NULL,
-  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `roles`
---
-
-INSERT INTO `roles` (`role_id`, `name`, `created_at`, `updated_at`) VALUES
-(1, 'admin', NULL, NULL),
-(2, 'teacher', NULL, NULL),
-(3, 'student', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -777,7 +744,12 @@ INSERT INTO `tchecklistprerequisite` (`ID`, `ChecklistID`, `SubjectID`) VALUES
 (102, '148', '297'),
 (103, '161', '268'),
 (104, '163', '268'),
-(105, '163', '269');
+(105, '163', '269'),
+(106, '164', '276'),
+(107, '165', '277'),
+(108, '167', '303'),
+(109, '171', '275'),
+(110, '172', '276');
 
 -- --------------------------------------------------------
 
@@ -817,7 +789,6 @@ INSERT INTO `tchecklists` (`ID`, `CurriculumID`, `SubjectID`, `LabUnits`, `LecUn
 (30, 15, 307, '', '3', '', '3', 2, 2, 'Basic 1'),
 (31, 15, 299, '', '3', '', '3', 2, 1, 'Basic 1'),
 (39, 15, 318, '', '3', '', '3', 3, 2, 'Basic 1'),
-(40, 15, 311, '3', '3', '3', '2', 3, 1, 'Basic 1'),
 (41, 15, 319, '', '3', '', '3', 3, 2, 'Basic 1'),
 (42, 15, 312, '', '3', '', '3', 3, 1, 'Basic 1'),
 (43, 15, 320, '2', '1', '3', '2', 3, 2, 'Basic 1'),
@@ -831,14 +802,11 @@ INSERT INTO `tchecklists` (`ID`, `CurriculumID`, `SubjectID`, `LabUnits`, `LecUn
 (51, 15, 329, '', '', '500', '', 4, 2, 'Basic 1'),
 (54, 15, 327, '2', '1', '3', '2', 4, 1, 'Basic 1'),
 (55, 15, 328, '', '3', '', '3', 4, 1, 'Basic 1'),
-(56, 15, 326, '3', '1', '2', '2', 4, 1, 'Basic 1'),
 (59, 15, 274, '0', '2', '0', '2', 1, 1, 'Basic 1'),
 (65, 15, 279, '', '3', '', '3', 1, 2, 'Basic 1'),
 (66, 15, 281, '', '3', '', '3', 1, 2, 'Basic 1'),
 (67, 15, 282, '', '2', '', '2', 1, 2, 'Basic 1'),
-(68, 15, 283, '', '3', '', '3', 1, 2, 'Basic 1'),
 (70, 15, 285, '', '3', '', '2', 2, 1, 'Basic 1'),
-(73, 15, 297, '3', '3', '3', '2', 2, 1, 'Basic 1'),
 (76, 15, 303, '2', '1', '3', '2', 2, 2, 'Basic 1'),
 (77, 15, 304, '2', '1', '3', '2', 2, 2, 'Major'),
 (81, 15, 276, '2', '1', '3', '2', 1, 2, 'Basic 1'),
@@ -847,13 +815,9 @@ INSERT INTO `tchecklists` (`ID`, `CurriculumID`, `SubjectID`, `LabUnits`, `LecUn
 (94, 15, 301, '', '2', '', '2', 2, 1, 'Basic 1'),
 (95, 15, 308, '', '3', '', '3', 2, 2, 'Basic 1'),
 (96, 15, 284, '', '3', '3', '2', 2, 1, 'Basic 1'),
-(97, 15, 286, '3', '3', '3', '2', 2, 1, 'Basic 1'),
 (98, 15, 309, '', '2', '', '2', 2, 2, 'Basic 1'),
-(99, 15, 300, '', '4', '', '3', 2, 1, 'Basic 1'),
 (100, 15, 302, '2', '1', '3', '2', 2, 2, 'Basic 1'),
-(101, 15, 310, '3', '3', '3', '2', 3, 1, 'Basic 1'),
 (104, 15, 325, '', '1', '', '2', 4, 1, 'Basic 1'),
-(105, 15, 324, '3', '1', '3', '2', 4, 1, 'Basic 1'),
 (106, 15, 317, '2', '1', '3', '2', 3, 2, 'Basic 1'),
 (107, 15, 306, '2', '2', '3', '2', 2, 2, 'Basic 1'),
 (108, 16, 225, '2', '1', '3', '2', 1, 1, ''),
@@ -879,9 +843,7 @@ INSERT INTO `tchecklists` (`ID`, `CurriculumID`, `SubjectID`, `LabUnits`, `LecUn
 (128, 16, 297, '', '3', '', '3', 2, 1, ''),
 (129, 16, 298, '', '3', '', '3', 2, 1, ''),
 (130, 16, 299, '', '3', '', '3', 2, 1, ''),
-(131, 16, 300, '2', '2', '3', '3', 2, 1, ''),
 (132, 16, 301, '', '2', '', '2', 2, 1, ''),
-(133, 16, 302, '2', '1', '3', '1', 2, 2, ''),
 (134, 16, 303, '2', '1', '3', '2', 2, 2, ''),
 (135, 16, 304, '2', '1', '3', '2', 2, 2, ''),
 (136, 16, 305, '', '3', '', '3', 2, 2, ''),
@@ -909,7 +871,17 @@ INSERT INTO `tchecklists` (`ID`, `CurriculumID`, `SubjectID`, `LabUnits`, `LecUn
 (158, 16, 327, '2', '1', '3', '2', 4, 1, ''),
 (159, 16, 328, '', '3', '', '3', 4, 1, ''),
 (160, 16, 329, '', '9', '', '500', 4, 2, ''),
-(163, 15, 277, '2', '1', '3', '2', 1, 2, 'Major');
+(163, 15, 277, '2', '1', '3', '2', 1, 2, 'Major'),
+(164, 15, 286, '2', '1', '3', '2', 2, 1, 'Basic 1'),
+(165, 15, 297, '2', '1', '3', '2', 2, 1, 'Basic 1'),
+(166, 15, 311, '2', '1', '3', '2', 3, 1, 'Basic 1'),
+(167, 15, 310, '2', '1', '3', '2', 3, 1, 'Basic 1'),
+(168, 15, 324, '2', '1', '3', '2', 4, 1, 'Basic 1'),
+(169, 15, 326, '2', '1', '3', '2', 4, 1, 'Basic 1'),
+(170, 15, 300, '2', '2', '3', '3', 2, 1, 'Basic 1'),
+(171, 15, 283, '', '3', '', '3', 1, 2, 'Basic 1'),
+(172, 16, 302, '2', '1', '3', '2', 2, 2, 'Basic 1'),
+(173, 16, 291, '3', '3', '3', '3', 2, 1, 'Core');
 
 -- --------------------------------------------------------
 
@@ -1058,7 +1030,8 @@ CREATE TABLE `tcurriculums` (
 
 INSERT INTO `tcurriculums` (`ID`, `CurriculumCode`, `CourseID`, `EntryYear`) VALUES
 (15, 'BSIT-INFOTECH2013-2013', 68, 2013),
-(16, 'BSIT-WEBPROG2018-2018', 67, 2018);
+(16, 'BSIT-WEBPROG2018-2018', 67, 2018),
+(17, 'BSPA-SCO SCI2018\r-2018', 76, 2018);
 
 -- --------------------------------------------------------
 
@@ -1759,23 +1732,44 @@ INSERT INTO `tschoolyears` (`id`, `description`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tstudgrades`
+-- Table structure for table `tstudentgrades`
 --
 
-CREATE TABLE `tstudgrades` (
+CREATE TABLE `tstudentgrades` (
   `ID` int(11) NOT NULL,
-  `StudentID` int(11) DEFAULT NULL,
-  `SubjectID` int(11) DEFAULT NULL,
-  `Grades` varchar(45) DEFAULT NULL,
-  `Remarks` varchar(45) DEFAULT NULL
+  `StudentID` varchar(45) NOT NULL,
+  `SubjectID` int(45) NOT NULL,
+  `Grade` int(11) NOT NULL,
+  `remarks` varchar(45) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table `tstudgrades`
+-- Dumping data for table `tstudentgrades`
 --
 
-INSERT INTO `tstudgrades` (`ID`, `StudentID`, `SubjectID`, `Grades`, `Remarks`) VALUES
-(1, NULL, 268, '95', 'TEST');
+INSERT INTO `tstudentgrades` (`ID`, `StudentID`, `SubjectID`, `Grade`, `remarks`) VALUES
+(1, 'ABC123', 225, 90, ''),
+(2, '', 269, 80, ''),
+(3, 'asd', 225, 1, '');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tstudents`
+--
+
+CREATE TABLE `tstudents` (
+  `ID` int(11) NOT NULL,
+  `StudentID` varchar(45) DEFAULT NULL,
+  `CurriculumID` varchar(45) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `tstudents`
+--
+
+INSERT INTO `tstudents` (`ID`, `StudentID`, `CurriculumID`) VALUES
+(1, 'ABC123', '16');
 
 -- --------------------------------------------------------
 
@@ -2191,7 +2185,7 @@ CREATE TABLE `tusers` (
   `UserID` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `LoginID` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `role_id` int(11) NOT NULL,
+  `UserTypeID` int(11) NOT NULL,
   `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
@@ -2201,8 +2195,10 @@ CREATE TABLE `tusers` (
 -- Dumping data for table `tusers`
 --
 
-INSERT INTO `tusers` (`id`, `UserID`, `LoginID`, `password`, `role_id`, `remember_token`, `created_at`, `updated_at`) VALUES
-(1, 'admin', 'admin', 'secret', 1, 'GtJtN47LJo1BDS5xJKU7SKV7liD8CvLWLkKYdveu3qcLUGs0RfSDwDp0AAwR', NULL, NULL);
+INSERT INTO `tusers` (`id`, `UserID`, `LoginID`, `password`, `UserTypeID`, `remember_token`, `created_at`, `updated_at`) VALUES
+(1, 'admin', 'admin', 'secret', 1, 'wnAISXKGjYVYwtndqHK6WxOtI2SP5wzZD4cJVTefBzGYQdeDjfbEsyOidK4Y', NULL, NULL),
+(2, 'teacher', 'teacher', 'secret', 2, 'IqunTzoFFnbGqvEeXhks7lbvD1iaS2TOxSmRfAt7JnW1nfaCWFTq14Wh0MAN', NULL, NULL),
+(3, 'ABC123', 'ABC123', 'secret', 3, 'Z7eAIUxb28OuGGxugFwufu9Qw9qUWkjg93xHTM4u4yzKhevvpabKeXI8jN3k', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -2225,38 +2221,6 @@ INSERT INTO `tusertypes` (`ID`, `Description`) VALUES
 (3, 'Student'),
 (4, 'College Head'),
 (5, 'Department Head');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `users`
---
-
-CREATE TABLE `users` (
-  `id` int(10) UNSIGNED NOT NULL,
-  `school_id` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `curriculum_id` int(11) DEFAULT NULL,
-  `l_name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `f_name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `m_name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `email` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `password` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `course_id` int(10) UNSIGNED NOT NULL,
-  `role_id` int(10) UNSIGNED NOT NULL,
-  `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `users`
---
-
-INSERT INTO `users` (`id`, `school_id`, `curriculum_id`, `l_name`, `f_name`, `m_name`, `email`, `password`, `course_id`, `role_id`, `remember_token`, `created_at`, `updated_at`) VALUES
-(1, 'ZXCZXCZX', 0, 'Test', 'Test', 'Test', 'test', '$2y$10$KGIG5upJ.GlYqY.O/IOaKOJcz54uanpqb5kSeiUjjLxH77QpjmnZW', 1, 1, 'SrpWMtYdboPt6sih2gkPnbDmWHfrR79BP8xupVDUYvIy45HR4iGANOMvJVsC', NULL, '2017-11-20 02:33:13'),
-(2, '', 1, 'admin', 'admin', 'admin', 'admin', 'secret', 0, 1, 'NqexItBdrEpBFxyFrz5kUsjlecQ3eZb2rj5U6Umfrfv0oghTT91levvaocM9', NULL, NULL),
-(28, 'TEST', 15, 'Test', 'Test', 'Test', 'student', 'secret', 1, 3, 'osXG3Z4DAa8UzrWeyObBSDdErPMA4Yeq9mXY6V7LEuaflGwBwnmPPha0Y5GP', NULL, NULL),
-(29, 'TEST', 1, 'sephel', 'Test', 'Test', 'teacher', 'secret', 1, 2, '6G0HJeEx5kRfCHDpnAL6InfIdtwio3DpO806fcnY3g95HQRxoPOoIdNE4oYD', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -2478,10 +2442,27 @@ CREATE TABLE `vrooms` (
 -- --------------------------------------------------------
 
 --
--- Stand-in structure for view `vstudgrades`
+-- Stand-in structure for view `vstudentchecklists`
 -- (See below for the actual view)
 --
-CREATE TABLE `vstudgrades` (
+CREATE TABLE `vstudentchecklists` (
+`ID` int(11)
+,`CurriculumID` int(11)
+,`SubjectID` int(11)
+,`StudentID` varchar(45)
+,`SubjectCode` varchar(45)
+,`SubjectDescription` varchar(100)
+,`Units` int(11)
+,`LabUnits` varchar(45)
+,`LecUnits` varchar(45)
+,`LabHours` varchar(45)
+,`LecHours` varchar(45)
+,`SubjectYearDescription` varchar(45)
+,`TermDescription` varchar(50)
+,`PreRequisiteID` varchar(341)
+,`PreRequisiteCODE` varchar(341)
+,`SubjectType` varchar(50)
+,`Grade` int(11)
 );
 
 -- --------------------------------------------------------
@@ -2586,27 +2567,15 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`192.168.1.177` SQL SECURITY DEFINER V
 -- --------------------------------------------------------
 
 --
--- Structure for view `vstudgrades`
+-- Structure for view `vstudentchecklists`
 --
-DROP TABLE IF EXISTS `vstudgrades`;
+DROP TABLE IF EXISTS `vstudentchecklists`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`192.168.1.177` SQL SECURITY DEFINER VIEW `vstudgrades`  AS  select `tchecklists`.`ID` AS `ID`,`vcurriculums`.`ID` AS `CurriculumID`,`vcurriculums`.`CurriculumCode` AS `CurriculumCode`,`vcurriculums`.`CourseTitle` AS `CourseTitle`,`tsubjects`.`SubjectCode` AS `SubjectCode`,`tsubjects`.`SubjectDescription` AS `SubjectDescription`,`tsubjects`.`Units` AS `Units`,`tchecklists`.`LabUnits` AS `LabUnits`,`tchecklists`.`LecUnits` AS `LecUnits`,`tchecklists`.`LabHours` AS `LabHours`,`tchecklists`.`LecHours` AS `LecHours`,`tchecklists`.`SubjectTermID` AS `SubjectTermID`,`tsubjectterm`.`TermDescription` AS `TermDescription`,`tchecklists`.`SubjectYearID` AS `SubjectYearID`,`tsubjectyears`.`SubjectYearDescription` AS `SubjectYearDescription`,`tchecklists`.`SubjectType` AS `SubjectType`,`tchecklists`.`PreCoRequisiteID` AS `PreCoRequisiteID`,`tsubjects`.`SubjectCode` AS `PreCoRequisiteCode`,`tstudgrades`.`Grades` AS `grades` from (((((`tchecklists` join `tsubjects` on((`tchecklists`.`SubjectID` = `tsubjects`.`ID`))) join `tsubjectterm` on((`tchecklists`.`SubjectTermID` = `tsubjectterm`.`ID`))) join `vcurriculums` on((`vcurriculums`.`ID` = `tchecklists`.`CurriculumID`))) join `tsubjectyears` on((`tsubjectyears`.`ID` = `tchecklists`.`SubjectYearID`))) left join `tstudgrades` on((`tchecklists`.`SubjectID` = `tstudgrades`.`SubjectID`))) ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`192.168.1.177` SQL SECURITY DEFINER VIEW `vstudentchecklists`  AS  select `tchecklists`.`ID` AS `ID`,`tchecklists`.`CurriculumID` AS `CurriculumID`,`tchecklists`.`SubjectID` AS `SubjectID`,`subj`.`StudentID` AS `StudentID`,`tsubjects`.`SubjectCode` AS `SubjectCode`,`tsubjects`.`SubjectDescription` AS `SubjectDescription`,`tsubjects`.`Units` AS `Units`,`tchecklists`.`LabUnits` AS `LabUnits`,`tchecklists`.`LecUnits` AS `LecUnits`,`tchecklists`.`LabHours` AS `LabHours`,`tchecklists`.`LecHours` AS `LecHours`,`tsubjectyears`.`SubjectYearDescription` AS `SubjectYearDescription`,`tsubjectterm`.`TermDescription` AS `TermDescription`,(select group_concat(`tchecklistprerequisite`.`SubjectID` separator ', ') from `tchecklistprerequisite` where (`tchecklistprerequisite`.`ChecklistID` = `tchecklists`.`ID`) group by `tchecklistprerequisite`.`ChecklistID`) AS `PreRequisiteID`,(select group_concat(`a`.`SubjectCode` separator ', ') from (`tchecklistprerequisite` join `tsubjects` `a` on((`a`.`ID` = `tchecklistprerequisite`.`SubjectID`))) where (`tchecklistprerequisite`.`ChecklistID` = `tchecklists`.`ID`)) AS `PreRequisiteCODE`,`tchecklists`.`SubjectType` AS `SubjectType`,`subj`.`Grade` AS `Grade` from ((((((`tchecklists` left join (select `tstudentgrades`.`ID` AS `ID`,`tstudentgrades`.`StudentID` AS `StudentID`,`tstudentgrades`.`SubjectID` AS `SubjectID`,`tstudentgrades`.`Grade` AS `Grade`,`tstudentgrades`.`remarks` AS `remarks` from `tstudentgrades`) `subj` on((`tchecklists`.`SubjectID` = `subj`.`SubjectID`))) join `vcurriculums` on((`tchecklists`.`CurriculumID` = `vcurriculums`.`ID`))) join `tsubjects` on((`tchecklists`.`SubjectID` = `tsubjects`.`ID`))) join `tsubjectyears` on((`tchecklists`.`SubjectYearID` = `tsubjectyears`.`ID`))) left join `tsubjectterm` on((`tchecklists`.`SubjectTermID` = `tsubjectterm`.`ID`))) left join `tsubjects` `tsubjects1` on((`tchecklists`.`ID` = `tsubjects1`.`ID`))) ;
 
 --
 -- Indexes for dumped tables
 --
-
---
--- Indexes for table `migrations`
---
-ALTER TABLE `migrations`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `roles`
---
-ALTER TABLE `roles`
-  ADD PRIMARY KEY (`role_id`);
 
 --
 -- Indexes for table `samle`
@@ -2759,9 +2728,15 @@ ALTER TABLE `tschoolyears`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `tstudgrades`
+-- Indexes for table `tstudentgrades`
 --
-ALTER TABLE `tstudgrades`
+ALTER TABLE `tstudentgrades`
+  ADD PRIMARY KEY (`ID`);
+
+--
+-- Indexes for table `tstudents`
+--
+ALTER TABLE `tstudents`
   ADD PRIMARY KEY (`ID`);
 
 --
@@ -2795,26 +2770,8 @@ ALTER TABLE `tusertypes`
   ADD PRIMARY KEY (`ID`);
 
 --
--- Indexes for table `users`
---
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`);
-
---
 -- AUTO_INCREMENT for dumped tables
 --
-
---
--- AUTO_INCREMENT for table `migrations`
---
-ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `roles`
---
-ALTER TABLE `roles`
-  MODIFY `role_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `samle`
@@ -2832,13 +2789,13 @@ ALTER TABLE `tbuildings`
 -- AUTO_INCREMENT for table `tchecklistprerequisite`
 --
 ALTER TABLE `tchecklistprerequisite`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=106;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=111;
 
 --
 -- AUTO_INCREMENT for table `tchecklists`
 --
 ALTER TABLE `tchecklists`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=164;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=174;
 
 --
 -- AUTO_INCREMENT for table `tcities`
@@ -2868,7 +2825,7 @@ ALTER TABLE `tcourses`
 -- AUTO_INCREMENT for table `tcurriculums`
 --
 ALTER TABLE `tcurriculums`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `tdepartments`
@@ -2967,9 +2924,15 @@ ALTER TABLE `tschoolyears`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT for table `tstudgrades`
+-- AUTO_INCREMENT for table `tstudentgrades`
 --
-ALTER TABLE `tstudgrades`
+ALTER TABLE `tstudentgrades`
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `tstudents`
+--
+ALTER TABLE `tstudents`
   MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
@@ -2994,19 +2957,13 @@ ALTER TABLE `tsubjectyears`
 -- AUTO_INCREMENT for table `tusers`
 --
 ALTER TABLE `tusers`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `tusertypes`
 --
 ALTER TABLE `tusertypes`
   MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- AUTO_INCREMENT for table `users`
---
-ALTER TABLE `users`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
