@@ -38,18 +38,9 @@ return [
     'guards' => [
         'web' => [
             'driver' => 'session',
-            'provider' => 'users',
+            'provider' => 'tusers',
         ],
 
-        'api' => [
-            'driver' => 'token',
-            'provider' => 'users',
-        ],
-        'admin'=>[
-            'driver' => 'session',
-            'provider' => 'users',
-        ],
-        
 
         'tuser' => [
             'driver' => 'session',
@@ -79,11 +70,7 @@ return [
     */
 
     'providers' => [
-        'users' => [
-            'driver' => 'eloquent',
-            'model' => App\User::class,
-        ],
-
+   
         'tusers' => [
             'driver' => 'eloquent',
             'model' => App\tuser::class,

@@ -7,8 +7,8 @@
         </a>
 
     </div>
-          {{{ Auth::user()  }}}
-    @if (Auth::user()->role_id === 1)
+       
+    @if (Auth::user()->UserTypeID === 1)
     <ul class="nav">
         <li id="dashboard">
             <a  href="{{ route('dashboard') }}">
@@ -66,7 +66,7 @@
         </li>
 
     </ul>
-    @elseif (Auth::user()->role_id === 2)
+    @elseif (Auth::user()->UserTypeID === 2)
     <ul class="nav">
      
         <li id="employee">
@@ -78,7 +78,7 @@
    
     </ul>
 
-    @elseif (Auth::user()->role_id === 3)
+    @elseif (Auth::user()->UserTypeID === 3)
     <ul class="nav">
         <li id="dashboard">
             <a  href="{{ route('dashboard') }}">
@@ -90,6 +90,12 @@
             <a  href="{{ route('student/checklist') }}">
                 <i class="ti-panel"></i>
                 <p>Checklist</p>
+            </a>
+        </li>
+          <li id="checklist">
+            <a  href="{{ route('student/checklist') }}">
+                <i class="ti-panel"></i>
+                <p>Certificate of Grades</p>
             </a>
         </li>
       

@@ -3,7 +3,7 @@
 namespace App;
 
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Foundation\Auth\user as Authenticatable;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class tuser extends Authenticatable
 {
@@ -16,7 +16,7 @@ class tuser extends Authenticatable
      */
     protected $guard = 'tuser';
     protected $fillable = [
-        'id', 'LoginID', 'password', 'role_id', 'course_id'
+        'id', 'LoginID', 'password', 'UserTypeID', 'course_id'
     ];
 
     /**
@@ -29,12 +29,12 @@ class tuser extends Authenticatable
     ];
 
     public function role(){
-        return $this->hasOne('App\Role', 'role_id', 'role_id');
+        return $this->hasOne('App\Role', 'ID', 'UserTypeID');
     }
 
     public function checkIfUserHasRole($need_role)
     {
-        return (strtolower($need_role)==strtolower($this->role->name) ? true : null);
+        return (strtolower($need_role)==strtolower($this->role->Description) ? true : null);
     }
 
     public function hasRole($roles)

@@ -12,7 +12,7 @@
             </div>
             <div class="content ">
                 <div class="panel-group" id="accordion">
-                  4
+                  
                     @for ($i = 0; $i < 4  ; $i++)
 
                     <div class="panel panel-default">
