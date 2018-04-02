@@ -35,4 +35,10 @@ class Controller extends BaseController
 
 		return view('building/building', compact('buildings'));
 	}
+
+	public function student(){
+		$students = DB::select("call spStudentslistViewAllORSearch('Student List','')");
+
+		return view('student/studentlist', compact('students'));
+	}
 }

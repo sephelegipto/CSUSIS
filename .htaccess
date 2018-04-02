@@ -1,0 +1,25 @@
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews
+    </IfModule>
+
+    RewriteEngine On
+
+    RewriteBase /home/folder/public_folder
+
+    RewriteCond %{HTTPS} !^on ^www.example.com$ [NC]
+    RewriteRule ^(.*)$ https://example.com/$1 [R=301,L]
+    
+    # Redirect Trailing Slashes...
+    RewriteRule ^(.*)/$ /$1 [L,R=301]
+
+    
+    ErrorDocument 404 /404-uh-oh.html
+
+    # Handle Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+
+    
+    RewriteRule ^ index.php [L]
+</IfModule>

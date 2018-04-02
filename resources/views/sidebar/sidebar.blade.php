@@ -16,10 +16,16 @@
                 <p>Dashboard</p>
             </a>
         </li>
+          <li id="students">
+            <a  href="{{ route('students') }}">
+                <i class="ti-user"></i>
+                <p>Students</p>
+            </a>
+        </li>
         <li id="employee">
             <a  href="{{ route('employee') }}">
                 <i class="ti-user"></i>
-                <p>Employee</p>
+                <p>Employees</p>
             </a>
         </li>
         <li id="department">
@@ -52,18 +58,7 @@
                 <p>Logs</p>
             </a>
         </li>
-        <li>
-            <a href="maps.html">
-                <i class="ti-map"></i>
-                <p>Maps</p>
-            </a>
-        </li>
-        <li>
-            <a href="notifications.html">
-                <i class="ti-bell"></i>
-                <p>Notifications</p>
-            </a>
-        </li>
+     
 
     </ul>
     @elseif (Auth::user()->UserTypeID === 2)

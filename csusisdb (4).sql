@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 28, 2018 at 05:59 AM
+-- Generation Time: Apr 02, 2018 at 10:44 AM
 -- Server version: 5.7.21-log
 -- PHP Version: 7.2.2
 
@@ -444,6 +444,7 @@ CREATE DEFINER=`root`@`192.168.1.177` PROCEDURE `spLibraryViewAllORSearch` (`Lib
 			SELECT * FROM vchecklists WHERE SearchText = ''
             OR CurriculumID LIKE  CONCAT('%',SearchText , '%')
 			order by id;
+	
 	END CASE;
     
 END$$
@@ -572,8 +573,65 @@ END$$
 CREATE DEFINER=`root`@`192.168.1.177` PROCEDURE `spStudentChecklistsViewAllORSearch` (`LibraryToLoad` VARCHAR(50), `CurriculumID` VARCHAR(50), `StudentID` VARCHAR(20))  BEGIN
 CASE LibraryToLoad
 	WHEN "Student Checklist" THEN
-		SELECT * FROM vStudentChecklists WHERE CurriculumID=SearchCode AND StudentID=StudentID;
+		    SELECT 
+        `csusisdb`.`tchecklists`.`ID` AS `ID`,
+        `csusisdb`.`tchecklists`.`CurriculumID` AS `CurriculumID`,
+        `csusisdb`.`tchecklists`.`SubjectID` AS `SubjectID`,
+        `subj`.`StudentID` AS `StudentID`,
+        `csusisdb`.`tsubjects`.`SubjectCode` AS `SubjectCode`,
+        `csusisdb`.`tsubjects`.`SubjectDescription` AS `SubjectDescription`,
+        `csusisdb`.`tsubjects`.`Units` AS `Units`,
+        `csusisdb`.`tchecklists`.`LabUnits` AS `LabUnits`,
+        `csusisdb`.`tchecklists`.`LecUnits` AS `LecUnits`,
+        `csusisdb`.`tchecklists`.`LabHours` AS `LabHours`,
+        `csusisdb`.`tchecklists`.`LecHours` AS `LecHours`,
+        `csusisdb`.`tsubjectyears`.`SubjectYearDescription` AS `SubjectYearDescription`,
+        `csusisdb`.`tsubjectterm`.`TermDescription` AS `TermDescription`,
+        (SELECT 
+                GROUP_CONCAT(`csusisdb`.`tchecklistprerequisite`.`SubjectID`
+                        SEPARATOR ', ')
+            FROM
+                `csusisdb`.`tchecklistprerequisite`
+            WHERE
+                (`csusisdb`.`tchecklistprerequisite`.`ChecklistID` = `csusisdb`.`tchecklists`.`ID`)
+            GROUP BY `csusisdb`.`tchecklistprerequisite`.`ChecklistID`) AS `PreRequisiteID`,
+        (SELECT 
+                GROUP_CONCAT(`a`.`SubjectCode`
+                        SEPARATOR ', ')
+            FROM
+                (`csusisdb`.`tchecklistprerequisite`
+                JOIN `csusisdb`.`tsubjects` `a` ON ((`a`.`ID` = `csusisdb`.`tchecklistprerequisite`.`SubjectID`)))
+            WHERE
+                (`csusisdb`.`tchecklistprerequisite`.`ChecklistID` = `csusisdb`.`tchecklists`.`ID`)) AS `PreRequisiteCODE`,
+        `csusisdb`.`tchecklists`.`SubjectType` AS `SubjectType`,
+        `subj`.`Grade` AS `Grade`
+    FROM
+        ((((((`csusisdb`.`tchecklists`
+        LEFT JOIN (SELECT 
+            `csusisdb`.`tstudentgrades`.`ID` AS `ID`,
+                `csusisdb`.`tstudentgrades`.`StudentID` AS `StudentID`,
+                `csusisdb`.`tstudentgrades`.`SubjectID` AS `SubjectID`,
+                `csusisdb`.`tstudentgrades`.`Grade` AS `Grade`,
+                `csusisdb`.`tstudentgrades`.`remarks` AS `remarks`
+        FROM
+            `csusisdb`.`tstudentgrades`
+        WHERE
+            (`csusisdb`.`tstudentgrades`.`StudentID` = StudentID)) `subj` ON ((`csusisdb`.`tchecklists`.`SubjectID` = `subj`.`SubjectID`)))
+        JOIN `csusisdb`.`vcurriculums` ON ((`csusisdb`.`tchecklists`.`CurriculumID` = `vcurriculums`.`ID`)))
+        JOIN `csusisdb`.`tsubjects` ON ((`csusisdb`.`tchecklists`.`SubjectID` = `csusisdb`.`tsubjects`.`ID`)))
+        JOIN `csusisdb`.`tsubjectyears` ON ((`csusisdb`.`tchecklists`.`SubjectYearID` = `csusisdb`.`tsubjectyears`.`ID`)))
+        LEFT JOIN `csusisdb`.`tsubjectterm` ON ((`csusisdb`.`tchecklists`.`SubjectTermID` = `csusisdb`.`tsubjectterm`.`ID`)))
+        LEFT JOIN `csusisdb`.`tsubjects` `tsubjects1` ON ((`csusisdb`.`tchecklists`.`ID` = `tsubjects1`.`ID`)))
+    WHERE
+        (`csusisdb`.`tchecklists`.`CurriculumID` = CurriculumID);
 	
+END CASE;
+END$$
+
+CREATE DEFINER=`root`@`192.168.1.177` PROCEDURE `spStudentslistViewAllORSearch` (`LibraryToLoad` VARCHAR(50), `SearchCode` VARCHAR(50))  BEGIN
+CASE LibraryToLoad
+	WHEN "Student List" THEN
+		SELECT * FROM vstudents;
 END CASE;
 END$$
 
@@ -749,7 +807,31 @@ INSERT INTO `tchecklistprerequisite` (`ID`, `ChecklistID`, `SubjectID`) VALUES
 (107, '165', '277'),
 (108, '167', '303'),
 (109, '171', '275'),
-(110, '172', '276');
+(110, '172', '276'),
+(111, '183', '270'),
+(112, '184', '273'),
+(113, '185', '274'),
+(114, '187', '268'),
+(115, '187', '269'),
+(116, '188', '275'),
+(117, '192', '270'),
+(118, '193', '282'),
+(119, '194', '277'),
+(120, '195', '276'),
+(121, '197', '276'),
+(122, '209', '270'),
+(123, '211', '297'),
+(124, '212', '270'),
+(125, '213', '276'),
+(126, '214', '276'),
+(127, '217', '303'),
+(128, '222', '271'),
+(129, '223', '268'),
+(130, '223', '269'),
+(131, '224', '268'),
+(132, '224', '269'),
+(133, '227', '300'),
+(134, '228', '301');
 
 -- --------------------------------------------------------
 
@@ -775,58 +857,14 @@ CREATE TABLE `tchecklists` (
 --
 
 INSERT INTO `tchecklists` (`ID`, `CurriculumID`, `SubjectID`, `LabUnits`, `LecUnits`, `LabHours`, `LecHours`, `SubjectYearID`, `SubjectTermID`, `SubjectType`) VALUES
-(4, 15, 268, '2', '1', '3', '2', 1, 1, 'Basic 1'),
-(5, 15, 269, '2', '1', '3', '2', 1, 1, 'Basic 1'),
-(7, 15, 270, '', '3', '', '3', 1, 1, 'Basic 1'),
-(9, 15, 271, '', '3', '', '3', 1, 1, 'Basic 1'),
-(11, 15, 272, '', '3', '', '3', 1, 1, 'Basic 1'),
-(13, 15, 273, '', '3', '', '3', 1, 1, 'Basic 1'),
-(14, 15, 280, '', '3', '', '3', 1, 2, 'Basic 1'),
-(16, 15, 275, '', '3', '', '3', 1, 1, 'Basic 1'),
 (25, 15, 0, '2', '1', '3', '2', 2, 2, 'Basic 1'),
-(26, 15, 305, '', '3', '', '3', 2, 2, 'Basic 1'),
-(29, 15, 298, '', '3', '', '3', 2, 1, 'Basic 1'),
-(30, 15, 307, '', '3', '', '3', 2, 2, 'Basic 1'),
-(31, 15, 299, '', '3', '', '3', 2, 1, 'Basic 1'),
-(39, 15, 318, '', '3', '', '3', 3, 2, 'Basic 1'),
-(41, 15, 319, '', '3', '', '3', 3, 2, 'Basic 1'),
-(42, 15, 312, '', '3', '', '3', 3, 1, 'Basic 1'),
-(43, 15, 320, '2', '1', '3', '2', 3, 2, 'Basic 1'),
-(44, 15, 313, '', '3', '', '3', 3, 1, 'Basic 1'),
-(45, 15, 321, '2', '1', '3', '2', 3, 2, 'Basic 1'),
-(46, 15, 314, '', '3', '', '3', 3, 1, 'Basic 1'),
-(47, 15, 322, '', '3', '', '3', 3, 2, 'Basic 1'),
-(48, 15, 315, '', '3', '', '3', 3, 1, 'Basic 1'),
-(49, 15, 323, '', '3', '', '3', 3, 2, 'Basic 1'),
-(50, 15, 316, '', '3', '', '3', 3, 1, 'Basic 1'),
-(51, 15, 329, '', '', '500', '', 4, 2, 'Basic 1'),
-(54, 15, 327, '2', '1', '3', '2', 4, 1, 'Basic 1'),
-(55, 15, 328, '', '3', '', '3', 4, 1, 'Basic 1'),
-(59, 15, 274, '0', '2', '0', '2', 1, 1, 'Basic 1'),
-(65, 15, 279, '', '3', '', '3', 1, 2, 'Basic 1'),
-(66, 15, 281, '', '3', '', '3', 1, 2, 'Basic 1'),
-(67, 15, 282, '', '2', '', '2', 1, 2, 'Basic 1'),
-(70, 15, 285, '', '3', '', '2', 2, 1, 'Basic 1'),
-(76, 15, 303, '2', '1', '3', '2', 2, 2, 'Basic 1'),
 (77, 15, 304, '2', '1', '3', '2', 2, 2, 'Major'),
-(81, 15, 276, '2', '1', '3', '2', 1, 2, 'Basic 1'),
-(92, 15, 278, '', '3', '', '3', 1, 2, 'Basic 1'),
-(93, 15, 296, '', '3', '', '3', 2, 1, 'Basic 1'),
-(94, 15, 301, '', '2', '', '2', 2, 1, 'Basic 1'),
-(95, 15, 308, '', '3', '', '3', 2, 2, 'Basic 1'),
-(96, 15, 284, '', '3', '3', '2', 2, 1, 'Basic 1'),
-(98, 15, 309, '', '2', '', '2', 2, 2, 'Basic 1'),
-(100, 15, 302, '2', '1', '3', '2', 2, 2, 'Basic 1'),
-(104, 15, 325, '', '1', '', '2', 4, 1, 'Basic 1'),
-(106, 15, 317, '2', '1', '3', '2', 3, 2, 'Basic 1'),
-(107, 15, 306, '2', '2', '3', '2', 2, 2, 'Basic 1'),
 (108, 16, 225, '2', '1', '3', '2', 1, 1, ''),
 (109, 16, 269, '2', '1', '3', '2', 1, 1, ''),
 (110, 16, 270, '', '3', '', '3', 1, 1, ''),
 (111, 16, 271, '', '3', '', '3', 1, 1, ''),
 (112, 16, 272, '', '3', '', '3', 1, 1, ''),
 (113, 16, 273, '', '3', '', '3', 1, 1, ''),
-(114, 16, 274, '', '2', '', '2', 1, 1, ''),
 (115, 16, 275, '', '3', '', '3', 1, 1, ''),
 (116, 16, 276, '2', '1', '3', '2', 1, 2, ''),
 (117, 16, 277, '2', '1', '3', '2', 1, 2, ''),
@@ -871,17 +909,61 @@ INSERT INTO `tchecklists` (`ID`, `CurriculumID`, `SubjectID`, `LabUnits`, `LecUn
 (158, 16, 327, '2', '1', '3', '2', 4, 1, ''),
 (159, 16, 328, '', '3', '', '3', 4, 1, ''),
 (160, 16, 329, '', '9', '', '500', 4, 2, ''),
-(163, 15, 277, '2', '1', '3', '2', 1, 2, 'Major'),
-(164, 15, 286, '2', '1', '3', '2', 2, 1, 'Basic 1'),
-(165, 15, 297, '2', '1', '3', '2', 2, 1, 'Basic 1'),
-(166, 15, 311, '2', '1', '3', '2', 3, 1, 'Basic 1'),
-(167, 15, 310, '2', '1', '3', '2', 3, 1, 'Basic 1'),
-(168, 15, 324, '2', '1', '3', '2', 4, 1, 'Basic 1'),
-(169, 15, 326, '2', '1', '3', '2', 4, 1, 'Basic 1'),
-(170, 15, 300, '2', '2', '3', '3', 2, 1, 'Basic 1'),
-(171, 15, 283, '', '3', '', '3', 1, 2, 'Basic 1'),
 (172, 16, 302, '2', '1', '3', '2', 2, 2, 'Basic 1'),
-(173, 16, 291, '3', '3', '3', '3', 2, 1, 'Core');
+(173, 16, 291, '3', '3', '3', '3', 2, 1, 'Core'),
+(174, 15, 269, '2', '1', '3', '2', 1, 1, 'Major'),
+(175, 15, 268, '2', '1', '3', '2', 1, 1, 'Major'),
+(176, 15, 275, '', '3', '', '3', 1, 1, 'Minor'),
+(179, 15, 274, '0', '2', '0', '2', 1, 1, 'Minor'),
+(180, 15, 270, '', '3', '', '3', 1, 1, 'Minor'),
+(181, 15, 271, '', '3', '', '3', 1, 1, 'Minor'),
+(182, 15, 272, '', '3', '', '3', 1, 1, 'Minor'),
+(183, 15, 278, '', '3', '', '3', 1, 2, 'Minor'),
+(184, 15, 281, '', '3', '', '3', 1, 2, 'Minor'),
+(185, 15, 282, '', '2', '', '2', 1, 2, 'Minor'),
+(186, 15, 280, '', '3', '', '3', 1, 2, 'Minor'),
+(187, 15, 277, '2', '1', '3', '2', 1, 2, 'Major'),
+(188, 15, 283, '', '3', '', '3', 1, 2, 'Minor'),
+(189, 15, 300, '2', '2', '3', '3', 2, 1, 'Major'),
+(191, 15, 299, '', '3', '', '3', 2, 1, 'Minor'),
+(192, 15, 285, '', '3', '', '2', 2, 1, 'Minor'),
+(193, 15, 301, '', '2', '', '2', 2, 1, 'Minor'),
+(194, 15, 297, '2', '1', '3', '2', 2, 1, 'Major'),
+(195, 15, 286, '2', '1', '3', '2', 2, 1, 'Major'),
+(196, 15, 298, '', '3', '', '3', 2, 1, 'Minor'),
+(197, 15, 296, '', '3', '', '3', 2, 1, 'Minor'),
+(198, 15, 329, '', '', '500', '', 4, 2, 'Major'),
+(199, 15, 324, '2', '1', '3', '2', 4, 1, 'Major'),
+(200, 15, 326, '2', '1', '3', '2', 4, 1, 'Major'),
+(201, 15, 325, '', '1', '', '2', 4, 1, 'Major'),
+(202, 15, 327, '2', '1', '3', '2', 4, 1, 'Major'),
+(203, 15, 328, '', '3', '', '3', 4, 1, 'Minor'),
+(204, 15, 318, '', '3', '', '3', 3, 2, 'Major'),
+(205, 15, 319, '', '3', '', '3', 3, 2, 'Major'),
+(206, 15, 321, '2', '1', '3', '2', 3, 2, 'Major'),
+(207, 15, 322, '', '3', '', '3', 3, 2, 'Minor'),
+(208, 15, 323, '', '3', '', '3', 3, 2, 'Minor'),
+(209, 15, 308, '', '3', '', '3', 2, 2, 'Minor'),
+(210, 15, 314, '', '3', '', '3', 3, 1, 'Minor'),
+(211, 15, 317, '2', '1', '3', '2', 3, 2, 'Minor'),
+(212, 15, 284, '', '3', '3', '2', 2, 1, 'Minor'),
+(213, 15, 302, '2', '1', '3', '2', 2, 2, 'Major'),
+(214, 15, 303, '2', '1', '3', '2', 2, 2, 'Major'),
+(215, 15, 307, '', '3', '', '3', 2, 2, 'Minor'),
+(216, 15, 313, '', '3', '', '3', 3, 1, 'Minor'),
+(217, 15, 310, '2', '1', '3', '2', 3, 1, 'Minor'),
+(218, 15, 315, '', '3', '', '3', 3, 1, 'Minor'),
+(219, 15, 312, '', '3', '', '3', 3, 1, 'Major'),
+(220, 16, 274, '', '2', '', '2', 1, 1, 'Minor'),
+(221, 15, 273, '', '3', '', '3', 1, 1, 'Minor'),
+(222, 15, 279, '', '3', '', '3', 1, 2, 'Minor'),
+(224, 15, 276, '2', '1', '3', '2', 1, 2, 'Major'),
+(225, 15, 320, '2', '1', '3', '2', 3, 2, 'Major'),
+(226, 15, 305, '', '3', '', '3', 2, 2, 'Minor'),
+(227, 15, 306, '2', '2', '3', '2', 2, 2, 'Major'),
+(228, 15, 309, '', '2', '', '2', 2, 2, 'Minor'),
+(229, 15, 311, '2', '1', '3', '2', 3, 1, 'Major'),
+(230, 15, 316, '', '3', '', '3', 3, 1, 'Major');
 
 -- --------------------------------------------------------
 
@@ -1342,7 +1424,8 @@ CREATE TABLE `tperiodcourses` (
 
 INSERT INTO `tperiodcourses` (`ID`, `PeriodID`, `CourseID`, `StudentYear`, `CostPerUnit`) VALUES
 (1, 11, 67, 1, '1410.00'),
-(2, 11, 68, 4, '39.00');
+(2, 11, 68, 4, '39.00'),
+(3, 11, 73, 4, '60.00');
 
 -- --------------------------------------------------------
 
@@ -1739,8 +1822,8 @@ CREATE TABLE `tstudentgrades` (
   `ID` int(11) NOT NULL,
   `StudentID` varchar(45) NOT NULL,
   `SubjectID` int(45) NOT NULL,
-  `Grade` int(11) NOT NULL,
-  `remarks` varchar(45) NOT NULL
+  `Grade` int(11) DEFAULT NULL,
+  `remarks` varchar(45) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -1750,7 +1833,14 @@ CREATE TABLE `tstudentgrades` (
 INSERT INTO `tstudentgrades` (`ID`, `StudentID`, `SubjectID`, `Grade`, `remarks`) VALUES
 (1, 'ABC123', 225, 90, ''),
 (2, '', 269, 80, ''),
-(3, 'asd', 225, 1, '');
+(3, 'asd', 225, 1, ''),
+(4, 'ABC123', 269, 91, NULL),
+(5, 'ABC123', 270, 80, NULL),
+(6, 'ABC123', 271, 84, NULL),
+(7, 'ABC123', 272, 82, NULL),
+(8, 'ABC123', 273, 83, NULL),
+(9, 'ABC123', 274, 84, NULL),
+(10, 'ABC123', 275, 85, NULL);
 
 -- --------------------------------------------------------
 
@@ -1769,7 +1859,8 @@ CREATE TABLE `tstudents` (
 --
 
 INSERT INTO `tstudents` (`ID`, `StudentID`, `CurriculumID`) VALUES
-(1, 'ABC123', '16');
+(1, 'ABC123', '16'),
+(2, '1', '15');
 
 -- --------------------------------------------------------
 
@@ -2196,9 +2287,10 @@ CREATE TABLE `tusers` (
 --
 
 INSERT INTO `tusers` (`id`, `UserID`, `LoginID`, `password`, `UserTypeID`, `remember_token`, `created_at`, `updated_at`) VALUES
-(1, 'admin', 'admin', 'secret', 1, 'wnAISXKGjYVYwtndqHK6WxOtI2SP5wzZD4cJVTefBzGYQdeDjfbEsyOidK4Y', NULL, NULL),
+(1, 'admin', 'admin', 'secret', 1, 'YtsWgXw4TsCkNcZHp9DcJrAGnwUTMVfkjVfkjqqxDknpu2DmJHgJYuqlkQn3', NULL, NULL),
 (2, 'teacher', 'teacher', 'secret', 2, 'IqunTzoFFnbGqvEeXhks7lbvD1iaS2TOxSmRfAt7JnW1nfaCWFTq14Wh0MAN', NULL, NULL),
-(3, 'ABC123', 'ABC123', 'secret', 3, 'Z7eAIUxb28OuGGxugFwufu9Qw9qUWkjg93xHTM4u4yzKhevvpabKeXI8jN3k', NULL, NULL);
+(3, 'ABC123', 'ABC123', 'secret', 3, 'j3K0TUyM0k2rNHSNwLh04XOK1NncokyuYhP1yZaYd5zCqYbSlVxCtgdcFZzn', NULL, NULL),
+(4, '1', '1', 'secret', 3, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -2459,10 +2551,24 @@ CREATE TABLE `vstudentchecklists` (
 ,`LecHours` varchar(45)
 ,`SubjectYearDescription` varchar(45)
 ,`TermDescription` varchar(50)
+,`SubjectYearID` int(11)
+,`TermID` int(11)
 ,`PreRequisiteID` varchar(341)
 ,`PreRequisiteCODE` varchar(341)
 ,`SubjectType` varchar(50)
 ,`Grade` int(11)
+,`Availability` varchar(341)
+);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `vstudents`
+-- (See below for the actual view)
+--
+CREATE TABLE `vstudents` (
+`StudentID` varchar(45)
+,`CurriculumCode` varchar(45)
 );
 
 -- --------------------------------------------------------
@@ -2571,7 +2677,16 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`192.168.1.177` SQL SECURITY DEFINER V
 --
 DROP TABLE IF EXISTS `vstudentchecklists`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`192.168.1.177` SQL SECURITY DEFINER VIEW `vstudentchecklists`  AS  select `tchecklists`.`ID` AS `ID`,`tchecklists`.`CurriculumID` AS `CurriculumID`,`tchecklists`.`SubjectID` AS `SubjectID`,`subj`.`StudentID` AS `StudentID`,`tsubjects`.`SubjectCode` AS `SubjectCode`,`tsubjects`.`SubjectDescription` AS `SubjectDescription`,`tsubjects`.`Units` AS `Units`,`tchecklists`.`LabUnits` AS `LabUnits`,`tchecklists`.`LecUnits` AS `LecUnits`,`tchecklists`.`LabHours` AS `LabHours`,`tchecklists`.`LecHours` AS `LecHours`,`tsubjectyears`.`SubjectYearDescription` AS `SubjectYearDescription`,`tsubjectterm`.`TermDescription` AS `TermDescription`,(select group_concat(`tchecklistprerequisite`.`SubjectID` separator ', ') from `tchecklistprerequisite` where (`tchecklistprerequisite`.`ChecklistID` = `tchecklists`.`ID`) group by `tchecklistprerequisite`.`ChecklistID`) AS `PreRequisiteID`,(select group_concat(`a`.`SubjectCode` separator ', ') from (`tchecklistprerequisite` join `tsubjects` `a` on((`a`.`ID` = `tchecklistprerequisite`.`SubjectID`))) where (`tchecklistprerequisite`.`ChecklistID` = `tchecklists`.`ID`)) AS `PreRequisiteCODE`,`tchecklists`.`SubjectType` AS `SubjectType`,`subj`.`Grade` AS `Grade` from ((((((`tchecklists` left join (select `tstudentgrades`.`ID` AS `ID`,`tstudentgrades`.`StudentID` AS `StudentID`,`tstudentgrades`.`SubjectID` AS `SubjectID`,`tstudentgrades`.`Grade` AS `Grade`,`tstudentgrades`.`remarks` AS `remarks` from `tstudentgrades`) `subj` on((`tchecklists`.`SubjectID` = `subj`.`SubjectID`))) join `vcurriculums` on((`tchecklists`.`CurriculumID` = `vcurriculums`.`ID`))) join `tsubjects` on((`tchecklists`.`SubjectID` = `tsubjects`.`ID`))) join `tsubjectyears` on((`tchecklists`.`SubjectYearID` = `tsubjectyears`.`ID`))) left join `tsubjectterm` on((`tchecklists`.`SubjectTermID` = `tsubjectterm`.`ID`))) left join `tsubjects` `tsubjects1` on((`tchecklists`.`ID` = `tsubjects1`.`ID`))) ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`192.168.1.177` SQL SECURITY DEFINER VIEW `vstudentchecklists`  AS  select `tchecklists`.`ID` AS `ID`,`tchecklists`.`CurriculumID` AS `CurriculumID`,`tchecklists`.`SubjectID` AS `SubjectID`,`subj`.`StudentID` AS `StudentID`,`tsubjects`.`SubjectCode` AS `SubjectCode`,`tsubjects`.`SubjectDescription` AS `SubjectDescription`,`tsubjects`.`Units` AS `Units`,`tchecklists`.`LabUnits` AS `LabUnits`,`tchecklists`.`LecUnits` AS `LecUnits`,`tchecklists`.`LabHours` AS `LabHours`,`tchecklists`.`LecHours` AS `LecHours`,`tsubjectyears`.`SubjectYearDescription` AS `SubjectYearDescription`,`tsubjectterm`.`TermDescription` AS `TermDescription`,`tsubjectyears`.`ID` AS `SubjectYearID`,`tsubjectterm`.`ID` AS `TermID`,(select group_concat(`tchecklistprerequisite`.`SubjectID` separator ', ') from `tchecklistprerequisite` where (`tchecklistprerequisite`.`ChecklistID` = `tchecklists`.`ID`) group by `tchecklistprerequisite`.`ChecklistID`) AS `PreRequisiteID`,(select group_concat(`a`.`SubjectCode` separator ', ') from (`tchecklistprerequisite` join `tsubjects` `a` on((`a`.`ID` = `tchecklistprerequisite`.`SubjectID`))) where (`tchecklistprerequisite`.`ChecklistID` = `tchecklists`.`ID`)) AS `PreRequisiteCODE`,`tchecklists`.`SubjectType` AS `SubjectType`,`subj`.`Grade` AS `Grade`,(select group_concat(`tchecklistprerequisite`.`SubjectID` separator ', ') from `tchecklistprerequisite` where (`tchecklistprerequisite`.`ChecklistID` = `tchecklists`.`ID`) group by `tchecklistprerequisite`.`ChecklistID`) AS `Availability` from ((((((`tchecklists` left join (select `tstudentgrades`.`ID` AS `ID`,`tstudentgrades`.`StudentID` AS `StudentID`,`tstudentgrades`.`SubjectID` AS `SubjectID`,`tstudentgrades`.`Grade` AS `Grade`,`tstudentgrades`.`remarks` AS `remarks` from `tstudentgrades` where (`tstudentgrades`.`StudentID` = 'ABC123')) `subj` on((`tchecklists`.`SubjectID` = `subj`.`SubjectID`))) join `vcurriculums` on((`tchecklists`.`CurriculumID` = `vcurriculums`.`ID`))) join `tsubjects` on((`tchecklists`.`SubjectID` = `tsubjects`.`ID`))) join `tsubjectyears` on((`tchecklists`.`SubjectYearID` = `tsubjectyears`.`ID`))) left join `tsubjectterm` on((`tchecklists`.`SubjectTermID` = `tsubjectterm`.`ID`))) left join `tsubjects` `tsubjects1` on((`tchecklists`.`ID` = `tsubjects1`.`ID`))) where (`tchecklists`.`CurriculumID` = 15) ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `vstudents`
+--
+DROP TABLE IF EXISTS `vstudents`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`192.168.1.177` SQL SECURITY DEFINER VIEW `vstudents`  AS  select `tstudents`.`StudentID` AS `StudentID`,`tcurriculums`.`CurriculumCode` AS `CurriculumCode` from (`tstudents` join `tcurriculums` on((`tstudents`.`CurriculumID` = `tcurriculums`.`ID`))) ;
 
 --
 -- Indexes for dumped tables
@@ -2789,13 +2904,13 @@ ALTER TABLE `tbuildings`
 -- AUTO_INCREMENT for table `tchecklistprerequisite`
 --
 ALTER TABLE `tchecklistprerequisite`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=111;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=135;
 
 --
 -- AUTO_INCREMENT for table `tchecklists`
 --
 ALTER TABLE `tchecklists`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=174;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=231;
 
 --
 -- AUTO_INCREMENT for table `tcities`
@@ -2873,7 +2988,7 @@ ALTER TABLE `tnationalities`
 -- AUTO_INCREMENT for table `tperiodcourses`
 --
 ALTER TABLE `tperiodcourses`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `tperiods`
@@ -2927,13 +3042,13 @@ ALTER TABLE `tschoolyears`
 -- AUTO_INCREMENT for table `tstudentgrades`
 --
 ALTER TABLE `tstudentgrades`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `tstudents`
 --
 ALTER TABLE `tstudents`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `tsubjects`
@@ -2957,7 +3072,7 @@ ALTER TABLE `tsubjectyears`
 -- AUTO_INCREMENT for table `tusers`
 --
 ALTER TABLE `tusers`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `tusertypes`
