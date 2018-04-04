@@ -34,12 +34,14 @@ Route::group(['middleware'=>['authen','roles'],'roles'=>['admin']],function(){
 
 
 	Route::get('/studentlist/{id}', [ 'uses'=>'StudentController@adminstudentchecklist']);
+	Route::post('/Student/Checklist/AddUpdateGrade', ['as'=>'AddUpdateGrade', 'uses'=>'StudentController@AddUpdateGrade']);
+
 	
 });
 
 Route::group(['middleware'=>['authen','roles'],'roles'=>['student']],function(){
 	Route::get('/student/checklist', ['as'=>'student/checklist', 'uses'=>'StudentController@Checklist']);
-
+	Route::get('/student/enroll', ['as'=>'student/enroll', 'uses'=>'StudentController@Enroll']);
 	
 });
 

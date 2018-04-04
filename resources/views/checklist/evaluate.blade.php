@@ -7,7 +7,7 @@
 
     <div class="header">
 
-      <p class="category" id="StudentID">{{ $StudentID}}</p>
+      <p class="category"></p>
     </div>
     <div class="content content table-responsive ">
       <div class="panel-group" id="accordion">
@@ -55,19 +55,18 @@
                   </h5>
                   <table class="ui celled table" >
                     <thead>
-                     <th style="display:none""></th>
-                     <th>SubjectCode</th>
-                     <th>SubjectDescription</th>
+                      <th>SubjectCode</th>
+                      <th>SubjectDescription</th>
 
-                     <th>Units</th>
-                     <th>Prerequisite</th>
-                     <th>LabUnits</th>
-                     <th>LecUnits</th>
-                     <th>LabHours</th>
-                     <th>LecHours</th>
-                     <th>Grade</th>
-                   </thead>
-                   <tbody>
+                      <th>Units</th>
+                      <th>Prerequisite</th>
+                      <th>LabUnits</th>
+                      <th>LecUnits</th>
+                      <th>LabHours</th>
+                      <th>LecHours</th>
+                      <th>Grade</th>
+                    </thead>
+                    <tbody>
 
                      @foreach ($checklists as $sub)
 
@@ -75,8 +74,7 @@
 
                      @if ($i+ 1 == $sub->SubjectYearDescription and  $z + 1    == $sub->TermDescription)
                      <tr>
-                      <td style="display:none">{{ $sub->SubjectID }}</td>
-                      <td>{{ $sub->SubjectCode }}</td>
+                      <td>{{ $sub->SubjectID }}</td>
                       <td>{{ $sub->SubjectDescription }}</td>
 
                       <td>{{ $sub->Units }}</td>
@@ -85,13 +83,8 @@
                       <td>{{ $sub->LecUnits }}</td>
                       <td>{{ $sub->LabHours }}</td>
                       <td>{{ $sub->LecHours }}</td>
-                      <td style="width:  8.33%">
-                        <div class="col-2">
-                          <input class="form-control" type="text" value="{{ $sub->Grade }}" id="example-text-input">
-
-                        </div>
-
-                      </td>
+                      <td>
+                        {{ $sub->Grade }}</td>
                     </tr>
                     @endif
 
@@ -114,58 +107,15 @@
         </div>
       </div>
       @endfor
-      
+    
     </div>
   </div>
 
 </div>
 
 </div>
-@section('scriptsko')
 <script>
+    // document.getElementById("curriculumlist").className += " active";
 
-
-  $(document).ready(function() {
-    $('input').keyup(function(e) {
-      if(e.keyCode == 13) {
-
-        var StudentID = $('#StudentID').text();
-        var SubjectID = $(this).closest("tr").find('td:eq(0)').text();
-        var Grade = $(this).val();
-        var index = $('input').index(this) + 1;
-
-
-        $.post("{{ route('AddUpdateGrade') }}", { StudentID: StudentID, SubjectID: SubjectID, Grade: Grade }, function(data){
-
-           // value : data.academic_id,
-           // text : data.academic
-           
-         })
-
-
-
-        $('input').eq(index).focus();
-      }
-    });
-
-    $('input').bind("keyup focusout", function () {
-      var StudentID = $('#StudentID').text();
-      var SubjectID = $(this).closest("tr").find('td:eq(0)').text();
-      var Grade = $(this).val();
-      var index = $('input').index(this) + 1;
-
-
-      $.post("{{ route('AddUpdateGrade') }}", { StudentID: StudentID, SubjectID: SubjectID, Grade: Grade }, function(data){
-
-           // value : data.academic_id,
-           // text : data.academic
-           
-         })
-    });
-  });
-</script>
-
-
-@endsection
-
-@endsection
+  </script>
+  @endsection

@@ -64,5 +64,5 @@
 </body>
 
 @include('script.script')
-
+@yield('scriptsko')
 </html>

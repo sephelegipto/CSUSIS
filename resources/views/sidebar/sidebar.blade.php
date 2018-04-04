@@ -7,7 +7,7 @@
         </a>
 
     </div>
-       
+
     @if (Auth::user()->UserTypeID === 1)
     <ul class="nav">
         <li id="dashboard">
@@ -16,7 +16,7 @@
                 <p>Dashboard</p>
             </a>
         </li>
-          <li id="students">
+        <li id="students">
             <a  href="{{ route('students') }}">
                 <i class="ti-user"></i>
                 <p>Students</p>
@@ -58,19 +58,19 @@
                 <p>Logs</p>
             </a>
         </li>
-     
+
 
     </ul>
     @elseif (Auth::user()->UserTypeID === 2)
     <ul class="nav">
-     
+
         <li id="employee">
             <a  href="{{ route('employee') }}">
                 <i class="ti-user"></i>
                 <p>Class List</p>
             </a>
         </li>
-   
+
     </ul>
 
     @elseif (Auth::user()->UserTypeID === 3)
@@ -81,25 +81,37 @@
                 <p>Dashboard</p>
             </a>
         </li>
-         <li id="checklist">
+        <li id="checklist">
             <a  href="{{ route('student/checklist') }}">
                 <i class="ti-panel"></i>
                 <p>Checklist</p>
             </a>
         </li>
-          <li id="checklist">
+        <li id="checklist">
             <a  href="{{ route('student/checklist') }}">
                 <i class="ti-panel"></i>
                 <p>Certificate of Grades</p>
             </a>
         </li>
-      
-      
+         <li id="checklist">
+            <a  href="{{ route('student/enroll') }}">
+                <i class="ti-panel"></i>
+                <p>Enrollment / Evaluation</p>
+            </a>
+        </li>
+            <li id="checklist">
+            <a  href="{{ route('student/enroll') }}">
+                <i class="ti-panel"></i>
+                <p>Enrolled Subjects</p>
+            </a>
+        </li>
+
+
         
-      
-     
-    
-   
+
+
+
+
 
     </ul>
     @endif
