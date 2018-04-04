@@ -28,7 +28,7 @@
             <td>{{ $stud->CurriculumCode  }} </td>
             <td>
               <a href="{{ url('studentlist/'.$stud->StudentID ) }}" title="View Checklist"><i class="fa fa-list"></i></a>
-              <a href="{{ url('studentlist/'.$stud->StudentID ) }}" title="Evaluate"><i class="fa fa-files-o"></i></a>
+              <a href="{{ url('evaluate/'.$stud->StudentID ) }}" title="Evaluate"><i class="fa fa-files-o"></i></a>
             </td>
 
           </tr>

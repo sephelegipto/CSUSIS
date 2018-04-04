@@ -23,6 +23,7 @@ Route::group(['middleware'=>['authen','roles'],'roles'=>['admin']],function(){
 	Route::get('/curriculumlist', ['as'=>'curriculumlist', 'uses'=>'AdminController@ViewCurriculumList']);
 	Route::post('/Student/Checklist/AddUpdateGrade', ['as'=>'AddUpdateGrade', 'uses'=>'StudentController@AddUpdateGrade']);
 	Route::get('/studentlist/{id}', [ 'uses'=>'AdminStudentController@ViewStudentChecklist']);
+		Route::get('/evaluate/{id}', ['as'=>'evaluate', 'uses'=>'AdminStudentController@EvaluateStudent']);
 	Route::get('/checklist/{id}/{title}/{years}/{major}', ['as'=>'checklist', 'uses'=>'AdminCurriculumController@ViewCurriculumChecklist']);	
 	
 });
