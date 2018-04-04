@@ -16,21 +16,10 @@ class StudentController extends Controller
 		$checklists = DB::select("call spStudentChecklistsViewAllORSearch('Student Checklist','$x[0]','$StudentID')");
 		$sem = collect(['First Semester', 'Second Semester', 'Summer']);
 		$collection = collect(['First Year', 'Second Year', 'Third Year', 'Fourth Year', 'Fifth Year']);
-		return view('student/checklist', compact('checklists','title','years','collection','sem','maj9or', 'StudentID'));
+		return view('student/checklist/checklist', compact('checklists','title','years','collection','sem','major', 'StudentID'));
 
 	}
-	public function adminstudentchecklist($StudentID){
 
-		$x = DB::table('tusers')
-		->join('tstudents', 'tstudents.StudentID', '=', 'tusers.UserID')->where('tstudents.StudentID', '=', $StudentID)->pluck('CurriculumID');
-
-		$StudentID = $StudentID;
-		$checklists = DB::select("call spStudentChecklistsViewAllORSearch('Student Checklist','$x[0]','$StudentID')");
-		$sem = collect(['First Semester', 'Second Semester', 'Summer']);
-		$collection = collect(['First Year', 'Second Year', 'Third Year', 'Fourth Year', 'Fifth Year']);
-		return view('student/checklist', compact('checklists','title','years','collection','sem','maj9or', 'StudentID'));
-
-	}
 
 	public function Enroll(){
 		$StudentID = Auth::user()->UserID;
@@ -41,7 +30,7 @@ class StudentController extends Controller
 		$checklists = DB::select("call spStudentChecklistsViewAllORSearch('Student Checklist','$x[0]','$StudentID')");
 		$sem = collect(['First Semester', 'Second Semester', 'Summer']);
 		$collection = collect(['First Year', 'Second Year', 'Third Year', 'Fourth Year', 'Fifth Year']);
-		return view('checklist/evaluate', compact('checklists','years','collection','sem','major'));
+		return view('student/checklist/evaluate', compact('checklists','years','collection','sem','major'));
 
 	}
 

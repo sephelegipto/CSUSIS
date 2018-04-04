@@ -18,27 +18,4 @@ class Controller extends BaseController
 		return view('dashboard/dashboard');
 	}
 
-	public function employee(){
-		$employees = DB::select("call spLibraryViewAllORSearch('Employees','')");
-
-		return view('employee/employee', compact('employees'));
-	}
-
-	public function department(){
-		$departments = DB::select("call spLibraryViewAllORSearch('Departments','')");
-
-		return view('department/department', compact('departments'));
-	}
-
-	public function building(){
-		$buildings = DB::select("call spLibraryViewAllORSearch('Buildings','')");
-
-		return view('building/building', compact('buildings'));
-	}
-
-	public function student(){
-		$students = DB::select("call spStudentslistViewAllORSearch('Student List','')");
-
-		return view('student/studentlist', compact('students'));
-	}
 }

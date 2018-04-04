@@ -5,15 +5,6 @@ Auth::routes();
 Route::get('/', ['as'=>'/', 'uses'=>'LoginController@getLogin']);
 Route::post('/login',['as'=>'login','uses'=>'LoginController@postLogin']);
 
-
-
-
-
-
-
-
-
-
 Route::group(['middleware'=>['authen']], function(){
 	Route::get('/dashboard', ['as'=>'dashboard', 'uses'=>'Controller@dashboard']);
 	Route::get('/logout',['as'=>'logout', 'uses'=>'LoginController@getLogout']);
@@ -23,19 +14,16 @@ Route::group(['middleware'=>['authen']], function(){
 });
 
 Route::group(['middleware'=>['authen','roles'],'roles'=>['admin']],function(){
-	Route::get('/employee', ['as'=>'employee', 'uses'=>'Controller@employee']);
-	Route::get('/department', ['as'=>'department', 'uses'=>'Controller@department']);
-	Route::get('/building', ['as'=>'building', 'uses'=>'Controller@building']);
-	Route::get('/courses', ['as'=>'courses', 'uses'=>'CourseController@index']);
-	Route::get('/students', ['as'=>'students', 'uses'=>'Controller@student']);
-	Route::get('/curriculumlist', ['as'=>'curriculumlist', 'uses'=>'curriculumController@index']);
 
-	Route::get('/checklist/{id}/{title}/{years}/{major}', ['as'=>'checklist', 'uses'=>'curriculumController@viewchecklist']);
-
-
-	Route::get('/studentlist/{id}', [ 'uses'=>'StudentController@adminstudentchecklist']);
+	Route::get('/courses', ['as'=>'courses', 'uses'=>'AdminController@ViewCourse']);
+	Route::get('/employee', ['as'=>'employee', 'uses'=>'AdminController@ViewEmployee']);
+	Route::get('/department', ['as'=>'department', 'uses'=>'AdminController@ViewDepartment']);
+	Route::get('/building', ['as'=>'building', 'uses'=>'AdminController@ViewBuilding']);
+	Route::get('/students', ['as'=>'students', 'uses'=>'AdminController@ViewStudent']);
+	Route::get('/curriculumlist', ['as'=>'curriculumlist', 'uses'=>'AdminController@ViewCurriculumList']);
 	Route::post('/Student/Checklist/AddUpdateGrade', ['as'=>'AddUpdateGrade', 'uses'=>'StudentController@AddUpdateGrade']);
-
+	Route::get('/studentlist/{id}', [ 'uses'=>'AdminStudentController@ViewStudentChecklist']);
+	Route::get('/checklist/{id}/{title}/{years}/{major}', ['as'=>'checklist', 'uses'=>'AdminCurriculumController@ViewCurriculumChecklist']);	
 	
 });
 
