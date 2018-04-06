@@ -17,7 +17,7 @@ Route::group(['middleware'=>['authen','roles'],'roles'=>['admin']],function(){
 
 	Route::get('/courses', ['as'=>'courses', 'uses'=>'AdminController@ViewCourse']);
 	Route::get('/employee', ['as'=>'employee', 'uses'=>'AdminController@ViewEmployee']);
-	Route::get('/department', ['as'=>'department', 'uses'=>'AdminController@ViewDepartment']);
+	Route::get('/colleges', ['as'=>'colleges', 'uses'=>'AdminController@ViewCollege']);
 	Route::get('/building', ['as'=>'building', 'uses'=>'AdminController@ViewBuilding']);
 	Route::get('/students', ['as'=>'students', 'uses'=>'AdminController@ViewStudent']);
 	Route::get('/curriculumlist', ['as'=>'curriculumlist', 'uses'=>'AdminController@ViewCurriculumList']);
@@ -25,7 +25,10 @@ Route::group(['middleware'=>['authen','roles'],'roles'=>['admin']],function(){
 	Route::get('/studentlist/{id}', [ 'uses'=>'AdminStudentController@ViewStudentChecklist']);
 		Route::get('/evaluate/{id}', ['as'=>'evaluate', 'uses'=>'AdminStudentController@EvaluateStudent']);
 	Route::get('/checklist/{id}/{title}/{years}/{major}', ['as'=>'checklist', 'uses'=>'AdminCurriculumController@ViewCurriculumChecklist']);	
-	
+	Route::get('/upload/{id}', ['as'=>'upload', 'uses'=>'AdminCourseController@ViewUploadPage']);
+
+Route::post('upload/ImportSubjects', [ 'uses'=>'AdminCourseController@ImportSubjects']);
+
 });
 
 Route::group(['middleware'=>['authen','roles'],'roles'=>['student']],function(){

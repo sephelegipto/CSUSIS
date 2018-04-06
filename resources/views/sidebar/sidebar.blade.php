@@ -29,9 +29,9 @@
             </a>
         </li>
         <li id="department">
-            <a href="{{ route('department') }}">
+            <a href="{{ route('colleges') }}">
                 <i class="ti-view-list-alt"></i>
-                <p>Departments</p>
+                <p>Colleges</p>
             </a>
         </li>
         <li id="building">

@@ -18,10 +18,10 @@ class AdminController extends Controller
 		return view('admin/employee/employee', compact('employees'));
 	}
 
-	public function ViewDepartment(){
-		$departments = DB::select("call spLibraryViewAllORSearch('Departments','')");
+	public function ViewCollege(){
+		$colleges = DB::select("call spLibraryViewAllORSearch('Colleges','')");
 
-		return view('admin/department/department', compact('departments'));
+		return view('admin/college/college', compact('colleges'));
 	}
 
 	public function ViewBuilding(){
