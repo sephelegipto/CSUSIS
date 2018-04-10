@@ -27,7 +27,8 @@
 
 
     <!--  Fonts and icons     -->
-    <link href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
+  
+ <link href="{{ asset('assets/css/font-awesome.min.css') }}" rel="stylesheet">
     <link href='https://fonts.googleapis.com/css?family=Muli:400,300' rel='stylesheet' type='text/css'>
     <link href="{{ asset('assets/css/themify-icons.css') }}" rel="stylesheet">
     
@@ -64,5 +65,5 @@
 </body>
 
 @include('script.script')
-@yield('scriptsko')
+@yield('script')
 </html>

@@ -23,11 +23,17 @@ Route::group(['middleware'=>['authen','roles'],'roles'=>['admin']],function(){
 	Route::get('/curriculumlist', ['as'=>'curriculumlist', 'uses'=>'AdminController@ViewCurriculumList']);
 	Route::post('/Student/Checklist/AddUpdateGrade', ['as'=>'AddUpdateGrade', 'uses'=>'StudentController@AddUpdateGrade']);
 	Route::get('/studentlist/{id}', [ 'uses'=>'AdminStudentController@ViewStudentChecklist']);
-		Route::get('/evaluate/{id}', ['as'=>'evaluate', 'uses'=>'AdminStudentController@EvaluateStudent']);
+	Route::get('/evaluate/{id}', ['as'=>'evaluate', 'uses'=>'AdminStudentController@EvaluateStudent']);
 	Route::get('/checklist/{id}/{title}/{years}/{major}', ['as'=>'checklist', 'uses'=>'AdminCurriculumController@ViewCurriculumChecklist']);	
 	Route::get('/upload/{id}', ['as'=>'upload', 'uses'=>'AdminCourseController@ViewUploadPage']);
 
-Route::post('upload/ImportSubjects', [ 'uses'=>'AdminCourseController@ImportSubjects']);
+	Route::post('upload/ImportSubjects', [ 'uses'=>'AdminCourseController@ImportSubjects']);
+
+});
+
+Route::group(['middleware'=>['authen','roles'],'roles'=>['FACULTY']],function(){
+
+	Route::get('/employee/pds', ['as'=>'employee/pds', 'uses'=>'EmployeeController@ViewPds']);
 
 });
 

@@ -65,9 +65,9 @@
     <ul class="nav">
 
         <li id="employee">
-            <a  href="{{ route('employee') }}">
+            <a  href="{{ route('employee/pds') }}">
                 <i class="ti-user"></i>
-                <p>Class List</p>
+                <p>Personal Data Sheet</p>
             </a>
         </li>
 
