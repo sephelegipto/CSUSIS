@@ -20,6 +20,14 @@ class EmployeeController extends Controller
 		->where('tusers.UserID', $UserID)
 		->get();
 
-		return view('employee/employeepds',compact('empDetails'));
+		$childrens = DB::table('temployeeChildrens')->where('EmployeeID', $UserID)->get();
+
+		$ELEMENTARY = DB::table('temployeeEB')->where('EmployeeID', $UserID)->where('EBLevelID', 1)->get();
+		$SECONDARY = DB::table('temployeeEB')->where('EmployeeID', $UserID)->where('EBLevelID', 2)->get();
+		$VOCATIONAL = DB::table('temployeeEB')->where('EmployeeID', $UserID)->where('EBLevelID', 3)->get();
+		$COLLEGE = DB::table('temployeeEB')->where('EmployeeID', $UserID)->where('EBLevelID', 4)->get();
+		$GRADUATE  = DB::table('temployeeEB')->where('EmployeeID', $UserID)->where('EBLevelID', 5)->get();
+
+		return view('employee/employeepds',compact('empDetails', 'ELEMENTARY', 'SECONDARY', 'VOCATIONAL', 'COLLEGE', 'GRADUATE', 'childrens'));
 	}
 }
