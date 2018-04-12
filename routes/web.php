@@ -34,6 +34,10 @@ Route::group(['middleware'=>['authen','roles'],'roles'=>['admin']],function(){
 Route::group(['middleware'=>['authen','roles'],'roles'=>['FACULTY']],function(){
 
 	Route::get('/employee/pds', ['as'=>'employee/pds', 'uses'=>'EmployeeController@ViewPds']);
+	Route::post('UpdatePersonalInfo', ['as'=>'UpdatePersonalInfo', 'uses'=>'EmployeeController@UpdatePersonalInformation']);
+	Route::post('UpdateFamilyBackground', ['as'=>'UpdateFamilyBackground', 'uses'=>'EmployeeController@UpdateFamilyBackground']);
+	Route::post('UpdateReferences', ['as'=>'UpdateReferences', 'uses'=>'EmployeeController@UpdateReferences']);
+
 
 });
 

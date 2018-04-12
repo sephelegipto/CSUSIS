@@ -70,7 +70,18 @@
                 <p>Personal Data Sheet</p>
             </a>
         </li>
-
+        <li id="employee">
+            <a  href="{{ route('employee/pds') }}">
+                <i class="ti-user"></i>
+                <p>Daily Time Record</p>
+            </a>
+        </li>
+        <li id="employee">
+            <a  href="{{ route('employee/pds') }}">
+                <i class="ti-user"></i>
+                <p>Subjects</p>
+            </a>
+        </li>
     </ul>
 
     @elseif (Auth::user()->UserTypeID === 3)
@@ -93,13 +104,13 @@
                 <p>Certificate of Grades</p>
             </a>
         </li>
-         <li id="checklist">
+        <li id="checklist">
             <a  href="{{ route('student/enroll') }}">
                 <i class="ti-panel"></i>
                 <p>Enrollment / Evaluation</p>
             </a>
         </li>
-            <li id="checklist">
+        <li id="checklist">
             <a  href="{{ route('student/enroll') }}">
                 <i class="ti-panel"></i>
                 <p>Enrolled Subjects</p>
