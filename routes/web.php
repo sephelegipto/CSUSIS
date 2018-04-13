@@ -27,7 +27,7 @@ Route::group(['middleware'=>['authen','roles'],'roles'=>['admin']],function(){
 	Route::get('/checklist/{id}/{title}/{years}/{major}', ['as'=>'checklist', 'uses'=>'AdminCurriculumController@ViewCurriculumChecklist']);	
 	Route::get('/upload/{id}', ['as'=>'upload', 'uses'=>'AdminCourseController@ViewUploadPage']);
 
-	Route::post('upload/ImportSubjects', [ 'uses'=>'AdminCourseController@ImportSubjects']);
+	Route::post('upload/ImportSubjects', [ 'as'=>'ImportSubjects','uses'=>'AdminCourseController@ImportSubjects']);
 
 });
 

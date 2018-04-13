@@ -6,12 +6,14 @@ use Illuminate\Http\Request;
 
 
 use Illuminate\Support\Facades\Input;
+use DB;
+use App\PeriodSubjects;
 
 class AdminCourseController extends Controller
 {
   public function ImportSubjects(Request $request)
   {
-
+    $SubjectPeriod = collect([]);
 
     if($request->hasFile('file')){
       $path = $request->file('file')->getRealPath();
@@ -27,33 +29,57 @@ $highestRow = $worksheet->getHighestRow(); // e.g. 10
 $highestColumn = $worksheet->getHighestColumn(); // e.g 'F'
 $highestColumnIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($highestColumn); // e.g. 5
 
-echo '<table>' . "\n";
+
 for ($row = 2; $row <= $highestRow; ++$row) {
-  echo '<tr>' . PHP_EOL;
+  $InputSubjectPeriod = collect([]);
   $details = collect([]);
   for ($col = 1; $col <= 23; ++$col) {
     $value = $worksheet->getCellByColumnAndRow($col, $row)->getValue();
     
     $details->push($value);
+
   }
 
+  $teacherid =   DB::table('vemployees')->select('ID')->where('FullName', $details[22])->pluck('ID');
+  if ($details[3] == NULL){
+    break;
+  }
+  if (isset($teacherid[0]) AND isset($details[3])){
+    PeriodSubjects::updateOrCreate(['ClassCode'=>$details[3]], ['TeacherID' => $teacherid[0]] );
 
-   //  $id = DB::table('tperiodsubjects')->insertGetId(
-   //    ['ClassCode' => $details[3] ,
-   //     'ClassCode' => 'john@example.com',
-   //     'ClassCode' => 'john@example.com',
-   //     'ClassCode' => 'john@example.com'
-   // ]
-   //  );
 
-  dd($details);
-  echo '</tr>' . PHP_EOL;
+
+    $newCompete = PeriodSubjects::updateOrCreate(['ClassCode'=>$details[3]], ['TeacherID' => $teacherid[0]] );
+
+    $result = DB::table('vperiodsubjects')->where('ClassCode', $details[3])->get();
+    $zxc = json_decode($result, true);
+
+    $a = array('test'=>'asd');
+    array_push($zxc[0], $a);
+    $InputSubjectPeriod = $zxc;
+
+
+
+
+  }else{
+
+
+
+    $result = DB::table('vperiodsubjects')->where('ClassCode', $details[3])->get();
+    $zxc = json_decode($result, true);
+
+    $a = array('test'=>'asd');
+    array_push($zxc[0], $a);
+    $InputSubjectPeriod = $zxc;
+  }
+
+  $SubjectPeriod->push($InputSubjectPeriod);
 
 }
-echo '</table>' . PHP_EOL;
 
 
 
+return view('upload', compact('SubjectPeriod'));
 }
 }
 
