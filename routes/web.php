@@ -25,9 +25,9 @@ Route::group(['middleware'=>['authen','roles'],'roles'=>['admin']],function(){
 	Route::get('/studentlist/{id}', [ 'uses'=>'AdminStudentController@ViewStudentChecklist']);
 	Route::get('/evaluate/{id}', ['as'=>'evaluate', 'uses'=>'AdminStudentController@EvaluateStudent']);
 	Route::get('/checklist/{id}/{title}/{years}/{major}', ['as'=>'checklist', 'uses'=>'AdminCurriculumController@ViewCurriculumChecklist']);	
-	Route::get('/upload/{id}', ['as'=>'upload', 'uses'=>'AdminCourseController@ViewUploadPage']);
+	Route::get('/upload/{id}', ['as'=>'upload', 'uses'=>'AdminCollegeController@ViewUploadPage']);
 
-	Route::post('upload/ImportSubjects', [ 'as'=>'ImportSubjects','uses'=>'AdminCourseController@ImportSubjects']);
+	Route::post('upload/ImportSubjects', [ 'as'=>'ImportSubjects','uses'=>'AdminCollegeController@ImportSubjects']);
 
 });
 

@@ -10,4 +10,10 @@ class PeriodSubjects extends Model
 	protected $fillable = ['EmployeeID','PeriodSectionID','ClassCode','TeacherID'];
 	protected $primaryKey = 'ID';
 	public $timestamps = false;
+
+
+
+
 }
+
+
