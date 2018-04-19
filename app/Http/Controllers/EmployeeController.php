@@ -11,18 +11,23 @@ use App\EmployeePI;
 use App\Employees;
 use App\EmployeeFB;
 use App\EmployeeReferences;
+use App\EmployeeChildren;
 class EmployeeController extends Controller
 {
 	public function ViewPds(){
 		$UserID = Auth::user()->UserID;
 
-		$empDetails = DB::table('tusers')
-		->join('temployees', 'tusers.UserID', '=', 'temployees.EmployeeID')
-		->join('temployeespersonalinformation', 'tusers.UserID', '=', 'temployeespersonalinformation.EmployeeID')
-		->join('temployeesfamilybackground', 'tusers.UserID', '=', 'temployeesfamilybackground.EmployeeID')
-		->select('tusers.*', 'temployees.*', 'temployeespersonalinformation.*', 'temployeesfamilybackground.*')
-		->where('tusers.UserID', $UserID)
+		$UserID = DB::table('temployees')->where('EmployeeID', '=', $UserID)->pluck('ID');
+
+		$empDetails = DB::table('temployees')
+
+		->leftjoin('temployeespersonalinformation', 'temployees.ID', '=', 'temployeespersonalinformation.EmployeeID')
+		->leftjoin('temployeesfamilybackground', 'temployees.ID', '=', 'temployeesfamilybackground.EmployeeID')
+		->select('temployees.*', 'temployees.*', 'temployeespersonalinformation.*', 'temployeesfamilybackground.*')
+		->where('temployees.ID', $UserID[0])
 		->get();
+
+
 
 		$childrens = DB::table('temployeeChildrens')->where('EmployeeID', $UserID)->get();
 		$references = DB::table('temployeesreferences')->where('EmployeeID', $UserID)->get();
@@ -33,14 +38,14 @@ class EmployeeController extends Controller
 		$COLLEGE = DB::table('temployeeseducationbackground')->where('EmployeeID', $UserID)->where('EBLevelID', 4)->get();
 		$GRADUATE  = DB::table('temployeeseducationbackground')->where('EmployeeID', $UserID)->where('EBLevelID', 5)->get();
 
-		return view('employee/employeepds',compact('empDetails', 'ELEMENTARY', 'SECONDARY', 'VOCATIONAL', 'COLLEGE', 'GRADUATE', 'childrens', 'references'));
+		return view('employee/employeepds',compact('empDetails', 'ELEMENTARY', 'SECONDARY', 'VOCATIONAL', 'COLLEGE', 'GRADUATE', 'childrens', 'references', 'UserID'));
 	}
 
 	public function UpdatePersonalInformation(Request $request){
 		if ($request->ajax())
 		{
 			EmployeePI::updateOrCreate(['EmployeeID'=>$request->EmployeeID],$request->all());
-			Employees::updateOrCreate(['EmployeeID'=>$request->EmployeeID],$request->all());
+			Employees::updateOrCreate(['ID'=>$request->EmployeeID],$request->all());
 		}
 	}
 
@@ -53,6 +58,30 @@ class EmployeeController extends Controller
 		}
 	}
 
+	public function AddChildren(Request $request){
+		if ($request->ajax())
+		{
+
+
+			return response(EmployeeChildren::updateOrCreate(['EmployeeID'=>$request->EmployeeID, 'Name'=>$request->Name],$request->all()));
+		}
+	}
+
+	public function EditChildren(Request $request){
+		if ($request->ajax())
+		{
+			return response(EmployeeChildren::updateOrCreate(['ID'=>$request->ID], $request->all()));
+		}
+	}
+
+	public function DeleteChildren(Request $request){
+		if ($request->ajax())
+		{
+			$info = EmployeeChildren::find($request->ID);
+			EmployeeChildren::destroy($request->ID);
+			return response($info);
+		}
+	}
 
 	public function UpdateReferences(Request $request){
 		if ($request->ajax())

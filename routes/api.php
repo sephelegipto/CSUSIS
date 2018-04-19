@@ -13,6 +13,6 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/tusers', function (Request $request) {
+Route::middleware('auth:api')->get('/tloginverificators', function (Request $request) {
     return $request->tusers();
 });

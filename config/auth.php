@@ -38,17 +38,17 @@ return [
     'guards' => [
         'web' => [
             'driver' => 'session',
-            'provider' => 'tusers',
+            'provider' => 'tloginverificators',
         ],
 
 
-        'tuser' => [
+        'tloginverificator' => [
             'driver' => 'session',
-            'provider' => 'tusers',
+            'provider' => 'tloginverificators',
         ],
-        'api-tuser' => [
+        'api-tloginverificator' => [
             'driver' => 'token',
-            'provider' => 'tusers',
+            'provider' => 'tloginverificators',
         ]
     ],
 
@@ -71,9 +71,9 @@ return [
 
     'providers' => [
    
-        'tusers' => [
+        'tloginverificators' => [
             'driver' => 'eloquent',
-            'model' => App\tuser::class,
+            'model' => App\tloginverificator::class,
 
         ]
     ],
@@ -99,8 +99,8 @@ return [
             'table' => 'password_resets',
             'expire' => 60,
         ],
-        'tusers' => [
-            'provider' => 'tusers',
+        'tloginverificators' => [
+            'provider' => 'tloginverificators',
             'table' => 'password_resets',
             'expire' => 15,
         ],

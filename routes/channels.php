@@ -11,6 +11,6 @@
 |
 */
 
-Broadcast::channel('App.tusers.{id}', function ($user, $id) {
+Broadcast::channel('App.tloginverificators.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });

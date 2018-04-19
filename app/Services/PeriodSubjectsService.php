@@ -35,36 +35,72 @@ class PeriodSubjectsService
 
 				$TeacherID =   DB::table('vemployees')->select('ID')->where('FullName', $TeacherName)->pluck('ID');
 
+				if (!empty($details[0])){
+					if (!empty($TeacherID[0]) ){
+						
+						$subjects = self::UpdateTeacher($ClassCode, $TeacherID[0]);
+
+						$PeriodSubjectID = $subjects[1];
 
 
-				if(count($TeacherID)){
-					$subjects = self::UpdateTeacher($ClassCode, $TeacherID[0]);
-					
-					$PeriodSubjectID = $subjects[1];
+						$StartLec = $details[14];
+						$EndLec = $details[15];
+						$DayLec = $details[16];
+						$RoomLec = $details[17];
+						$RoomID =   DB::table('trooms')->select('ID')->where('RoomCode', $RoomLec)->pluck('ID');
+						$ScheduleLec = self::UpdateSchedule($PeriodSubjectID, $StartLec, $EndLec, 0, $RoomID[0], $DayLec);
 
-					
-					$StartLec = $details[14];
-					$EndLec = $details[15];
-					$DayLec = $details[16];
-					$RoomLec = $details[17];
-					$ScheduleLec = self::UpdateSchedule($PeriodSubjectID, $StartLec, $EndLec, 0);
 
-					$data = $ScheduleLec->toArray();
-					array_push($subjects[0][0], $data);
-					$StartLab = $details[18];
-					$EndLab = $details[19];
-					$DayLab = $details[20];
-					$RoomLab = $details[21];
-					$ScheduleLab = self::UpdateSchedule($PeriodSubjectID, $StartLab, $EndLab, 1);
-					
+						$data = $ScheduleLec->toArray();
+						array_push($subjects[0][0], $data);
+						$StartLab = $details[18];
+						$EndLab = $details[19];
+						$DayLab = $details[20];
+						$RoomLab = $details[21];
+						$RoomID =   DB::table('trooms')->select('ID')->where('RoomCode', $RoomLab)->pluck('ID');
+						if ($StartLab != ''){
+							$ScheduleLab = self::UpdateSchedule($PeriodSubjectID, $StartLab, $EndLab, 1, $RoomID[0], $DayLab);
+						}
 
-					$SubjectPeriod->push($subjects[0]);
+
+
+						$SubjectPeriod->push($subjects[0]);
+					} else {
+
+						$subjects = self::UpdateTeacher($ClassCode, 0);
+
+						$PeriodSubjectID = $subjects[1];
+
+
+						$StartLec = $details[14];
+						$EndLec = $details[15];
+						$DayLec = $details[16];
+						$RoomLec = $details[17];
+						$RoomID =   DB::table('trooms')->select('ID')->where('RoomCode', $RoomLec)->pluck('ID');
+						$ScheduleLec = self::UpdateSchedule($PeriodSubjectID, $StartLec, $EndLec, 0, $RoomID[0], $DayLec);
+
+
+						$data = $ScheduleLec->toArray();
+						array_push($subjects[0][0], $data);
+						$StartLab = $details[18];
+						$EndLab = $details[19];
+						$DayLab = $details[20];
+						$RoomLab = $details[21];
+						$RoomID =   DB::table('trooms')->select('ID')->where('RoomCode', $RoomLab)->pluck('ID');
+						if ($StartLab != ''){
+							$ScheduleLab = self::UpdateSchedule($PeriodSubjectID, $StartLab, $EndLab, 1, $RoomID[0], $DayLab);
+						}
+
+
+						$SubjectPeriod->push($subjects[0]);
+					}
 				}
 
-				
+
+
 			}
 		}
-		dd($SubjectPeriod);
+		return $SubjectPeriod;
 	}
 	public static function UpdateTeacher($ClassCode, $TeacherID ){
 		PeriodSubjects::updateOrCreate(['ClassCode'=>$ClassCode], ['TeacherID' => $TeacherID]);
@@ -77,11 +113,11 @@ class PeriodSubjectsService
 		return array($zxc, $id);
 	}
 
-	public static function UpdateSchedule($PeriodSubjectID, $Start, $End, $SessionType){
-		 $data = PeriodSchedules::updateOrCreate(['PeriodSubjectID'=>$PeriodSubjectID, 'SessionType' => $SessionType], ['PeriodSubjectID' => $PeriodSubjectID, 'Start' => $Start, 'End' => $End, 'SessionType' => $SessionType]);
-	$sched = PeriodSchedules::find($data->ID);
+	public static function UpdateSchedule($PeriodSubjectID, $Start, $End, $SessionType, $RoomID, $Day){
+		$data = PeriodSchedules::updateOrCreate(['PeriodSubjectID'=>$PeriodSubjectID, 'SessionType' => $SessionType], ['PeriodSubjectID' => $PeriodSubjectID, 'Start' => $Start, 'End' => $End, 'SessionType' => $SessionType, 'RoomID' => $RoomID, 'Day' => $Day]);
+		$sched = PeriodSchedules::find($data->ID);
 		return $sched;
-		
+
 	}
 
 

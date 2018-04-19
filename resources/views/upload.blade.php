@@ -62,7 +62,8 @@
             <th>LBH</th>
             <th>LCH</th>
             <th>Teacher</th>
-            <th></th>
+            <th>Start</th>
+            <th>End</th>
           </thead>
           <tbody>
 
@@ -100,7 +101,10 @@
              {{$sub[0]['Teacher']}}
            </td>
            <td>
-            {{$sub[0][0]['test']}}
+            {{$sub[0][1]['Start']}}
+          </td>
+           <td>
+            {{$sub[0][1]['End']}}
           </td>
 
         </tr>
