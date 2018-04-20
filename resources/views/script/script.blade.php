@@ -38,5 +38,11 @@
 			'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
 		}
 	});
-
+function getCleanObject(jsonObject) {
+    var clone = JSON.parse(JSON.stringify(jsonObject))
+    for(var prop in clone)
+       if(clone[prop] == null)
+           delete clone[prop];
+    return JSON.stringify(clone);
+}
 </script>

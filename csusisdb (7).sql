@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 19, 2018 at 11:04 AM
+-- Generation Time: Apr 20, 2018 at 11:42 AM
 -- Server version: 5.7.21-log
 -- PHP Version: 7.2.2
 
@@ -46,14 +46,14 @@ END$$
 CREATE DEFINER=`root`@`192.168.1.177` PROCEDURE `spChecklistsViewAllORSearch` (`LibraryToLoad` VARCHAR(50), `SearchText` VARCHAR(50), `SearchCode` VARCHAR(50), `SubjectYear` VARCHAR(20), `TD` VARCHAR(20))  BEGIN
 CASE LibraryToLoad
 	WHEN "Subject Details" THEN
-		SELECT * FROM vChecklists WHERE CurriculumCode=SearchCode AND SubjectYearDescription=SubjectYear AND TermDescription=TD AND(SearchText = '' 
+		SELECT  * FROM vChecklists WHERE CurriculumCode=SearchCode AND SubjectYearDescription=SubjectYear AND TermDescription=TD AND(SearchText = '' 
 		OR SubjectCode LIKE  CONCAT('%',SearchText , '%')
 		OR SubjectDescription LIKE  CONCAT('%',SearchText , '%')
 		OR Units LIKE  CONCAT('%',SearchText , '%')
 		OR SubjectYearDescription LIKE  CONCAT('%',SearchText , '%')
 		OR TermDescription LIKE  CONCAT('%',SearchText , '%')
 		OR PreRequisiteCODE LIKE  CONCAT('%',SearchText , '%')
-        OR SubjectType LIKE  CONCAT('%',SearchText , '%'));
+        OR SubjectType LIKE  CONCAT('%',SearchText , '%'))LIMIT 100;
 	WHEN "Subjects" THEN
 		SELECT * FROM vChecklists WHERE CurriculumCode=SearchCode AND (SearchText = '' 
 		OR SubjectCode LIKE  CONCAT('%',SearchText , '%')
@@ -836,7 +836,7 @@ CREATE DEFINER=`root`@`192.168.1.177` PROCEDURE `spPeriodFeesAddOREdit` (`AESwit
     END IF;
 END$$
 
-CREATE DEFINER=`root`@`192.168.1.177` PROCEDURE `spPeriodsAddOREdit` (`AESwitch` INT(11), `PCode` VARCHAR(50), `PTerm` INT(11), `PStart` DATE, `PEnd` DATE, `EStart` DATE, `EEnd` DATE, `ExPrelim` DATE, `ExMidterm` DATE, `ExFinals` DATE, `GStart` DATE, `GEnd` DATE)  BEGIN
+CREATE DEFINER=`root`@`192.168.1.177` PROCEDURE `spPeriodsAddOREdit` (`AESwitch` INT(11), `PCode` VARCHAR(50), `PTerm` INT(11), `PStart` DATE, `PEnd` DATE, `EStart` DATE, `EEnd` DATE, `ExPrelim` DATE, `ExMidterm` DATE, `ExFinals` DATE, `GStart` DATE, `GEnd` DATE, `SYear` INT, `EYear` INT)  BEGIN
 	IF AESwitch= 0 THEN
 		IF (SELECT COUNT(ID) FROM TPERIODS WHERE
 			PERIODCODE=PCODE AND
@@ -849,9 +849,11 @@ CREATE DEFINER=`root`@`192.168.1.177` PROCEDURE `spPeriodsAddOREdit` (`AESwitch`
             MIDTERMDATE=EXMIDTERM AND
             FINALSDATE=EXFINALS AND
             GRADEINPUTSTART=GSTART AND
-            GRADEINPUTEND=GEND)=0 THEN
-            INSERT INTO TPERIODS(PERIODCODE,TERMID,STARTDATE,ENDDATE,ENROLLMENTSTARTDATE,ENROLLMENTENDDATE,PRELIMDATE,MIDTERMDATE,FINALSDATE,GRADEINPUTSTART,GRADEINPUTEND)
-            VALUES (PCODE,PTERM,PSTART,PEND,ESTART,EEND,EXPRELIM,EXMIDTERM,EXFINALS,GSTART,GEND);
+            GRADEINPUTEND=GEND AND
+            STARTYEAR=SYEAR AND
+            ENDYEAR=EYEAR)=0 THEN
+            INSERT INTO TPERIODS(PERIODCODE,TERMID,STARTDATE,ENDDATE,ENROLLMENTSTARTDATE,ENROLLMENTENDDATE,PRELIMDATE,MIDTERMDATE,FINALSDATE,GRADEINPUTSTART,GRADEINPUTEND,STARTYEAR,ENDYEAR)
+            VALUES (PCODE,PTERM,PSTART,PEND,ESTART,EEND,EXPRELIM,EXMIDTERM,EXFINALS,GSTART,GEND,SYEAR,EYEAR);
 		END IF;
     else
 		IF (SELECT COUNT(ID) FROM TPERIODS WHERE
@@ -865,7 +867,9 @@ CREATE DEFINER=`root`@`192.168.1.177` PROCEDURE `spPeriodsAddOREdit` (`AESwitch`
             MIDTERMDATE=EXMIDTERM AND
             FINALSDATE=EXFINALS AND
             GRADEINPUTSTART=GSTART AND
-            GRADEINPUTEND=GEND)=0 THEN
+            GRADEINPUTEND=GEND AND
+            STARTYEAR=SYEAR AND
+            ENDYEAR=EYEAR)=0 THEN
             UPDATE TPERIODS SET 
 			PERIODCODE=PCODE,
             TERMID=PTERM,
@@ -877,7 +881,9 @@ CREATE DEFINER=`root`@`192.168.1.177` PROCEDURE `spPeriodsAddOREdit` (`AESwitch`
             MIDTERMDATE=EXMIDTERM,
             FINALSDATE=EXFINALS,
             GRADEINPUTSTART=GSTART,
-            GRADEINPUTEND=GEND
+            GRADEINPUTEND=GEND,
+            STARTYEAR=SYEAR,
+            ENDYEAR=EYEAR
             WHERE ID=AESWITCH;
 		END IF;
     END IF;
@@ -908,6 +914,14 @@ CREATE DEFINER=`root`@`192.168.1.177` PROCEDURE `spPeriodsViewAllORSearch` (`Lib
 			ORDER BY ID DESC;
 		WHEN 'COURSES' THEN
 			SELECT * FROM vPeriodCourses WHERE PeriodCode=PeriodToLoad AND (SearchText = '' 
+			or CourseCode LIKE  CONCAT('%',SearchText , '%')
+			or CourseTitle LIKE  CONCAT('%',SearchText , '%')
+			or NoOfYears LIKE  CONCAT('%',SearchText , '%')
+			or StudentYear LIKE  CONCAT('%',SearchText , '%')
+			or CostPerUnit LIKE  CONCAT('%',SearchText , '%'))
+			ORDER BY ID DESC;
+		WHEN 'COURSE REGISTRATION(COURSES)' THEN
+			SELECT distinct CourseCode,CourseTitle,MajorCode,NoOfYears,ActiveCurriculum FROM vPeriodCourses WHERE PeriodCode=PeriodToLoad AND (SearchText = '' 
 			or CourseCode LIKE  CONCAT('%',SearchText , '%')
 			or CourseTitle LIKE  CONCAT('%',SearchText , '%')
 			or NoOfYears LIKE  CONCAT('%',SearchText , '%')
@@ -1034,15 +1048,82 @@ END CASE;
 END$$
 
 CREATE DEFINER=`root`@`192.168.1.176` PROCEDURE `spStudentProfileAddorEdit` (`AESwitch` INT(11), `TY` VARCHAR(50), `IDN` VARCHAR(50), `LN` VARCHAR(100), `FN` VARCHAR(100), `MN` VARCHAR(100), `BDate` DATE, `BNo` VARCHAR(50), `BMun` VARCHAR(50), `BCoun` VARCHAR(50), `GEN` VARCHAR(50), `REL` VARCHAR(50), `SCHO` VARCHAR(100), `NAT` VARCHAR(50), `FOREIG` INT(11), `PASS` VARCHAR(50), `HNO` VARCHAR(50), `HSTREET` VARCHAR(50), `HMUN` VARCHAR(50), `HCOUN` VARCHAR(50), `CS` VARCHAR(50), `MNO` VARCHAR(50), `EM` VARCHAR(50), `GUARD` VARCHAR(50), `GUARDCONT` VARCHAR(50), `BDNO` VARCHAR(50), `BDSTREET` VARCHAR(50), `BDMUN` VARCHAR(50), `BDCOUN` VARCHAR(50), `R1` INT(11), `R2` INT(11), `R3` INT(11), `R4` INT(11), `R5` INT(11), `R6` INT(11), `R7` INT(11), `R8` INT(11), `R9` INT(11), `R10` INT(11), `R11` INT(11), `R12` INT(11))  BEGIN
-	if aeswitch=0 then
-		IF (SELECT COUNT(ID) FROM VSTUDENTPROFILES WHERE IDNUMBER=IDN)= 0 THEN
-			INSERT INTO TSTUDENTPROFILE VALUES (0,(SELECT ID FROM TSTUDENTTYPE WHERE DESCRIPTION=TY),
-			IDN,LN,FN,MN,BDATE,BNO,(SELECT ID FROM VCITIES WHERE CITYDESCRIPTION=BMUN),(SELECT ID FROM TCOUNTRIES WHERE CountryDescription=BCOUN),(SELECT ID FROM TGENDERS WHERE DESCRIPTION=GEN),
-			(SELECT ID FROM TRELIGIONS WHERE RELIGIONDESCRIPTION=REL),(SELECT ID FROM TSCHOLARSHIPS WHERE ScholarshipDescription=SCHO),(SELECT ID FROM TNATIONALITIES WHERE NationalityDescription=NAT),
-			FOREIG,PASS,HNO,HSTREET,(SELECT ID FROM VCITIES WHERE CITYDESCRIPTION=HMUN),(SELECT ID FROM TCOUNTRIES WHERE CountryDescription=HCOUN),(SELECT ID FROM TCIVILSTATUSES WHERE DESCRIPTION= CS),
-			MNO,EM,GUARD,GUARDCONT,BDNO,BDSTREET,(SELECT ID FROM VCITIES WHERE CITYDESCRIPTION=BDMUN),(SELECT ID FROM TCOUNTRIES WHERE CountryDescription=BDCOUN),
-			R1,R2,R3,R4,R5,R6,R7,R8,R9,R10,R11,R12);
-		end if;
+	IF AESwitch=0 THEN
+			IF (SELECT COUNT(ID) FROM VSTUDENTPROFILES WHERE IDNUMBER=IDN)= 0 THEN
+				INSERT INTO TSTUDENTPROFILE VALUES 
+				(	0,
+					(SELECT ID FROM TSTUDENTTYPE WHERE DESCRIPTION=TY),
+					IDN,LN,FN,MN,BDATE,BNO,
+					(SELECT ID FROM VCITIES WHERE CITYDESCRIPTION=BMUN),
+					(SELECT ID FROM TCOUNTRIES WHERE CountryDescription=BCOUN),
+					(SELECT ID FROM TGENDERS WHERE DESCRIPTION=GEN),
+					(SELECT ID FROM TRELIGIONS WHERE RELIGIONDESCRIPTION=REL),
+					(SELECT ID FROM TSCHOLARSHIPS WHERE ScholarshipDescription=SCHO),
+					(SELECT ID FROM TNATIONALITIES WHERE NationalityDescription=NAT),
+					FOREIG,PASS,HNO,HSTREET,(SELECT ID FROM VCITIES WHERE CITYDESCRIPTION=HMUN),
+					(SELECT ID FROM TCOUNTRIES WHERE CountryDescription=HCOUN),
+					(SELECT ID FROM TCIVILSTATUSES WHERE DESCRIPTION= CS),
+					MNO,EM,GUARD,GUARDCONT,BDNO,BDSTREET,
+					(SELECT ID FROM VCITIES WHERE CITYDESCRIPTION=BDMUN),
+					(SELECT ID FROM TCOUNTRIES WHERE CountryDescription=BDCOUN),
+					R1,R2,R3,R4,R5,R6,R7,R8,R9,R10,R11,R12
+				);	
+			END IF;
+	ELSE	
+		IF (SELECT COUNT(ID) FROM VSTUDENTPROFILES WHERE IDNUMBER=IDN)=0 THEN
+			IF (SELECT COUNT(ID) FROM VSTUDENTPROFILES WHERE 	
+				TYPE=TY AND	IDNUMBER=IDN AND LASTNAME=LN AND FIRSTNAME=FN AND MIDDLENAME=MN AND
+				BITHDATE=BDATE AND BIRTHNO=BNO AND BirthCityDescription=BMUN AND BIRTHCOUNTRYDESCRIPTION=BCOUN AND
+				GENDER=GEN AND RELIGIONDESCRIPTION=REL AND SCHOLARSHIPDESCRIPTION=SCHO AND NATIONALITYDESCRIPTION=NAT AND
+				FOREIGNER=FOREIG AND PASSPORTNO=PASS AND HOMENO=HNO AND HOMESTREET=HSTREET AND HOMECITYDESCRIPTION=HMUN AND
+				HOMECOUNTRYDESCRIPTION=HCOUN AND CIVILSTATUS=CS AND MOBILENO=MNO AND EMAIL=EM AND GUARDIAN=GUARD AND
+				GUARDIANCONTACT=GUARDCONT AND BORDINGNO=BDNO AND BORDINGSTREET=BDSTREET AND BORDINGCITYDESCRIPTION=BDMUN AND
+				BORDINGCOUNTRYDESCRIPTION=BDCOUN AND F138=R1 AND F137A=R1 AND NSO=R3 AND BC=R4 AND PC=R5 AND
+				NBIC=R6 AND  CC=R7 AND CGM=R8 AND MC=R9 AND HD=R10 AND TOR=R11 AND CAT=R12)= 0 THEN
+				UPDATE TSTUDENTPROFILE SET 
+					TYPE=(SELECT ID FROM TSTUDENTTYPE WHERE DESCRIPTION=TY),
+					IDNUMBER=IDN,
+					LASTNAME=LN,
+					FIRSTNAME=FN,
+					MIDDLENAME=MN,
+					BITHDATE=BDATE,
+					BIRTHNO=BNO ,
+					BirthMinucipalityID=(SELECT ID FROM VCITIES WHERE CITYDESCRIPTION=BMUN) ,
+					BIRTHCOUNTRYID=(SELECT ID FROM TCOUNTRIES WHERE CountryDescription=BCOUN) ,
+					GENDER=(SELECT ID FROM TGENDERS WHERE DESCRIPTION=GEN) ,
+					RELIGIONID=(SELECT ID FROM TRELIGIONS WHERE RELIGIONDESCRIPTION=REL) ,
+					SCHOLARSHIPID=(SELECT ID FROM TSCHOLARSHIPS WHERE ScholarshipDescription=SCHO) ,
+					NATIONALITYID=(SELECT ID FROM TNATIONALITIES WHERE NationalityDescription=NAT) ,
+					FOREIGNER=FOREIG ,
+					PASSPORTNO=PASS ,
+					HOMENO=HNO ,
+					HOMESTREET=HSTREET ,
+					HomeMinicipalityID=(SELECT ID FROM VCITIES WHERE CITYDESCRIPTION=HMUN) ,
+					HOMECOUNTRYID=(SELECT ID FROM TCOUNTRIES WHERE CountryDescription=HCOUN) ,
+					CIVILSTATUS=(SELECT ID FROM TCIVILSTATUSES WHERE DESCRIPTION= CS) ,
+					MOBILENO=MNO ,
+					EMAIL=EM ,
+					GUARDIAN=GUARD ,
+					GUARDIANCONTACT=GUARDCONT ,
+					BORDINGNO=BDNO ,
+					BORDINGSTREET=BDSTREET ,
+					BORDINGMUNICIPALITYID=(SELECT ID FROM VCITIES WHERE CITYDESCRIPTION=BDMUN) ,
+					BORDINGCOUNTRYID=(SELECT ID FROM TCOUNTRIES WHERE CountryDescription=BDCOUN) ,
+					F138=R1 ,
+					F137A=R1 ,
+					NSO=R3 ,
+					BC=R4 ,
+					PC=R5 ,
+					NBIC=R6 ,
+					CC=R7 ,
+					CGM=R8 ,
+					MC=R9 , 
+					HD=R10 ,
+					TOR=R11 ,
+					CAT=R12
+				WHERE ID=AESwitch;
+			END IF;
+		END IF;
 	end if;
 END$$
 
@@ -2080,7 +2161,9 @@ INSERT INTO `tcurriculums` (`ID`, `CurriculumCode`, `CourseID`, `EntryYear`) VAL
 (18, 'BSE-ENG-2013', 66, 2013),
 (19, 'BSIT-ANIM-2013', 87, 2013),
 (20, 'BSCS-COMSCI-2018', 70, 2017),
-(21, 'BSCS-COMSCI-2020', 70, 2020);
+(21, 'BSCS-COMSCI-2020', 70, 2020),
+(22, 'BSIT-PROG-2020', 68, 2020),
+(23, 'BSPA-SCO SCI-2021', 76, 2021);
 
 -- --------------------------------------------------------
 
@@ -2168,8 +2251,49 @@ CREATE TABLE `temployeechildrens` (
 --
 
 INSERT INTO `temployeechildrens` (`ID`, `EmployeeID`, `Name`, `Birthday`) VALUES
-(13, '64', '123', '2018-04-05'),
-(14, '64', '1', '2018-04-05');
+(19, '64', '2', '2018-04-07'),
+(20, '64', '1', '2018-04-06');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `temployeecseligibilities`
+--
+
+CREATE TABLE `temployeecseligibilities` (
+  `ID` int(11) NOT NULL,
+  `EmployeeID` int(11) DEFAULT NULL,
+  `CareerService` varchar(45) DEFAULT NULL,
+  `Rating` varchar(45) DEFAULT NULL,
+  `DateOfExamination` varchar(45) DEFAULT NULL,
+  `PlaceOfExamination` varchar(45) DEFAULT NULL,
+  `LicenseNumber` varchar(45) DEFAULT NULL,
+  `DateValidity` varchar(45) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `temployeecseligibilities`
+--
+
+INSERT INTO `temployeecseligibilities` (`ID`, `EmployeeID`, `CareerService`, `Rating`, `DateOfExamination`, `PlaceOfExamination`, `LicenseNumber`, `DateValidity`) VALUES
+(74, 64, NULL, NULL, NULL, NULL, '5', NULL),
+(75, 64, NULL, '5', NULL, NULL, NULL, NULL),
+(76, 64, NULL, '2', NULL, NULL, NULL, NULL),
+(77, 64, NULL, '4', NULL, NULL, NULL, NULL),
+(78, 64, NULL, NULL, NULL, '5', NULL, NULL),
+(79, 64, NULL, '2', NULL, NULL, NULL, NULL),
+(80, 64, NULL, '2', NULL, '4', NULL, NULL),
+(81, 64, NULL, NULL, NULL, '2', NULL, NULL),
+(82, 64, NULL, NULL, NULL, '6', NULL, NULL),
+(83, 64, NULL, '2', NULL, '5', NULL, NULL),
+(84, 64, '3', '2', NULL, '5', NULL, NULL),
+(85, 64, NULL, '4', NULL, NULL, NULL, NULL),
+(86, 64, NULL, NULL, NULL, '5', '5', NULL),
+(87, 64, NULL, '5', NULL, NULL, NULL, NULL),
+(88, 64, NULL, NULL, NULL, NULL, '5', NULL),
+(89, 64, NULL, NULL, NULL, '5', '5', NULL),
+(90, 64, NULL, NULL, NULL, NULL, '5', NULL),
+(91, 64, NULL, NULL, NULL, '5', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -2216,7 +2340,7 @@ INSERT INTO `temployees` (`ID`, `EmployeeID`, `Salutation`, `LastName`, `FirstNa
 (61, 'CICS-0012', 'Mr.', 'BRAVO', 'EDISON', 'D.', 53, 26, 'MALE', 9, 5, 1, '-', 'TUGUEGARAO CITY, CAGAYAN', 2, 2),
 (62, 'CICS-0013', 'Ms.', 'DAYAG', 'CHRISSA', 'P.', 53, 26, 'FEMALE', 9, 3, 1, '-', 'TUGUEGARAO CITY, CAGAYAN', 2, 2),
 (63, 'CICS-0014', 'Ms.', 'ELIZAGA', 'JENNELYN', 'BALISI', 53, 26, 'FEMALE', 9, 5, 1, '-', 'SOLANA, CAGAYAN', 2, 2),
-(64, '123', 'Mr.', 'EGIPTO232', 'J SEPHEL', 'B.1', 53, 26, 'MALE', 9, 5, 1, '-', 'TUGUEGARAO CITY, CAGYAN', 2, 2),
+(64, '123', 'Mr.', 'Egipto', 'J Sephel Eliphaz', 'Baptista', 53, 26, 'MALE', 9, 5, 1, '-', 'TUGUEGARAO CITY, CAGYAN', 2, 2),
 (65, 'CICS-0016', 'Mr.', 'JAMINOLA', 'FERNANDO JR.', 'M.', 53, 26, 'MALE', 9, 5, 1, '-', 'TUGUEGARAO CITY, CAGAYAN', 2, 2),
 (66, 'CICS-0017', 'Ms.', 'GUZMAN', 'DANNIVER', 'RAFUL', 53, 26, 'FEMALE', 9, 5, 1, '-', 'TUGUEGARAO CITY, CAGAYAN', 2, 2),
 (67, 'CICS-0018', 'Ms.', 'FURIFGAY', 'PRINCESS VANEZZA', 'M.', 53, 26, 'FEMALE', 9, 5, 1, '-', 'PEÑABLANCA, CAGAYAN', 2, 2),
@@ -2315,22 +2439,22 @@ INSERT INTO `temployeeseducationbackground` (`id`, `EmployeeID`, `NameOfSchool`,
 CREATE TABLE `temployeesfamilybackground` (
   `id` int(11) NOT NULL,
   `EmployeeID` varchar(50) NOT NULL,
-  `sSurname` varchar(80) NOT NULL,
-  `sFirstname` varchar(80) NOT NULL,
-  `sMiddlename` varchar(80) NOT NULL,
-  `sExtentionname` varchar(80) NOT NULL,
-  `mMiddlename` varchar(80) NOT NULL,
-  `sOccupation` varchar(80) NOT NULL,
-  `sBusinessname` varchar(80) NOT NULL,
-  `sBusinessaddress` varchar(80) NOT NULL,
-  `sTel` varchar(80) NOT NULL,
-  `fSurname` varchar(80) NOT NULL,
-  `fFirstname` varchar(80) NOT NULL,
-  `fExtensionname` varchar(80) NOT NULL,
-  `fMiddlename` varchar(80) NOT NULL,
-  `mMaidenname` varchar(80) NOT NULL,
-  `mSurname` varchar(80) NOT NULL,
-  `mFirstname` varchar(80) NOT NULL
+  `sSurname` varchar(80) DEFAULT NULL,
+  `sFirstname` varchar(80) DEFAULT NULL,
+  `sMiddlename` varchar(80) DEFAULT NULL,
+  `sExtentionname` varchar(80) DEFAULT NULL,
+  `mMiddlename` varchar(80) DEFAULT NULL,
+  `sOccupation` varchar(80) DEFAULT NULL,
+  `sBusinessname` varchar(80) DEFAULT NULL,
+  `sBusinessaddress` varchar(80) DEFAULT NULL,
+  `sTel` varchar(80) DEFAULT NULL,
+  `fSurname` varchar(80) DEFAULT NULL,
+  `fFirstname` varchar(80) DEFAULT NULL,
+  `fExtensionname` varchar(80) DEFAULT NULL,
+  `fMiddlename` varchar(80) DEFAULT NULL,
+  `mMaidenname` varchar(80) DEFAULT NULL,
+  `mSurname` varchar(80) DEFAULT NULL,
+  `mFirstname` varchar(80) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -2338,7 +2462,7 @@ CREATE TABLE `temployeesfamilybackground` (
 --
 
 INSERT INTO `temployeesfamilybackground` (`id`, `EmployeeID`, `sSurname`, `sFirstname`, `sMiddlename`, `sExtentionname`, `mMiddlename`, `sOccupation`, `sBusinessname`, `sBusinessaddress`, `sTel`, `fSurname`, `fFirstname`, `fExtensionname`, `fMiddlename`, `mMaidenname`, `mSurname`, `mFirstname`) VALUES
-(2, '64', 'test1', 'test13', 'test12', 'test1', 'test13', 'test13', 'test13', 'test13', 'test1', 'test1', 'test1', 'test13', 'test1', 'test1', 'test1', 'test1'),
+(2, '64', NULL, NULL, NULL, NULL, 'Baptista', 'Part time teacher, Web developer and Database administrator', 'Cagayan State University', 'Carig', NULL, 'Egipto', 'Joel Joseph', NULL, 'Lorenzo', 'Baptista', 'Egipto', 'Lerma'),
 (3, '123', 'test11', 'test1', 'test12', 'test1', 'test1', 'test1', 'test1', 'test1', 'test1', 'test1', 'test1', 'test1', 'test1', 'test1', 'test1', 'test1');
 
 -- --------------------------------------------------------
@@ -2401,7 +2525,7 @@ CREATE TABLE `temployeespersonalinformation` (
 --
 
 INSERT INTO `temployeespersonalinformation` (`id`, `EmployeeID`, `ExtensionName`, `DOB`, `POB`, `Email`, `PhoneNumber`, `Telephone`, `CivilStatus`, `Height`, `Weight`, `BloodType`, `GSIS`, `PAGIBIG`, `PHILHEALTH`, `SSS`, `TIN`, `AGENCYEMPLOYEENO`, `ResZipCode`, `PermZipCode`, `ResHouseBlockLotNo`, `ResStreet`, `ResSubDiv`, `ResBrngy`, `ResCity`, `ResProvince`, `PermHouseBlockLotNo`, `PermStreet`, `PermSubDiv`, `PermBrngy`, `PermCity`, `PermProvince`, `temployeespersonalinformationcol`) VALUES
-(4, '64', '123', '2018-04-06', '1', NULL, NULL, NULL, 'Single', '1', '1', 'A+', '1', '1', '1', '2', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+(4, '64', NULL, '1994-01-08', 'Tuguegarao City', 'Sephelegipto@gmail.com', '09759556027', NULL, 'Single', '11.70688', '50', 'A+', NULL, NULL, NULL, NULL, NULL, 'PT-CICS-708', '3500', '3500', '166', 'E', 'Balzain West', '12', 'Tuguegarao', 'Cagayan Valley', '166', 'E', 'Balzain West', '12', 'Tuguegarao', 'Cagayan Valley', NULL);
 
 -- --------------------------------------------------------
 
@@ -2424,7 +2548,46 @@ CREATE TABLE `temployeesreferences` (
 INSERT INTO `temployeesreferences` (`ID`, `EmployeeID`, `Name`, `Address`, `ContactNumber`) VALUES
 (4, '64', NULL, NULL, NULL),
 (5, '64', NULL, NULL, NULL),
-(6, '64', NULL, NULL, NULL);
+(6, '64', NULL, NULL, NULL),
+(7, '64', '4', NULL, NULL),
+(8, '64', NULL, NULL, NULL),
+(9, '64', NULL, NULL, NULL),
+(10, '64', '22', '2', '2'),
+(11, '64', NULL, NULL, NULL),
+(12, '64', NULL, NULL, NULL),
+(13, '64', '1', '1', '1'),
+(14, '64', NULL, NULL, NULL),
+(15, '64', NULL, NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `temployeesworkexperiences`
+--
+
+CREATE TABLE `temployeesworkexperiences` (
+  `ID` int(11) NOT NULL,
+  `EmployeeID` varchar(45) DEFAULT NULL,
+  `InclusiveDateFrom` varchar(45) DEFAULT NULL,
+  `InclusiveDateTo` varchar(45) DEFAULT NULL,
+  `Position` varchar(45) DEFAULT NULL,
+  `Department` varchar(45) DEFAULT NULL,
+  `MonthlySalary` varchar(45) DEFAULT NULL,
+  `JobPay` varchar(45) DEFAULT NULL,
+  `StatusAppointment` varchar(45) DEFAULT NULL,
+  `GovernmentService` varchar(45) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `temployeesworkexperiences`
+--
+
+INSERT INTO `temployeesworkexperiences` (`ID`, `EmployeeID`, `InclusiveDateFrom`, `InclusiveDateTo`, `Position`, `Department`, `MonthlySalary`, `JobPay`, `StatusAppointment`, `GovernmentService`) VALUES
+(1, '64', '2018-04-07', '2018-04-07', '1', '1', '1', '1', '1', '1'),
+(2, '64', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(3, '64', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(4, '64', '2018-04-07', NULL, '1', '1', NULL, NULL, NULL, NULL),
+(5, '64', '2018-04-06', '2018-04-21', NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -2786,8 +2949,8 @@ INSERT INTO `tloginverificators` (`id`, `UserID`, `Password`, `UserTypeID`, `Sec
 (18, 'PT-CICS-078', '453e406dcee4d18174d4ff623f52dcd8', 2, NULL, NULL, 1, 'A8drpw3w5maB1RBbHie9PO8CDscmF37AjL9WlsPUh5CovLEfRoI6rNciGkew', NULL, NULL),
 (22, 'ABC123', 'secret', 3, 0, 0, 0, 'nlBqGQYj9YntM30HaTXGufQWhCgWcYBrxtXGk7Tcqa9tupH0Tk4dyjHDv6sY', NULL, NULL),
 (23, '1', 'secret', 3, 0, 0, 0, NULL, NULL, NULL),
-(24, '123', '453e406dcee4d18174d4ff623f52dcd8', 2, NULL, NULL, 1, 'HCpwSLgke0296KPTyONyUAjz8cKPlaTnyTEojnEOWS6CilEqdEnZH6F85HUI', NULL, NULL),
-(25, 'PRES-001', '453e406dcee4d18174d4ff623f52dcd8', 1, NULL, NULL, 1, '2wZbadx2tEkK53b7fjbugoAW7MWCouaFePd28dhOrGHTDFEZEarvHclQzuFF', NULL, NULL);
+(24, '123', '453e406dcee4d18174d4ff623f52dcd8', 2, NULL, NULL, 1, '3N48VtmLtPxBuUPFscQZCvJnI9o7iME2spTCJUtUBVo6mJpKGOL7wqazdOlA', NULL, NULL),
+(25, 'PRES-001', '453e406dcee4d18174d4ff623f52dcd8', 1, NULL, NULL, 1, 'JJ27mRUSx03wxttoQ5OiPjhr8JyXL5VD2IHFYlPO1rdjFGf6Hd7fa3joi3wA', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -2899,7 +3062,8 @@ INSERT INTO `tperiodcourses` (`ID`, `PeriodID`, `CourseID`, `StudentYear`, `Cost
 (2, 22, 68, 2, '0.00', 15, 0),
 (3, 22, 68, 3, '0.00', 15, 0),
 (4, 22, 68, 4, '0.00', 15, 0),
-(5, 22, 68, 1, '200.00', 15, 1);
+(5, 22, 68, 1, '200.00', 15, 1),
+(6, 22, 68, 1, '0.00', 22, 0);
 
 -- --------------------------------------------------------
 
@@ -2952,15 +3116,18 @@ CREATE TABLE `tperiods` (
   `MidtermDate` date DEFAULT NULL,
   `FinalsDate` date DEFAULT NULL,
   `GradeInputStart` date DEFAULT NULL,
-  `GradeInputEnd` date DEFAULT NULL
+  `GradeInputEnd` date DEFAULT NULL,
+  `StartYear` int(11) DEFAULT NULL,
+  `EndYear` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `tperiods`
 --
 
-INSERT INTO `tperiods` (`ID`, `PeriodCode`, `TermID`, `StartDate`, `EndDate`, `EnrollmentStartDate`, `EnrollmentEndDate`, `PrelimDate`, `MidtermDate`, `FinalsDate`, `GradeInputStart`, `GradeInputEnd`) VALUES
-(22, '1-42018-82018', 1, '2018-04-12', '2018-08-12', '2018-03-29', '2018-04-12', '2018-05-12', '2018-06-12', '2018-07-12', '2018-07-12', '2018-09-12');
+INSERT INTO `tperiods` (`ID`, `PeriodCode`, `TermID`, `StartDate`, `EndDate`, `EnrollmentStartDate`, `EnrollmentEndDate`, `PrelimDate`, `MidtermDate`, `FinalsDate`, `GradeInputStart`, `GradeInputEnd`, `StartYear`, `EndYear`) VALUES
+(22, '1-42018-82018', 1, '2018-04-12', '2018-08-12', '2018-03-29', '2018-04-12', '2018-05-12', '2018-06-12', '2018-07-12', '2018-07-12', '2018-09-12', 2018, 2019),
+(23, '1-18-19', 1, '2018-04-20', '2018-08-20', '2018-04-06', '2018-04-20', '2018-05-20', '2018-06-20', '2018-07-20', '2018-07-20', '2018-09-20', 2018, 2019);
 
 -- --------------------------------------------------------
 
@@ -3572,8 +3739,9 @@ CREATE TABLE `tstudentprofile` (
 --
 
 INSERT INTO `tstudentprofile` (`ID`, `Type`, `IDNumber`, `LastName`, `FirstName`, `MiddleName`, `BithDate`, `BirthNo`, `BirthMinucipalityID`, `BirthCountryID`, `Gender`, `ReligionID`, `ScholarshipID`, `NationalityID`, `Foreigner`, `PassportNo`, `HomeNo`, `HomeStreet`, `HomeMinicipalityID`, `HomeCountryID`, `CivilStatus`, `MobileNo`, `Email`, `Guardian`, `GuardianContact`, `BordingNo`, `BordingStreet`, `BordingMunicipalityID`, `BordingCountryID`, `F138`, `F137A`, `NSO`, `BC`, `PC`, `NBIC`, `CC`, `CGM`, `MC`, `HD`, `TOR`, `CAT`) VALUES
-(3, 1, '11-13826', 'CABASAG', 'VINCE GILBERT', 'MAGRAMO', '1995-05-01', 'PAYATAS B, BANSALANGIN ST.,', 18, 173, 1, 32, NULL, 3, 0, '', '08', 'M.JULIAN ST. SANTANA SUBDIVISION, BRGY. DOLORES', 17, 173, 1, '09754420890', 'vincemgrm000@gmail.com', 'FELIPE MAGRAMO SR.', '09272399994', '15D', 'MAHARLIKA HIGHWAY', 19, 173, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1),
-(4, 1, '132132', 'EGIPTO', 'SEPHEL', 'BAPTISTA', '2044-06-15', '166', 19, 173, 1, 35, 20, 2, 1, '99999', '12', '123', 19, 12, 6, '09759556027', 'SEPHELEGIPTO@GMAIL.COM', 'WALA', 'WALA', '', '', 16, NULL, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+(3, 1, '11-13826', 'CABASAG', 'VINCE', 'MAGRAMO', '1995-05-01', 'PAYATAS B, BANSALANGIN ST.,', 18, 173, 1, 32, NULL, 3, 0, '', '08', 'M.JULIAN ST. SANTANA SUBDIVISION, BRGY. DOLORES', 17, 173, 1, '09754420890', 'vincemgrm000@gmail.com', 'FELIPE MAGRAMO SR.', '09272399994', '15D', 'MAHARLIKA HWAY\r\n', 19, 173, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1),
+(4, 1, '132132', 'EGIPTO', 'SEPHEL', 'BAPTISTA', '2044-06-15', '166', 19, 173, 1, 35, 20, 2, 1, '99999', '12', '123', 19, 12, 6, '09759556027', 'SEPHELEGIPTO@GMAIL.COM', 'WALA', 'WALA', '', '', 16, NULL, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(9, 1, '123', 'CARANGUIAN', 'MA. THERESA', 'BATTUNG', '1996-10-01', '13 MAHARLIKA HWAY, TANZA', 19, 173, 2, 32, NULL, 3, 0, '', '', '', 21, NULL, 1, '09169671899', 'theresacaranguian@gmail.com', 'N/A', '00', '', '', 21, NULL, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
 
 -- --------------------------------------------------------
 
@@ -4372,6 +4540,59 @@ CREATE TABLE `vperiodfees` (
 -- (See below for the actual view)
 --
 CREATE TABLE `vperiodmashedup` (
+`ID` int(11)
+,`Code` varchar(45)
+,`Term` varchar(50)
+,`StartDate` date
+,`EndDate` date
+,`EnrollmentStartDate` date
+,`EnrollmentEndDate` date
+,`PrelimDate` date
+,`MidtermDate` date
+,`FinalsDate` date
+,`GradeInputStart` date
+,`GradeInputEnd` date
+,`vPeriodCoursesID` int(11)
+,`PeriodCode` varchar(45)
+,`CourseID` int(11)
+,`CourseCode` varchar(45)
+,`ClassCodePrefix` char(5)
+,`CourseTitle` varchar(100)
+,`MajorCode` varchar(45)
+,`CollegeCode` varchar(45)
+,`NoOfYears` int(11)
+,`StudentYear` int(11)
+,`CostPerUnit` decimal(10,2)
+,`ActiveCurriculum` varchar(45)
+,`vPeriodSectionsID` int(11)
+,`Section` char(4)
+,`AdviserID` int(11)
+,`Adviser` varchar(183)
+,`vPeriodSubjectsID` int(11)
+,`ClassCode` varchar(45)
+,`SubjectID` int(11)
+,`SubjectCode` varchar(45)
+,`SubjectDescription` varchar(100)
+,`Units` int(11)
+,`LabUnits` varchar(45)
+,`LecUnits` varchar(45)
+,`LabHours` varchar(45)
+,`LecHours` varchar(45)
+,`PrerequisiteCode` varchar(341)
+,`SubjectType` varchar(50)
+,`SubjectYearDescription` varchar(45)
+,`TeacherID` int(11)
+,`Teacher` varchar(183)
+,`ClassSize` int(11)
+,`vperiodschedulesID` int(11)
+,`Day` varchar(341)
+,`StartTime` varchar(341)
+,`EndTime` varchar(341)
+,`RoomID` varchar(256)
+,`RoomCode` varchar(341)
+,`Building` varchar(341)
+,`College` varchar(341)
+,`SessionType` varchar(256)
 );
 
 -- --------------------------------------------------------
@@ -4434,6 +4655,8 @@ CREATE TABLE `vperiods` (
 ,`FinalsDate` date
 ,`GradeInputStart` date
 ,`GradeInputEnd` date
+,`StartYear` int(11)
+,`EndYear` int(11)
 );
 
 -- --------------------------------------------------------
@@ -4455,7 +4678,7 @@ CREATE TABLE `vperiodschedules` (
 ,`RoomCode` varchar(341)
 ,`Building` varchar(341)
 ,`College` varchar(341)
-,`SessionType,` varchar(256)
+,`SessionType` varchar(256)
 ,`TeacherID` int(11)
 ,`Teacher` varchar(183)
 );
@@ -4792,7 +5015,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`192.168.1.176` SQL SECURITY DEFINER V
 --
 DROP TABLE IF EXISTS `vperiods`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`192.168.1.177` SQL SECURITY DEFINER VIEW `vperiods`  AS  select `tperiods`.`ID` AS `ID`,`tperiods`.`PeriodCode` AS `Code`,`tsubjectterm`.`TermDescription` AS `Term`,`tperiods`.`StartDate` AS `StartDate`,`tperiods`.`EndDate` AS `EndDate`,`tperiods`.`EnrollmentStartDate` AS `EnrollmentStartDate`,`tperiods`.`EnrollmentEndDate` AS `EnrollmentEndDate`,`tperiods`.`PrelimDate` AS `PrelimDate`,`tperiods`.`MidtermDate` AS `MidtermDate`,`tperiods`.`FinalsDate` AS `FinalsDate`,`tperiods`.`GradeInputStart` AS `GradeInputStart`,`tperiods`.`GradeInputEnd` AS `GradeInputEnd` from (`tperiods` join `tsubjectterm` on((`tsubjectterm`.`ID` = `tperiods`.`TermID`))) ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`192.168.1.177` SQL SECURITY DEFINER VIEW `vperiods`  AS  select `tperiods`.`ID` AS `ID`,`tperiods`.`PeriodCode` AS `Code`,`tsubjectterm`.`TermDescription` AS `Term`,`tperiods`.`StartDate` AS `StartDate`,`tperiods`.`EndDate` AS `EndDate`,`tperiods`.`EnrollmentStartDate` AS `EnrollmentStartDate`,`tperiods`.`EnrollmentEndDate` AS `EnrollmentEndDate`,`tperiods`.`PrelimDate` AS `PrelimDate`,`tperiods`.`MidtermDate` AS `MidtermDate`,`tperiods`.`FinalsDate` AS `FinalsDate`,`tperiods`.`GradeInputStart` AS `GradeInputStart`,`tperiods`.`GradeInputEnd` AS `GradeInputEnd`,`tperiods`.`StartYear` AS `StartYear`,`tperiods`.`EndYear` AS `EndYear` from (`tperiods` join `tsubjectterm` on((`tsubjectterm`.`ID` = `tperiods`.`TermID`))) ;
 
 -- --------------------------------------------------------
 
@@ -4801,7 +5024,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`192.168.1.177` SQL SECURITY DEFINER V
 --
 DROP TABLE IF EXISTS `vperiodschedules`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`192.168.1.177` SQL SECURITY DEFINER VIEW `vperiodschedules`  AS  select `vperiodsubjects`.`ID` AS `ID`,`vperiodsubjects`.`ID` AS `PeriodSubjectID`,`vperiodsubjects`.`ClassCode` AS `ClassCode`,`vperiodsubjects`.`SubjectCode` AS `SubjectCode`,`vperiodsubjects`.`SubjectDescription` AS `SubjectDescription`,(select group_concat(`s`.`Day` separator '/') from `tperiodschedules` `s` where (`s`.`PeriodSubjectID` = `vperiodsubjects`.`ID`) group by `s`.`PeriodSubjectID`) AS `Day`,(select group_concat(`s`.`Start` separator '/') from `tperiodschedules` `s` where (`s`.`PeriodSubjectID` = `vperiodsubjects`.`ID`) group by `s`.`PeriodSubjectID`) AS `StartTime`,(select group_concat(`s`.`End` separator '/') from `tperiodschedules` `s` where (`s`.`PeriodSubjectID` = `vperiodsubjects`.`ID`) group by `s`.`PeriodSubjectID`) AS `EndTime`,(select group_concat(`s`.`RoomID` separator '/') from `tperiodschedules` `s` where (`s`.`PeriodSubjectID` = `vperiodsubjects`.`ID`) group by `s`.`PeriodSubjectID`) AS `RoomID`,(select group_concat(`vrooms`.`RoomCode` separator '/') from (`tperiodschedules` `s` left join `vrooms` on((`vrooms`.`ID` = `s`.`RoomID`))) where (`s`.`PeriodSubjectID` = `vperiodsubjects`.`ID`) group by `s`.`PeriodSubjectID`) AS `RoomCode`,(select group_concat(`vrooms`.`BuildingDescription` separator '/') from (`tperiodschedules` `s` left join `vrooms` on((`vrooms`.`ID` = `s`.`RoomID`))) where (`s`.`PeriodSubjectID` = `vperiodsubjects`.`ID`) group by `s`.`PeriodSubjectID`) AS `Building`,(select group_concat(`vrooms`.`CollegeDescription` separator '/') from (`tperiodschedules` `s` left join `vrooms` on((`vrooms`.`ID` = `s`.`RoomID`))) where (`s`.`PeriodSubjectID` = `vperiodsubjects`.`ID`) group by `s`.`PeriodSubjectID`) AS `College`,(select group_concat(`s`.`SessionType` separator '/') from `tperiodschedules` `s` where (`s`.`PeriodSubjectID` = `vperiodsubjects`.`ID`) group by `s`.`PeriodSubjectID`) AS `SessionType,`,`vperiodsubjects`.`TeacherID` AS `TeacherID`,`vperiodsubjects`.`Teacher` AS `Teacher` from `vperiodsubjects` ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`192.168.1.177` SQL SECURITY DEFINER VIEW `vperiodschedules`  AS  select `vperiodsubjects`.`ID` AS `ID`,`vperiodsubjects`.`ID` AS `PeriodSubjectID`,`vperiodsubjects`.`ClassCode` AS `ClassCode`,`vperiodsubjects`.`SubjectCode` AS `SubjectCode`,`vperiodsubjects`.`SubjectDescription` AS `SubjectDescription`,(select group_concat(`s`.`Day` separator '/') from `tperiodschedules` `s` where (`s`.`PeriodSubjectID` = `vperiodsubjects`.`ID`) group by `s`.`PeriodSubjectID`) AS `Day`,(select group_concat(`s`.`Start` separator '/') from `tperiodschedules` `s` where (`s`.`PeriodSubjectID` = `vperiodsubjects`.`ID`) group by `s`.`PeriodSubjectID`) AS `StartTime`,(select group_concat(`s`.`End` separator '/') from `tperiodschedules` `s` where (`s`.`PeriodSubjectID` = `vperiodsubjects`.`ID`) group by `s`.`PeriodSubjectID`) AS `EndTime`,(select group_concat(`s`.`RoomID` separator '/') from `tperiodschedules` `s` where (`s`.`PeriodSubjectID` = `vperiodsubjects`.`ID`) group by `s`.`PeriodSubjectID`) AS `RoomID`,(select group_concat(`vrooms`.`RoomCode` separator '/') from (`tperiodschedules` `s` left join `vrooms` on((`vrooms`.`ID` = `s`.`RoomID`))) where (`s`.`PeriodSubjectID` = `vperiodsubjects`.`ID`) group by `s`.`PeriodSubjectID`) AS `RoomCode`,(select group_concat(`vrooms`.`BuildingDescription` separator '/') from (`tperiodschedules` `s` left join `vrooms` on((`vrooms`.`ID` = `s`.`RoomID`))) where (`s`.`PeriodSubjectID` = `vperiodsubjects`.`ID`) group by `s`.`PeriodSubjectID`) AS `Building`,(select group_concat(`vrooms`.`CollegeDescription` separator '/') from (`tperiodschedules` `s` left join `vrooms` on((`vrooms`.`ID` = `s`.`RoomID`))) where (`s`.`PeriodSubjectID` = `vperiodsubjects`.`ID`) group by `s`.`PeriodSubjectID`) AS `College`,(select group_concat(`s`.`SessionType` separator '/') from `tperiodschedules` `s` where (`s`.`PeriodSubjectID` = `vperiodsubjects`.`ID`) group by `s`.`PeriodSubjectID`) AS `SessionType`,`vperiodsubjects`.`TeacherID` AS `TeacherID`,`vperiodsubjects`.`Teacher` AS `Teacher` from `vperiodsubjects` ;
 
 -- --------------------------------------------------------
 
@@ -4855,7 +5078,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`192.168.1.177` SQL SECURITY DEFINER V
 --
 DROP TABLE IF EXISTS `vstudentprofiles`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`192.168.1.176` SQL SECURITY DEFINER VIEW `vstudentprofiles`  AS  select `tstudentprofile`.`ID` AS `ID`,`tstudenttype`.`Description` AS `Type`,`tstudentprofile`.`IDNumber` AS `IDNumber`,`tstudentprofile`.`LastName` AS `LastName`,`tstudentprofile`.`FirstName` AS `FirstName`,`tstudentprofile`.`MiddleName` AS `MiddleName`,`tstudentprofile`.`BithDate` AS `BithDate`,`tstudentprofile`.`BirthNo` AS `BirthNo`,`vcities`.`CityCode` AS `BirthCityCode`,`vcities`.`CityDescription` AS `BirthCityDescription`,`vcities`.`ProvinceCode` AS `BirthProvinceCode`,`vcities`.`ProvinceDescription` AS `BirthProvinceDescription`,`vcities`.`RegionCode` AS `BirthRegioncode`,`vcities`.`RegionDescription` AS `BirthRegionDescription`,`tcountries`.`CountryCode` AS `BirthCountryCode`,`tcountries`.`CountryDescription` AS `BirthCountryDescription`,`tgenders`.`Description` AS `Gender`,`treligions`.`ReligionCode` AS `ReligionCode`,`treligions`.`ReligionDescription` AS `ReligionDescription`,`tscholarships`.`ScholarshipCode` AS `ScholarshipCode`,`tscholarships`.`ScholarshipDescription` AS `ScholarshipDescription`,`tnationalities`.`NationalityCode` AS `NationalityCode`,`tnationalities`.`NationalityDescription` AS `NationalityDescription`,`tstudentprofile`.`Foreigner` AS `Foreigner`,`tstudentprofile`.`PassportNo` AS `PassportNo`,`tstudentprofile`.`HomeNo` AS `HomeNo`,`tstudentprofile`.`HomeStreet` AS `HomeStreet`,`vcities1`.`CityCode` AS `HomeCitycode`,`vcities1`.`CityDescription` AS `HomeCityDescription`,`vcities1`.`ProvinceCode` AS `HomeProvinceCode`,`vcities1`.`ProvinceDescription` AS `HomeProvinceDescription`,`vcities1`.`RegionCode` AS `HomeRegionCode`,`vcities1`.`RegionDescription` AS `HomeRegionDescription`,`tcountries1`.`CountryCode` AS `HomeCountryCode`,`tcountries1`.`CountryDescription` AS `HomeCountryDescription`,`tcivilstatuses`.`Description` AS `CivilStatus`,`tstudentprofile`.`MobileNo` AS `MobileNo`,`tstudentprofile`.`Email` AS `Email`,`tstudentprofile`.`Guardian` AS `Guardian`,`tstudentprofile`.`GuardianContact` AS `GuardianContact`,`tstudentprofile`.`BordingNo` AS `BordingNo`,`tstudentprofile`.`BordingStreet` AS `BordingStreet`,`vcities2`.`CityCode` AS `BordingCityCode`,`vcities2`.`CityDescription` AS `BordingCityDescription`,`vcities2`.`ProvinceCode` AS `BordingProvinceCode`,`vcities2`.`ProvinceDescription` AS `BordingProvinceDescription`,`vcities2`.`RegionCode` AS `BordingRegionCode`,`vcities2`.`RegionDescription` AS `BordingRegionDescription`,`tcountries2`.`CountryCode` AS `BordingCountryCode`,`tcountries2`.`CountryDescription` AS `BordingCountryDescription`,`tstudentprofile`.`F138` AS `F138`,`tstudentprofile`.`F137A` AS `F137A`,`tstudentprofile`.`NSO` AS `NSO`,`tstudentprofile`.`BC` AS `BC`,`tstudentprofile`.`PC` AS `PC`,`tstudentprofile`.`NBIC` AS `NBIC`,`tstudentprofile`.`CC` AS `CC`,`tstudentprofile`.`CGM` AS `CGM`,`tstudentprofile`.`MC` AS `MC`,`tstudentprofile`.`HD` AS `HD`,`tstudentprofile`.`TOR` AS `TOR`,`tstudentprofile`.`CAT` AS `CAT`,concat(`tstudentprofile`.`LastName`,', ',`tstudentprofile`.`FirstName`,', ',`tstudentprofile`.`MiddleName`) AS `FullName` from ((((((((((((`tstudentprofile` join `tstudenttype` on((`tstudentprofile`.`Type` = `tstudenttype`.`ID`))) left join `vcities` on((`tstudentprofile`.`BirthMinucipalityID` = `vcities`.`ID`))) left join `tcountries` on((`tstudentprofile`.`BirthCountryID` = `tcountries`.`ID`))) join `tgenders` on((`tstudentprofile`.`Gender` = `tgenders`.`ID`))) left join `treligions` on((`tstudentprofile`.`ReligionID` = `treligions`.`ID`))) left join `tscholarships` on((`tstudentprofile`.`ScholarshipID` = `tscholarships`.`ID`))) left join `tnationalities` on((`tstudentprofile`.`NationalityID` = `tnationalities`.`ID`))) left join `vcities` `vcities1` on((`tstudentprofile`.`HomeMinicipalityID` = `vcities1`.`ID`))) left join `tcountries` `tcountries1` on((`tstudentprofile`.`HomeCountryID` = `tcountries1`.`ID`))) join `tcivilstatuses` on((`tstudentprofile`.`CivilStatus` = `tcivilstatuses`.`ID`))) left join `vcities` `vcities2` on((`tstudentprofile`.`BordingMunicipalityID` = `vcities2`.`ID`))) left join `tcountries` `tcountries2` on((`tstudentprofile`.`BordingCountryID` = `tcountries2`.`ID`))) ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`192.168.1.176` SQL SECURITY DEFINER VIEW `vstudentprofiles`  AS  select `tstudentprofile`.`ID` AS `ID`,`tstudenttype`.`Description` AS `Type`,`tstudentprofile`.`IDNumber` AS `IDNumber`,`tstudentprofile`.`LastName` AS `LastName`,`tstudentprofile`.`FirstName` AS `FirstName`,`tstudentprofile`.`MiddleName` AS `MiddleName`,`tstudentprofile`.`BithDate` AS `BithDate`,`tstudentprofile`.`BirthNo` AS `BirthNo`,`vcities`.`CityCode` AS `BirthCityCode`,`vcities`.`CityDescription` AS `BirthCityDescription`,`vcities`.`ProvinceCode` AS `BirthProvinceCode`,`vcities`.`ProvinceDescription` AS `BirthProvinceDescription`,`vcities`.`RegionCode` AS `BirthRegioncode`,`vcities`.`RegionDescription` AS `BirthRegionDescription`,`tcountries`.`CountryCode` AS `BirthCountryCode`,`tcountries`.`CountryDescription` AS `BirthCountryDescription`,`tgenders`.`Description` AS `Gender`,`treligions`.`ReligionCode` AS `ReligionCode`,`treligions`.`ReligionDescription` AS `ReligionDescription`,`tscholarships`.`ScholarshipCode` AS `ScholarshipCode`,`tscholarships`.`ScholarshipDescription` AS `ScholarshipDescription`,`tnationalities`.`NationalityCode` AS `NationalityCode`,`tnationalities`.`NationalityDescription` AS `NationalityDescription`,`tstudentprofile`.`Foreigner` AS `Foreigner`,`tstudentprofile`.`PassportNo` AS `PassportNo`,`tstudentprofile`.`HomeNo` AS `HomeNo`,`tstudentprofile`.`HomeStreet` AS `HomeStreet`,`vcities1`.`CityCode` AS `HomeCitycode`,`vcities1`.`CityDescription` AS `HomeCityDescription`,`vcities1`.`ProvinceCode` AS `HomeProvinceCode`,`vcities1`.`ProvinceDescription` AS `HomeProvinceDescription`,`vcities1`.`RegionCode` AS `HomeRegionCode`,`vcities1`.`RegionDescription` AS `HomeRegionDescription`,`tcountries1`.`CountryCode` AS `HomeCountryCode`,`tcountries1`.`CountryDescription` AS `HomeCountryDescription`,`tcivilstatuses`.`Description` AS `CivilStatus`,`tstudentprofile`.`MobileNo` AS `MobileNo`,`tstudentprofile`.`Email` AS `Email`,`tstudentprofile`.`Guardian` AS `Guardian`,`tstudentprofile`.`GuardianContact` AS `GuardianContact`,`tstudentprofile`.`BordingNo` AS `BordingNo`,`tstudentprofile`.`BordingStreet` AS `BordingStreet`,`vcities2`.`CityCode` AS `BordingCityCode`,`vcities2`.`CityDescription` AS `BordingCityDescription`,`vcities2`.`ProvinceCode` AS `BordingProvinceCode`,`vcities2`.`ProvinceDescription` AS `BordingProvinceDescription`,`vcities2`.`RegionCode` AS `BordingRegionCode`,`vcities2`.`RegionDescription` AS `BordingRegionDescription`,`tcountries2`.`CountryCode` AS `BordingCountryCode`,`tcountries2`.`CountryDescription` AS `BordingCountryDescription`,`tstudentprofile`.`F138` AS `F138`,`tstudentprofile`.`F137A` AS `F137A`,`tstudentprofile`.`NSO` AS `NSO`,`tstudentprofile`.`BC` AS `BC`,`tstudentprofile`.`PC` AS `PC`,`tstudentprofile`.`NBIC` AS `NBIC`,`tstudentprofile`.`CC` AS `CC`,`tstudentprofile`.`CGM` AS `CGM`,`tstudentprofile`.`MC` AS `MC`,`tstudentprofile`.`HD` AS `HD`,`tstudentprofile`.`TOR` AS `TOR`,`tstudentprofile`.`CAT` AS `CAT`,concat(`tstudentprofile`.`LastName`,', ',`tstudentprofile`.`FirstName`,', ',`tstudentprofile`.`MiddleName`) AS `FullName` from ((((((((((((`tstudentprofile` left join `tstudenttype` on((`tstudentprofile`.`Type` = `tstudenttype`.`ID`))) left join `vcities` on((`tstudentprofile`.`BirthMinucipalityID` = `vcities`.`ID`))) left join `tcountries` on((`tstudentprofile`.`BirthCountryID` = `tcountries`.`ID`))) left join `tgenders` on((`tstudentprofile`.`Gender` = `tgenders`.`ID`))) left join `treligions` on((`tstudentprofile`.`ReligionID` = `treligions`.`ID`))) left join `tscholarships` on((`tstudentprofile`.`ScholarshipID` = `tscholarships`.`ID`))) left join `tnationalities` on((`tstudentprofile`.`NationalityID` = `tnationalities`.`ID`))) left join `vcities` `vcities1` on((`tstudentprofile`.`HomeMinicipalityID` = `vcities1`.`ID`))) left join `tcountries` `tcountries1` on((`tstudentprofile`.`HomeCountryID` = `tcountries1`.`ID`))) left join `tcivilstatuses` on((`tstudentprofile`.`CivilStatus` = `tcivilstatuses`.`ID`))) left join `vcities` `vcities2` on((`tstudentprofile`.`BordingMunicipalityID` = `vcities2`.`ID`))) left join `tcountries` `tcountries2` on((`tstudentprofile`.`BordingCountryID` = `tcountries2`.`ID`))) ;
 
 -- --------------------------------------------------------
 
@@ -4973,6 +5196,12 @@ ALTER TABLE `temployeechildrens`
   ADD PRIMARY KEY (`ID`);
 
 --
+-- Indexes for table `temployeecseligibilities`
+--
+ALTER TABLE `temployeecseligibilities`
+  ADD PRIMARY KEY (`ID`);
+
+--
 -- Indexes for table `temployees`
 --
 ALTER TABLE `temployees`
@@ -5006,6 +5235,12 @@ ALTER TABLE `temployeespersonalinformation`
 -- Indexes for table `temployeesreferences`
 --
 ALTER TABLE `temployeesreferences`
+  ADD PRIMARY KEY (`ID`);
+
+--
+-- Indexes for table `temployeesworkexperiences`
+--
+ALTER TABLE `temployeesworkexperiences`
   ADD PRIMARY KEY (`ID`);
 
 --
@@ -5274,7 +5509,7 @@ ALTER TABLE `tcourses`
 -- AUTO_INCREMENT for table `tcurriculums`
 --
 ALTER TABLE `tcurriculums`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `tdays`
@@ -5298,13 +5533,19 @@ ALTER TABLE `tdesignations`
 -- AUTO_INCREMENT for table `temployeechildrens`
 --
 ALTER TABLE `temployeechildrens`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+
+--
+-- AUTO_INCREMENT for table `temployeecseligibilities`
+--
+ALTER TABLE `temployeecseligibilities`
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=92;
 
 --
 -- AUTO_INCREMENT for table `temployees`
 --
 ALTER TABLE `temployees`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=134;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=132;
 
 --
 -- AUTO_INCREMENT for table `temployeeseducationbackground`
@@ -5334,7 +5575,13 @@ ALTER TABLE `temployeespersonalinformation`
 -- AUTO_INCREMENT for table `temployeesreferences`
 --
 ALTER TABLE `temployeesreferences`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+
+--
+-- AUTO_INCREMENT for table `temployeesworkexperiences`
+--
+ALTER TABLE `temployeesworkexperiences`
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `tfacultyranks`
@@ -5382,7 +5629,7 @@ ALTER TABLE `tnationalities`
 -- AUTO_INCREMENT for table `tperiodcourses`
 --
 ALTER TABLE `tperiodcourses`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `tperiodfees`
@@ -5394,7 +5641,7 @@ ALTER TABLE `tperiodfees`
 -- AUTO_INCREMENT for table `tperiods`
 --
 ALTER TABLE `tperiods`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `tperiodschedules`
@@ -5484,7 +5731,7 @@ ALTER TABLE `tstudentgrades`
 -- AUTO_INCREMENT for table `tstudentprofile`
 --
 ALTER TABLE `tstudentprofile`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `tstudents`

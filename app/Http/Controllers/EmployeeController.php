@@ -12,6 +12,9 @@ use App\Employees;
 use App\EmployeeFB;
 use App\EmployeeReferences;
 use App\EmployeeChildren;
+use App\EmployeeCSEligibilities;
+use App\EmployeeWorkExperience;
+
 class EmployeeController extends Controller
 {
 	public function ViewPds(){
@@ -37,8 +40,10 @@ class EmployeeController extends Controller
 		$VOCATIONAL = DB::table('temployeeseducationbackground')->where('EmployeeID', $UserID)->where('EBLevelID', 3)->get();
 		$COLLEGE = DB::table('temployeeseducationbackground')->where('EmployeeID', $UserID)->where('EBLevelID', 4)->get();
 		$GRADUATE  = DB::table('temployeeseducationbackground')->where('EmployeeID', $UserID)->where('EBLevelID', 5)->get();
+		$workexperiences = EmployeeWorkExperience::where('EmployeeID', '=' ,$UserID)->get();
+		$CSEligibilities = EmployeeCSEligibilities::where('EmployeeID', '=' ,$UserID)->get();
 
-		return view('employee/employeepds',compact('empDetails', 'ELEMENTARY', 'SECONDARY', 'VOCATIONAL', 'COLLEGE', 'GRADUATE', 'childrens', 'references', 'UserID'));
+		return view('employee/employeepds',compact('empDetails', 'ELEMENTARY', 'SECONDARY', 'VOCATIONAL', 'COLLEGE', 'GRADUATE', 'childrens', 'references', 'UserID', 'CSEligibilities', 'workexperiences'));
 	}
 
 	public function UpdatePersonalInformation(Request $request){
@@ -67,18 +72,48 @@ class EmployeeController extends Controller
 		}
 	}
 
-	public function EditChildren(Request $request){
+	public function AddCSEligibility(Request $request){
 		if ($request->ajax())
 		{
-			return response(EmployeeChildren::updateOrCreate(['ID'=>$request->ID], $request->all()));
+			return response(EmployeeCSEligibilities::updateOrCreate(['EmployeeID'=>$request->CareerService, 'CareerService'=>$request->CareerService],$request->all())->toArray());
 		}
 	}
 
+
+	public function AddWorkExperience(Request $request){
+		if ($request->ajax())
+		{
+			return response(EmployeeWorkExperience::updateOrCreate(['EmployeeID'=>$request->CareerService, 'InclusiveDateFrom'=>$request->InclusiveDateFrom],$request->all()));
+		}
+	}
+
+	public function EditChildren(Request $request){
+		if ($request->ajax())
+		{
+			return response(EmployeeChildren::updateOrCreate(['ID'=>$request->EmployeeID], $request->all()));
+		}
+	}
+
+	public function EditCSEligibility(Request $request){
+		if ($request->ajax())
+		{
+			return response(EmployeeCSEligibilities::updateOrCreate(['ID'=>$request->ID], $request->all()));
+		}
+	}
 	public function DeleteChildren(Request $request){
 		if ($request->ajax())
 		{
 			$info = EmployeeChildren::find($request->ID);
 			EmployeeChildren::destroy($request->ID);
+			return response($info);
+		}
+	}
+
+	public function DeleteCSEligibility(Request $request){
+		if ($request->ajax())
+		{
+			$info = EmployeeCSEligibilities::find($request->ID);
+			EmployeeCSEligibilities::destroy($request->ID);
 			return response($info);
 		}
 	}

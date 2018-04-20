@@ -1,48 +1,51 @@
-       <div class="tab-pane" id="tab5">
-            <table class="table table-bordered">
+       <div class="tab-pane content content table-responsive " id="tab5">
+        <table class="table table-bordered" id="workexperience-table">
 
-             <tbody><tr>
-               <th class="success  text-center col-lg-2 ">Inclusive Dates From</th>
-               <th class="success  text-center col-lg-2 ">Inclusive Dates To</th>
-               <th class="success  text-center col-lg-2 ">Position Title</th>
-               <th class="success  text-center col-lg-2">Departmnet/Agency/Office/Company</th>
-               <th class="success  text-center col-lg-2 ">Monthly Salary</th>
-               <th class="success  text-center col-lg-2 ">Salary /Job Pay</th>
-               <th class="success  text-center col-lg-3 ">Status Appointment</th>
-               <th class="success  text-center col-lg-2 ">Gov't Service</th>
-               <th colspan="2" class="success  text-center col-lg-2">Action</th>
-             </tr>
-             <tr class="">
-               <td class="">2017-11-30</td>
-               <td class="">2017-11-29</td>
-               <td class="">N/n</td>
-               <td class="">N/n</td>
-               <td class="">1</td>
-               <td class="">1</td>
-               <td class="">N/n</td>
-               <td class="">YES</td>
-               <td class="text-center"> <a class="btn btn-info btn-xs"> <span class="glyphicon glyphicon-pencil" href="include/editwork.php?id=1" data-toggle="modal" data-target="#work"></span></a></td>
+          <tbody>
+            <tr>
+             <th class="success  text-center col-lg-2 ">Inclusive Dates From</th>
+             <th class="success  text-center col-lg-2 ">Inclusive Dates To</th>
+             <th class="success  text-center col-lg-2 ">Position Title</th>
+             <th class="success  text-center col-lg-2">Departmnet/Agency/Office/Company</th>
+             <th class="success  text-center col-lg-2 ">Monthly Salary</th>
+             <th class="success  text-center col-lg-2 ">Salary /Job Pay</th>
+             <th class="success  text-center col-lg-3 ">Status Appointment</th>
+             <th class="success  text-center col-lg-2 ">Gov't Service</th>
+             <th colspan="2" class="success  text-center col-lg-2">Action</th>
+           </tr>
 
 
-               <td><a href="include/deletework.php?id=1" class="btn btn-danger btn-xs"> <span class="glyphicon glyphicon-trash" aria-hidden="true" name="Delete" value="Delete"></span></a></td>
+           @foreach ($workexperiences as $workexp)
+           <tr class="workexperience{{$workexp->ID}}">
+             <td class="">{{$workexp->InclusiveDateFrom}}</td>
+             <td class="">{{$workexp->InclusiveDateTo}}</td>
+             <td class="">{{$workexp->Position}}</td>
+             <td class="">{{$workexp->Department}}</td>
+             <td class="">{{$workexp->MonthlySalary}}</td>
+             <td class="">{{$workexp->JobPay}}</td>
+             <td class="">{{$workexp->StatusAppointment}}</td>
+             <td class="">{{$workexp->GovernmentService}}</td>
+             <td>
+              <button class="edit-workexperience-button btn btn-info" data-id="{{$workexp}}">
+                <span class="glyphicon glyphicon-edit"></span> 
+              </button>
 
+              <button id="delete-workexperience-button" class="delete-modal btn btn-danger" data-id="{{$workexp}}">
+                <span class="glyphicon glyphicon-trash"></span> 
+              </button>
+            </td>
 
-             </tr>
-             <tr class="">
-               <td class="">2017-11-30</td>
-               <td class="">2017-11-30</td>
-               <td class="">N/n</td>
-               <td class="">N/n</td>
-               <td class="">2</td>
-               <td class="">2</td>
-               <td class="">N/n</td>
-               <td class="">NO</td>
-               <td class="text-center"> <a class="btn btn-info btn-xs"> <span class="glyphicon glyphicon-pencil" href="include/editwork.php?id=2" data-toggle="modal" data-target="#work"></span></a></td>
+          </tr>
+          @endforeach
+        </tbody>
+      </table>
+      <button type="button" class="btn btn-primary pull-right" id="add-workexperience-button">
+        Add
+      </button>
+    </div>
 
+    @section('scriptfamilybackground')
+    <script>
 
-               <td><a href="include/deletework.php?id=2" class="btn btn-danger btn-xs"> <span class="glyphicon glyphicon-trash" aria-hidden="true" name="Delete" value="Delete"></span></a></td>
-
-
-             </tr>
-           </tbody></table>
-         </div>
+    </script>
+    @endsection
