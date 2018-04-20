@@ -50,25 +50,28 @@
               var url = $(this).attr('action');
               $.post(url,data,function(data){
 
-                JSON.stringify(data, function(key, value) {
-    // if value is null, return "" as a replacement
-    if(value === null) {
-      return "";
-    }
+                function clean(obj) {
+                  for (var propName in obj) { 
+                    if (obj[propName] === null || obj[propName] === undefined) {
+                      delete obj[propName];
+                    }
+                  }
+                }
 
-    // otherwise, leave the value unchanged
-    return value;
-  });
+                
+                
 
+                Object.keys(data).forEach((key) => (data[key] == undefined) && delete data[key]);
+                console.log(data);
                 $('#civilserviceelegibility-table').append(
                   "<tr class='CSEligibility" + data.ID + "'>" +
-                  "<td>" + data.CareerService + "</td> " +
-                  data.CareerService + "</td><td>" +
-                  data.Rating + "</td><td>" +
-                  data.DateOfExamination + "</td><td>" +
-                  data.PlaceOfExamination + "</td><td>" +
-                  data.LicenseNumber + "</td><td>" +
-                  data.DateValidity + "</td><td>" +
+                  "<td>" + (data.CareerService || '') + "</td> " +
+                  (data.CareerService|| '') + "</td><td>" +
+                  (data.Rating || '')+ "</td><td>" +
+                  (data.DateOfExamination || '')+ "</td><td>" +
+                  (data.PlaceOfExamination || '')+ "</td><td>" +
+                  ( data.LicenseNumber|| '') + "</td><td>" +
+                  ( data.DateValidity|| '') + "</td><td>" +
                   "<button class='edit-cseligibility-button btn btn-info' data-id='" + JSON.stringify(data) + "'><span class='glyphicon glyphicon-edit'></span></button></td><td> <button id='delete-cseligibility-button' class='delete-modal btn btn-danger' data-id='" + JSON.stringify(data) + "'><span class='glyphicon glyphicon-trash'></span></button></td></tr>");
 
                 $.notify({
