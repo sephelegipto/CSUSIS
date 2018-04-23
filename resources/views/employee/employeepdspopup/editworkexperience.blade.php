@@ -1,55 +1,69 @@
-<div class="modal fade" id="editcseligibility" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" data-backdrop="false">
+<div class="modal fade" id="editworkexperience" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" data-backdrop="false">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
+        <h5 class="modal-title" id="exampleModalLongTitle">Edit Work Experience</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
 
       <div class="modal-body">
-      <form action="{{ route('EditCSEligibility') }}" method="POST" id="frm-edit-cseligibility">
-        <input type="hidden" value="" name="ID" id="edit-cseligibility-ID">
+      <form action="{{ route('editworkexperience') }}" method="POST" id="frm-edit-workexperience">
+        <input type="hidden" value="" name="ID" id="edit-workexperience-ID">
         <div class="row">
           <div class="col-md-6">
             <div class="form-group">
-              <label>Career Service</label>
-              <input type="text" class="form-control border-input" name="CareerService" value="" id="edit-cseligibility-CareerService">
+              <label>InclusiveDateFrom</label>
+              <input type="date" class="form-control border-input" name="InclusiveDateFrom" value="" id="edit-workexperience-InclusiveDateFrom">
             </div>
           </div>
           <div class="col-md-6">
             <div class="form-group">
-              <label>Rating</label>
-              <input type="text" class="form-control border-input"  name="Rating" value="" id="edit-cseligibility-Rating">
+              <label>InclusiveDateTo</label>
+              <input type="date" class="form-control border-input"  name="InclusiveDateTo" value="" id="edit-workexperience-InclusiveDateTo">
             </div>
           </div>
         </div>
         <div class="row">
           <div class="col-md-6">
             <div class="form-group">
-              <label>Date of Examination</label>
-              <input type="date" class="form-control border-input"  name="DateOfExamination" value="" id="edit-cseligibility-DateOfExamination">
+              <label>Position</label>
+              <input type="text" class="form-control border-input"  name="Position" value="" id="edit-workexperience-Position">
             </div>
           </div>
           <div class="col-md-6">
             <div class="form-group">
-              <label>Place of Examination</label>
-              <input type="text" class="form-control border-input"  name="PlaceOfExamination" value="" id="edit-cseligibility-PlaceOfExamination">
+              <label>Department</label>
+              <input type="text" class="form-control border-input"  name="Department" value="" id="edit-workexperience-Department">
             </div>
           </div>
         </div>
         <div class="row">
           <div class="col-md-6">
             <div class="form-group">
-              <label>License Number</label>
-              <input type="text" class="form-control border-input"  name="LicenseNumber" value="" id="edit-cseligibility-LicenseNumber">
+              <label>MonthlySalary</label>
+              <input type="text" class="form-control border-input"  name="MonthlySalary" value="" id="edit-workexperience-MonthlySalary">
             </div>
           </div>
           <div class="col-md-6">
             <div class="form-group">
-              <label>Date of Validity</label>
-              <input type="date" class="form-control border-input" name="DateValidity"  value="" id="edit-cseligibility-DateValidity">
+              <label>JobPay</label>
+              <input type="text" class="form-control border-input" name="JobPay"  value="" id="edit-workexperience-JobPay">
+            </div>
+          </div>
+        </div>
+            <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>StatusAppointment</label>
+              <input type="text" class="form-control border-input"  name="StatusAppointment" value="" id="edit-workexperience-StatusAppointment">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>GovernmentService</label>
+              <input type="text" class="form-control border-input" name="GovernmentService"  value="" id="edit-workexperience-GovernmentService">
             </div>
           </div>
         </div>

@@ -50,19 +50,7 @@
               var url = $(this).attr('action');
               $.post(url,data,function(data){
 
-                function clean(obj) {
-                  for (var propName in obj) { 
-                    if (obj[propName] === null || obj[propName] === undefined) {
-                      delete obj[propName];
-                    }
-                  }
-                }
-
-                
-                
-
-                Object.keys(data).forEach((key) => (data[key] == undefined) && delete data[key]);
-                console.log(data);
+               
                 $('#civilserviceelegibility-table').append(
                   "<tr class='CSEligibility" + data.ID + "'>" +
                   "<td>" + (data.CareerService || '') + "</td> " +
@@ -108,13 +96,13 @@
 
               $.post(url,data,function(data){
                 $('.CSEligibility' + data.ID).replaceWith("<tr class='CSEligibility" + data.ID + "'>" +
-                  "<td>" + data.CareerService + "</td> " +
-                  data.CareerService + "</td><td>" +
-                  data.Rating + "</td><td>" +
-                  data.DateOfExamination + "</td><td>" +
-                  data.PlaceOfExamination + "</td><td>" +
-                  data.LicenseNumber + "</td><td>" +
-                  data.DateValidity + "</td><td>" +
+                  "<td>" + ( data.CareerService || '') + "</td> " +
+                  ( data.CareerService || '') + "</td><td>" +
+                  ( data.Rating || '') + "</td><td>" +
+                  ( data.DateOfExamination || '') + "</td><td>" +
+                  ( data.PlaceOfExamination || '') + "</td><td>" +
+                  ( data.LicenseNumber || '') + "</td><td>" +
+                  ( data.DateValidity || '') + "</td><td>" +
                   "<button class='edit-cseligibility-button btn btn-info' data-id='" + JSON.stringify(data) + "'><span class='glyphicon glyphicon-edit'></span></button></td><td> <button id='delete-cseligibility-button' class='delete-modal btn btn-danger' data-id='" + JSON.stringify(data) + "'><span class='glyphicon glyphicon-trash'></span></button></td></tr>");
 
                 $.notify({
@@ -133,7 +121,7 @@
             $(document).on('click', '#delete-cseligibility-button', function() {
               $('#delete-cseligibility-id').val($(this).data('id').ID);
 
-              document.getElementById("dname").innerHTML = $(this).data('id').CareerService;
+              document.getElementById("careerservice").innerHTML = $(this).data('id').CareerService;
 
               $('#deletecseligibility').modal('show');
 

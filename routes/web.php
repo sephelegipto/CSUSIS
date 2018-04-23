@@ -47,9 +47,14 @@ Route::group(['middleware'=>['authen','roles'],'roles'=>['FACULTY']],function(){
 	Route::post('EditCSEligibility', ['as'=>'EditCSEligibility', 'uses'=>'EmployeeController@EditCSEligibility']);
 	Route::post('DeleteCSEligibility', ['as'=>'DeleteCSEligibility', 'uses'=>'EmployeeController@DeleteCSEligibility']);
 
-		Route::post('AddWorkExperience', ['as'=>'AddWorkExperience', 'uses'=>'EmployeeController@AddWorkExperience']);
+	Route::post('AddWorkExperience', ['as'=>'AddWorkExperience', 'uses'=>'EmployeeController@AddWorkExperience']);
+	Route::post('editworkexperience', ['as'=>'editworkexperience', 'uses'=>'EmployeeController@EditWorkexperience']);
+	Route::post('DeleteWorkExperience', ['as'=>'DeleteWorkExperience', 'uses'=>'EmployeeController@DeleteWorkExperience']);
 
-		
+	Route::post('AddVoluntarilyWork', ['as'=>'AddVoluntarilyWork', 'uses'=>'EmployeeController@AddVoluntarilyWork']);
+	Route::post('EditVoluntarilyWork', ['as'=>'EditVoluntarilyWork', 'uses'=>'EmployeeController@EditVoluntarilyWork']);
+	Route::post('DeleteVoluntaryWork', ['as'=>'DeleteVoluntaryWork', 'uses'=>'EmployeeController@DeleteVoluntaryWork']);
+
 	Route::post('UpdateReferences', ['as'=>'UpdateReferences', 'uses'=>'EmployeeController@UpdateReferences']);
 
 

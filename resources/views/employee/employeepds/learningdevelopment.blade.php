@@ -1,4 +1,4 @@
-         <div class="tab-pane" id="tab7">
+         <div class="tab-pane content content table-responsive " id="tab7">
           <table class="table table-striped table-hover">
            <tbody><tr>
              <th class="success text-center  col-lg-4">Title of Learning and Development Intervention/Training Programs</th>
@@ -10,21 +10,6 @@
              <th colspan="2" class="success text-center  col-lg-1 text-center">Action</th>    
            </tr> 
 
-           <tr class="">
-             <td class="col-lg-2 ">N/n</td>
-             <td class="col-lg-2 ">2017-12-07</td>
-             <td class="col-lg-2 ">2017-12-13</td>
-             <td class="col-lg-2 ">1</td>
-             <td class="col-lg-2 ">N/n</td>
-             <td class="col-lg-2 ">N/n</td>
-
-
-             <td class="text-center"> <a class="btn btn-info btn-xs"> <span class="glyphicon glyphicon-pencil" href="include/editlearning.php?id=1" data-toggle="modal" data-target="#learn"></span></a></td>
-
-
-             <td><a href="include/deletelearning.php?id=1" class="btn btn-danger btn-xs"> <span class="glyphicon glyphicon-trash" aria-hidden="true" name="Delete" value="Delete"></span></a></td>
-
-           </tr>
 
            <tr class="">
              <td class="col-lg-2 ">N/n</td>
@@ -35,12 +20,22 @@
              <td class="col-lg-2 ">N/n</td>
 
 
-             <td class="text-center"> <a class="btn btn-info btn-xs"> <span class="glyphicon glyphicon-pencil" href="include/editlearning.php?id=2" data-toggle="modal" data-target="#learn"></span></a></td>
 
+             <td>
+              <button class="edit-voluntarywork-button btn btn-info" data-id="">
+                <span class="glyphicon glyphicon-edit"></span> 
+              </button>
+            </td>
+            <td>
+              <button id="delete-voluntarywork-button" class="delete-modal btn btn-danger" data-id="">
+                <span class="glyphicon glyphicon-trash"></span> 
+              </button>
+            </td>
 
-             <td><a href="include/deletelearning.php?id=2" class="btn btn-danger btn-xs"> <span class="glyphicon glyphicon-trash" aria-hidden="true" name="Delete" value="Delete"></span></a></td>
+          </tr>
 
-           </tr>
-
-         </tbody></table>
-       </div>
+        </tbody></table>
+        <button type="button" class="btn btn-primary pull-right" id="add-voluntarilywork-button">
+          Add
+        </button>
+      </div>

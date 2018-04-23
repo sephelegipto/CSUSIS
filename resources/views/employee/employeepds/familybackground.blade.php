@@ -215,6 +215,7 @@ $('#frm-add-children').on('submit', function(e){
   var data = $(this).serialize();
   var url = $(this).attr('action');
   $.post(url,data,function(data){
+    
     $('#childrens-table').append("<tr class='item" + data.ID + "'><td>" + data.Name + "</td><td>" + data.Birthday + "</td><td><button class='edit-modal btn btn-info' data-id='" + data.ID + "' data-name='" + data.Name + "' data-birthday='" + data.Birthday + "'><span class='glyphicon glyphicon-edit'></span></button> <button id='delete-children-button' class='delete-modal btn btn-danger' data-id='" + data.ID + "' data-name='" + data.name + "'><span class='glyphicon glyphicon-trash'></span></button></td></tr>");
 
     $.notify({
@@ -240,7 +241,7 @@ $('#frm-edit-children').on('submit', function(e){
   var data = $(this).serialize();
   var url = $(this).attr('action');
 
-  $.post(url,data,function(data){
+  $.post(url,data,function(data){   
 
 
 

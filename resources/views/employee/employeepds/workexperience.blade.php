@@ -11,7 +11,7 @@
              <th class="success  text-center col-lg-2 ">Salary /Job Pay</th>
              <th class="success  text-center col-lg-3 ">Status Appointment</th>
              <th class="success  text-center col-lg-2 ">Gov't Service</th>
-             <th colspan="2" class="success  text-center col-lg-2">Action</th>
+             <th colspan="2" class="success  text-center col-lg-1">Action</th>
            </tr>
 
 
@@ -29,12 +29,12 @@
               <button class="edit-workexperience-button btn btn-info" data-id="{{$workexp}}">
                 <span class="glyphicon glyphicon-edit"></span> 
               </button>
-
+            </td>
+            <td>
               <button id="delete-workexperience-button" class="delete-modal btn btn-danger" data-id="{{$workexp}}">
                 <span class="glyphicon glyphicon-trash"></span> 
               </button>
             </td>
-
           </tr>
           @endforeach
         </tbody>

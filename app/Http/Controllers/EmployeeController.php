@@ -14,6 +14,7 @@ use App\EmployeeReferences;
 use App\EmployeeChildren;
 use App\EmployeeCSEligibilities;
 use App\EmployeeWorkExperience;
+use App\EmployeeVoluntarywork;
 
 class EmployeeController extends Controller
 {
@@ -34,6 +35,8 @@ class EmployeeController extends Controller
 
 		$childrens = DB::table('temployeeChildrens')->where('EmployeeID', $UserID)->get();
 		$references = DB::table('temployeesreferences')->where('EmployeeID', $UserID)->get();
+		$references = DB::table('temployeesreferences')->where('EmployeeID', $UserID)->get();
+
 
 		$ELEMENTARY = DB::table('temployeeseducationbackground')->where('EmployeeID', $UserID)->where('EBLevelID', 1)->get();
 		$SECONDARY = DB::table('temployeeseducationbackground')->where('EmployeeID', $UserID)->where('EBLevelID', 2)->get();
@@ -42,15 +45,21 @@ class EmployeeController extends Controller
 		$GRADUATE  = DB::table('temployeeseducationbackground')->where('EmployeeID', $UserID)->where('EBLevelID', 5)->get();
 		$workexperiences = EmployeeWorkExperience::where('EmployeeID', '=' ,$UserID)->get();
 		$CSEligibilities = EmployeeCSEligibilities::where('EmployeeID', '=' ,$UserID)->get();
+		$voluntarywork =  EmployeeVoluntarywork::where('EmployeeID', '=' ,$UserID)->get();
 
-		return view('employee/employeepds',compact('empDetails', 'ELEMENTARY', 'SECONDARY', 'VOCATIONAL', 'COLLEGE', 'GRADUATE', 'childrens', 'references', 'UserID', 'CSEligibilities', 'workexperiences'));
+		return view('employee/employeepds',compact('empDetails', 'ELEMENTARY', 'SECONDARY', 'VOCATIONAL', 'COLLEGE', 'GRADUATE', 'childrens', 'references', 'UserID', 'CSEligibilities', 'workexperiences', 'voluntarywork'));
 	}
 
 	public function UpdatePersonalInformation(Request $request){
 		if ($request->ajax())
 		{
-			EmployeePI::updateOrCreate(['EmployeeID'=>$request->EmployeeID],$request->all());
-			Employees::updateOrCreate(['ID'=>$request->EmployeeID],$request->all());
+			$UserID = Auth::user()->UserID;
+
+			$UserID = DB::table('temployees')->where('EmployeeID', '=', $UserID)->pluck('ID');
+
+
+			EmployeePI::updateOrCreate(['EmployeeID'=>$UserID],$request->all());
+			Employees::updateOrCreate(['ID'=>$UserID],$request->all());
 		}
 	}
 
@@ -58,27 +67,33 @@ class EmployeeController extends Controller
 	public function UpdateFamilyBackground(Request $request){
 		if ($request->ajax())
 		{
-
-			return response(EmployeeFB::updateOrCreate(['EmployeeID'=>$request->EmployeeID],$request->all()));
+			$UserID = Auth::user()->UserID;
+			$UserID = DB::table('temployees')->where('EmployeeID', '=', $UserID)->pluck('ID');			
+			return response(EmployeeFB::updateOrCreate(['EmployeeID'=>$UserID],$request->all()));
 		}
 	}
 
 	public function AddChildren(Request $request){
 		if ($request->ajax())
 		{
+			$UserID = Auth::user()->UserID;
+			$EmployeeID = DB::table('temployees')->where('EmployeeID', '=', $UserID)->pluck('ID');	
+			return response(EmployeeChildren::updateOrCreate(['EmployeeID'=>$UserID, 'EmployeeID' => $UserID],	
+				[
+					'EmployeeID' => $EmployeeID[0],
+					'Name' => $request->Name,
+					'Birthday' => $request->Birthday
 
-
-			return response(EmployeeChildren::updateOrCreate(['EmployeeID'=>$request->EmployeeID, 'Name'=>$request->Name],$request->all()));
+				]));
 		}
 	}
 
 	public function AddCSEligibility(Request $request){
 		if ($request->ajax())
-		{
+		{			
 			return response(EmployeeCSEligibilities::updateOrCreate(['EmployeeID'=>$request->CareerService, 'CareerService'=>$request->CareerService],$request->all())->toArray());
 		}
 	}
-
 
 	public function AddWorkExperience(Request $request){
 		if ($request->ajax())
@@ -87,10 +102,17 @@ class EmployeeController extends Controller
 		}
 	}
 
+	public function AddVoluntarilyWork(Request $request){
+		if ($request->ajax())
+		{
+			return response(EmployeeVoluntarywork::updateOrCreate(['EmployeeID'=>$request->CareerService, 'InclusiveDateFrom'=>$request->InclusiveDateFrom],$request->all()));
+		}
+	}
+
 	public function EditChildren(Request $request){
 		if ($request->ajax())
 		{
-			return response(EmployeeChildren::updateOrCreate(['ID'=>$request->EmployeeID], $request->all()));
+			return response(EmployeeChildren::updateOrCreate(['ID'=>$request->ID], $request->all()));
 		}
 	}
 
@@ -100,6 +122,21 @@ class EmployeeController extends Controller
 			return response(EmployeeCSEligibilities::updateOrCreate(['ID'=>$request->ID], $request->all()));
 		}
 	}
+
+	public function EditVoluntarilyWork(Request $request){
+		if ($request->ajax())
+		{
+			return response(EmployeeVoluntarywork::updateOrCreate(['ID'=>$request->ID], $request->all()));
+		}
+	}
+
+	public function EditWorkexperience(Request $request){
+		if ($request->ajax())
+		{
+			return response(EmployeeWorkExperience::updateOrCreate(['ID'=>$request->ID], $request->all()));
+		}
+	}
+
 	public function DeleteChildren(Request $request){
 		if ($request->ajax())
 		{
@@ -114,6 +151,24 @@ class EmployeeController extends Controller
 		{
 			$info = EmployeeCSEligibilities::find($request->ID);
 			EmployeeCSEligibilities::destroy($request->ID);
+			return response($info);
+		}
+	}
+
+	public function DeleteWorkExperience(Request $request){
+		if ($request->ajax())
+		{
+			$info = EmployeeWorkExperience::find($request->ID);
+			EmployeeWorkExperience::destroy($request->ID);
+			return response($info);
+		}
+	}
+
+	public function DeleteVoluntaryWork(Request $request){
+		if ($request->ajax())
+		{
+			$info = EmployeeVoluntarywork::find($request->ID);
+			EmployeeVoluntarywork::destroy($request->ID);
 			return response($info);
 		}
 	}

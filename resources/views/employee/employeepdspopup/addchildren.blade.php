@@ -9,7 +9,8 @@
       </div>
       <div class="modal-body">
        <form action="{{ route('AddChildren') }}" method="POST" id="frm-add-children">
-        <input type="hidden" value="{{ $UserID[0] }}" name="EmployeeID" id="EmployeeID">
+        
+
         <div class="form-group row">
           <label for="example-text-input" class="col-2 col-form-label">Text</label>
           <div class="col-10">

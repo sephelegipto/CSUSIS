@@ -12,7 +12,7 @@
           {{ csrf_field() }}
                 <input class="form-control" type="hidden" value="" id="delete-cseligibility-id" name="ID">
           <div class="deleteContent">
-            Are you sure you want to remove <span id="dname"></span> ?
+            Are you sure you want to remove <span id="careerservice"></span> ?
           </div>
           <div class="row">
 

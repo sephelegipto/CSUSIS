@@ -52,8 +52,13 @@
 
           @include('employee/employeepds/workexperience')
           @include('employee/employeepdspopup/addworkexperience')
+          @include('employee/employeepdspopup/editworkexperience')
+          @include('employee/employeepdspopup/deleteworkexperience')
 
           @include('employee/employeepds/voluntarilywork')
+          @include('employee/employeepdspopup/addvoluntarilywork')
+          @include('employee/employeepdspopup/editvoluntarilywork')
+             @include('employee/employeepdspopup/deletevoluntarilywork')
 
           @include('employee/employeepds/learningdevelopment')
 
@@ -76,122 +81,207 @@
 @yield('scriptfamilybackground')
 @yield('scriptcivilserviceeligibility')
 <script>
-
-  $(document).on('click', '#add-workexperience-button', function() {
-    $('#add-workexperience').modal('show');
-  });
-
-  $('#frm-add-workexperience').on('submit', function(e){
-    e.preventDefault();
-
-    var data = $(this).serialize();
-    var url = $(this).attr('action');
-    $.post(url,data,function(data){
-
-      $('#workexperience-table').append(
-        "<tr class='workexperience" + data.ID + "'>" +
-        "<td>" + data.InclusiveDateFrom + "</td> " +
-        data.InclusiveDateTo + "</td><td>" +
-        data.Position + "</td><td>" +
-        data.Department + "</td><td>" +
-        data.MonthlySalary + "</td><td>" +
-        data.JobPay + "</td><td>" +
-        data.StatusAppointment + "</td><td>" +
-        data.GovernmentService + "</td><td>" +
-        "<button class='edit-workexperience-button btn btn-info' data-id='" + JSON.stringify(data, replacer) + "'><span class='glyphicon glyphicon-edit'></span></button></td><td> <button id='delete-workexperience-button' class='delete-modal btn btn-danger' data-id='" + JSON.stringify(data) + "'><span class='glyphicon glyphicon-trash'></span></button></td></tr>");
-
-      $.notify({
-        icon: 'ti-success',
-        message: "You have successfully added " + data.CareerService + " in your civil service eligibility"
+ $(document).on('click', '#add-workexperience-button', function() {
+  $('#add-workexperience').modal('show');
+});
+ $(document).on('click', '#add-voluntarilywork-button', function() {
+  $('#add-voluntarilywork').modal('show');
+});
 
 
-      },{
-        type: 'success',
-        timer: 4000
-      });
-    })
-    $('#add-cseligibility').modal('hide');
+
+
+ $('#frm-add-voluntarywork').on('submit', function(e){
+  e.preventDefault();
+
+  var data = $(this).serialize();
+  var url = $(this).attr('action');
+  $.post(url,data,function(data){
+
+    $('#voluntarywork-table').append(
+      "<tr class='voluntary" + ( data.ID || '') + "'>" +
+      "<td>" + ( data.NameOfOrg || '') + "</td><td> " +
+      ( data.InclusiveDateFrom || '') + "</td><td>" +
+      ( data.InclusiveDateTo || '') + "</td><td>" +
+      ( data.NoOfHours || '') + "</td><td>" +
+      ( data.Position || '') + "</td><td>" +
+
+      "<button class='edit-voluntarywork-button btn btn-info' data-id='" + JSON.stringify(data) + "'><span class='glyphicon glyphicon-edit'></span></button></td><td> <button id='delete-voluntarywork-button' class='delete-modal btn btn-danger' data-id='" + JSON.stringify(data) + "'><span class='glyphicon glyphicon-trash'></span></button></td></tr>");
+
+    $.notify({
+      icon: 'ti-success',
+      message: "You have successfully added " + data.NameOfOrg + " in your Voluntarily Work"
+
+
+    },{
+      type: 'success',
+      timer: 4000
+    });
+  })
+  $('#add-voluntarilywork').modal('hide');
+})
+
+ $(document).on('click', '.edit-voluntarywork-button', function() {
+
+  $('#edit-voluntary-ID').val($(this).data('id').ID);
+  $('#edit-voluntary-NameOfOrg').val($(this).data('id').NameOfOrg);
+  $('#edit-voluntary-InclusiveDateFrom').val($(this).data('id').InclusiveDateFrom);
+  $('#edit-voluntary-InclusiveDateTo').val($(this).data('id').InclusiveDateTo);
+  $('#edit-voluntary-NoOfHours').val($(this).data('id').NoOfHours);
+  $('#edit-voluntary-Position').val($(this).data('id').Position);
+
+
+  $('#editvoluntarilywork').modal('show');
+});
+
+  $('#frm-edit-voluntarywork').on('submit', function(e){
+  e.preventDefault();
+
+  var data = $(this).serialize();
+  var url = $(this).attr('action');
+
+  $.post(url,data,function(data){
+    $('.voluntary' + data.ID).replaceWith("<tr class='voluntary" + data.ID + "'>" +
+     "<td>" + ( data.NameOfOrg || '') + "</td><td> " +
+     ( data.InclusiveDateFrom || '') + "</td><td>" +
+     ( data.InclusiveDateTo || '') + "</td><td>" +
+     ( data.NoOfHours || '') + "</td><td>" +
+     ( data.Position || '') + "</td><td>" +
+     
+     "<button class='edit-voluntarywork-button btn btn-info' data-id='" + JSON.stringify(data) + "'><span class='glyphicon glyphicon-edit'></span></button></td><td> <button id='delete-voluntarywork-button' class='delete-modal btn btn-danger' data-id='" + JSON.stringify(data) + "'><span class='glyphicon glyphicon-trash'></span></button></td></tr>");
+
+    $.notify({
+      icon: 'ti-success',
+      message: "You have successfully updated your work experience."
+
+    },{
+      type: 'success',
+      timer: 4000
+    });
   })
 
-  $(document).on('click', '.edit-cseligibility-button', function() {
+  $('#editvoluntarilywork').modal('hide');
+})
 
-    $('#edit-cseligibility-ID').val($(this).data('id').ID);
-    $('#edit-cseligibility-CareerService').val($(this).data('id').CareerService);
-    $('#edit-cseligibility-Rating').val($(this).data('id').Rating);
-    $('#edit-cseligibility-DateOfExamination').val($(this).data('id').DateOfExamination);
-    $('#edit-cseligibility-PlaceOfExamination').val($(this).data('id').PlaceOfExamination);
-    $('#edit-cseligibility-LicenseNumber').val($(this).data('id').LicenseNumber);
-    $('#edit-cseligibility-DateValidity').val($(this).data('id').DateValidity);
+ $(document).on('click', '#delete-voluntarywork-button', function() {
+  $('#delete-voluntary-id').val($(this).data('id').ID);
 
-    $('#editcseligibility').modal('show');
-  });
+  document.getElementById("voluntary").innerHTML = $(this).data('id').NameOfOrg;
 
-  $('#frm-edit-cseligibility').on('submit', function(e){
-    e.preventDefault();
+  $('#deletevoluntarywork').modal('show');
 
-    var data = $(this).serialize();
-    var url = $(this).attr('action');
+});
 
-    $.post(url,data,function(data){
-      $('.CSEligibility' + data.ID).replaceWith("<tr class='CSEligibility" + data.ID + "'>" +
-        "<td>" + data.CareerService + "</td> " +
-        data.CareerService + "</td><td>" +
-        data.Rating + "</td><td>" +
-        data.DateOfExamination + "</td><td>" +
-        data.PlaceOfExamination + "</td><td>" +
-        data.LicenseNumber + "</td><td>" +
-        data.DateValidity + "</td><td>" +
-        "<button class='edit-cseligibility-button btn btn-info' data-id='" + JSON.stringify(data) + "'><span class='glyphicon glyphicon-edit'></span></button></td><td> <button id='delete-cseligibility-button' class='delete-modal btn btn-danger' data-id='" + JSON.stringify(data) + "'><span class='glyphicon glyphicon-trash'></span></button></td></tr>");
+ $('#frm-del-voluntary').on('submit', function(e){
 
-      $.notify({
-        icon: 'ti-success',
-        message: "You have successfully updated your Civil Service Eligibility."
+  e.preventDefault();
 
-      },{
-        type: 'success',
-        timer: 4000
-      });
-    })
 
-    $('#editcseligibility').modal('hide');
+  var data = $(this).serialize();
+  var url = $(this).attr('action');
+
+  $.post(url,data,function(data){
+
+
+    $(".voluntary" + data.ID).remove();
+    $.notify({
+      icon: 'ti-success',
+      message: "You have successfully removed " + data.NameOfOrg
+
+    },{
+      type: 'success',
+      timer: 4000
+    });
+
+
   })
 
-  $(document).on('click', '#delete-cseligibility-button', function() {
-    $('#delete-cseligibility-id').val($(this).data('id').ID);
 
-    document.getElementById("dname").innerHTML = $(this).data('id').CareerService;
+  $('#deletevoluntarywork').modal('hide');
+})
 
-    $('#deletecseligibility').modal('show');
+ $(document).on('click', '.edit-workexperience-button', function() {
 
-  });
+  $('#edit-workexperience-ID').val($(this).data('id').ID);
+  $('#edit-workexperience-InclusiveDateFrom').val($(this).data('id').InclusiveDateFrom);
+  $('#edit-workexperience-InclusiveDateTo').val($(this).data('id').InclusiveDateTo);
+  $('#edit-workexperience-Position').val($(this).data('id').Position);
+  $('#edit-workexperience-Department').val($(this).data('id').Department);
+  $('#edit-workexperience-MonthlySalary').val($(this).data('id').MonthlySalary);
+  $('#edit-workexperience-JobPay').val($(this).data('id').JobPay);
+  $('#edit-workexperience-StatusAppointment').val($(this).data('id').StatusAppointment);
+  $('#edit-workexperience-GovernmentService').val($(this).data('id').GovernmentService);
 
-  $('#frm-del-cseligibility').on('submit', function(e){
+  $('#editworkexperience').modal('show');
+});
 
-    e.preventDefault();
+ $('#frm-edit-workexperience').on('submit', function(e){
+  e.preventDefault();
 
+  var data = $(this).serialize();
+  var url = $(this).attr('action');
 
-    var data = $(this).serialize();
-    var url = $(this).attr('action');
+  $.post(url,data,function(data){
+    $('.workexperience' + data.ID).replaceWith("<tr class='workexperience" + data.ID + "'>" +
+     "<td>" + ( data.InclusiveDateFrom || '') + "</td><td> " +
+     ( data.InclusiveDateTo || '') + "</td><td>" +
+     ( data.Position || '') + "</td><td>" +
+     ( data.Department || '') + "</td><td>" +
+     ( data.MonthlySalary || '') + "</td><td>" +
+     ( data.JobPay || '') + "</td><td>" +
+     ( data.StatusAppointment || '') + "</td><td>" +
+     ( data.GovernmentService || '') + "</td><td>" +
+     "<button class='edit-workexperience-button btn btn-info' data-id='" + JSON.stringify(data) + "'><span class='glyphicon glyphicon-edit'></span></button></td><td> <button id='delete-workexperience-button' class='delete-modal btn btn-danger' data-id='" + JSON.stringify(data) + "'><span class='glyphicon glyphicon-trash'></span></button></td></tr>");
 
-    $.post(url,data,function(data){
+    $.notify({
+      icon: 'ti-success',
+      message: "You have successfully updated your work experience."
 
-
-      $(".CSEligibility" + data.ID).remove();
-      $.notify({
-        icon: 'ti-success',
-        message: "You have successfully removed " + data.CareerService
-
-      },{
-        type: 'success',
-        timer: 4000
-      });
-
-
-    })
-
-
-    $('#deletecseligibility').modal('hide');
+    },{
+      type: 'success',
+      timer: 4000
+    });
   })
+
+  $('#editworkexperience').modal('hide');
+})
+
+ $(document).on('click', '#delete-workexperience-button', function() {
+  $('#delete-workexperience-id').val($(this).data('id').ID);
+
+  document.getElementById("workexp").innerHTML = $(this).data('id').Position;
+
+  $('#deleteworkexperience').modal('show');
+
+});
+
+ $('#frm-del-workexperience').on('submit', function(e){
+
+  e.preventDefault();
+
+
+  var data = $(this).serialize();
+  var url = $(this).attr('action');
+
+  $.post(url,data,function(data){
+
+
+    $(".workexperience" + data.ID).remove();
+    $.notify({
+      icon: 'ti-success',
+      message: "You have successfully removed " + data.CareerService
+
+    },{
+      type: 'success',
+      timer: 4000
+    });
+
+
+  })
+
+
+  $('#deleteworkexperience').modal('hide');
+})
 </script>
 @endsection
 @endsection
