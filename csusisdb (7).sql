@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 20, 2018 at 11:42 AM
+-- Generation Time: Apr 23, 2018 at 12:12 PM
 -- Server version: 5.7.21-log
 -- PHP Version: 7.2.2
 
@@ -908,18 +908,18 @@ END$$
 CREATE DEFINER=`root`@`192.168.1.177` PROCEDURE `spPeriodsViewAllORSearch` (`LibraryToLoad` VARCHAR(50), `SearchText` VARCHAR(50), `PeriodToLoad` VARCHAR(50))  BEGIN
 	CASE LibraryToLoad
 		WHEN 'PERIODS' THEN
-			SELECT * FROM vPeriods WHERE SearchText = '' 
+			SELECT ID,Code,Term,StartDate,EndDate,EnrollmentStartDate,EnrollmentEndDate,PrelimDate,MidtermDate,FinalsDate,GradeInputStart,GradeInputEnd,StartYear,EndYear FROM vPeriods WHERE SearchText = '' 
 			or Code LIKE  CONCAT('%',SearchText , '%')
 			or Term LIKE  CONCAT('%',SearchText , '%')
 			ORDER BY ID DESC;
 		WHEN 'COURSES' THEN
-			SELECT * FROM vPeriodCourses WHERE PeriodCode=PeriodToLoad AND (SearchText = '' 
+			SELECT ID,PeriodID,PeriodCode,CourseID,CourseCode,ClassCodePrefix,CourseTitle,MajorCode,CollegeCode,NoOfYears,StudentYear,CostPerUnit,ActiveCurriculum,Petition FROM vPeriodCourses WHERE PeriodCode=PeriodToLoad AND (SearchText = '' 
 			or CourseCode LIKE  CONCAT('%',SearchText , '%')
 			or CourseTitle LIKE  CONCAT('%',SearchText , '%')
 			or NoOfYears LIKE  CONCAT('%',SearchText , '%')
 			or StudentYear LIKE  CONCAT('%',SearchText , '%')
 			or CostPerUnit LIKE  CONCAT('%',SearchText , '%'))
-			ORDER BY ID DESC;
+			ORDER BY CourseTitle;
 		WHEN 'COURSE REGISTRATION(COURSES)' THEN
 			SELECT distinct CourseCode,CourseTitle,MajorCode,NoOfYears,ActiveCurriculum FROM vPeriodCourses WHERE PeriodCode=PeriodToLoad AND (SearchText = '' 
 			or CourseCode LIKE  CONCAT('%',SearchText , '%')
@@ -927,22 +927,22 @@ CREATE DEFINER=`root`@`192.168.1.177` PROCEDURE `spPeriodsViewAllORSearch` (`Lib
 			or NoOfYears LIKE  CONCAT('%',SearchText , '%')
 			or StudentYear LIKE  CONCAT('%',SearchText , '%')
 			or CostPerUnit LIKE  CONCAT('%',SearchText , '%'))
-			ORDER BY ID DESC;
+			ORDER BY CourseTitle;
         WHEN 'FEES' THEN
-			SELECT * FROM vPeriodFees WHERE PeriodCourseID=PeriodToLoad AND (SearchText = '' 
+			SELECT ID,PeriodCourseID,FeeID,FeeCode,FeeDescription,FeeCategory,Amount,AppliedToID,AppliedToDescription FROM vPeriodFees WHERE PeriodCourseID=PeriodToLoad AND (SearchText = '' 
 			or FeeDescription LIKE  CONCAT('%',SearchText , '%')
 			or FeeCategory LIKE  CONCAT('%',SearchText , '%')
 			or Amount LIKE  CONCAT('%',SearchText , '%')
 			or AppliedToDescription LIKE  CONCAT('%',SearchText , '%'))
 			ORDER BY FeeDescription;
 		WHEN 'SECTIONS' THEN
-			SELECT * FROM vPeriodSections WHERE PeriodCourseID=PeriodToLoad AND (SearchText = '' 
+			SELECT ID,PeriodCourseID,CourseCode,CourseTitle,MajorCode,Section,AdviserID,Adviser,ClassSize FROM vPeriodSections WHERE PeriodCourseID=PeriodToLoad AND (SearchText = '' 
 			or Section LIKE  CONCAT('%',SearchText , '%')
             or Adviser LIKE  CONCAT('%',SearchText , '%')
             or ClassSize LIKE  CONCAT('%',SearchText , '%'))
 			ORDER BY Section;
 		WHEN 'SUBJECTS' THEN
-			SELECT * FROM vPeriodSubjects WHERE PeriodSectionID=PeriodToLoad AND (SearchText = '' 
+			SELECT ID,PeriodSectionID,ClassCode,SubjectId,SubjectCode,SubjectDescription,Units,LabUnits,LecUnits,LabHours,LecHours,PreRequisiteCode,SubjectType,SubjectYearDescription,TeacherId,Teacher,Section FROM vPeriodSubjects WHERE PeriodSectionID=PeriodToLoad AND (SearchText = '' 
 			or ClassCode LIKE  CONCAT('%',SearchText , '%')
             or SubjectCode LIKE  CONCAT('%',SearchText , '%')
             or SubjectDescription LIKE  CONCAT('%',SearchText , '%')
@@ -951,8 +951,7 @@ CREATE DEFINER=`root`@`192.168.1.177` PROCEDURE `spPeriodsViewAllORSearch` (`Lib
             or Teacher LIKE  CONCAT('%',SearchText , '%'))
             ORDER BY ClassCode;
 		WHEN 'SCHEDULES' THEN
-			SELECT * FROM VPERIODSCHEDULES WHERE PERIODSUBJECTID  IN (SELECT ID FROM vPEriodSubjects WHERE PeriodSectionID=PeriodToLoad);
-            
+			SELECT ID,PeriodSubjectId,ClassCode,SubjectCode,SubjectDescription/*,Day,StartTime,EndTime,RoomID,RoomCode,Building,College,SessionType,TeacherId,Teacher*/ FROM VPERIODSCHEDULES WHERE PeriodSubjectID IN (SELECT ID from VperiodSubjects WHERE PeriodSectionID=PeriodToLoad); 
 	END CASE;
 		
 END$$
@@ -1184,12 +1183,12 @@ CREATE TABLE `samle` (
 --
 
 INSERT INTO `samle` (`idsamle`, `asd`) VALUES
-(1, 'asda'),
 (2, 'asd'),
 (3, 'asd'),
 (4, 'asd'),
-(5, 'vsdg'),
-(6, 'h');
+(1, 'asda'),
+(6, 'h'),
+(5, 'vsdg');
 
 -- --------------------------------------------------------
 
@@ -2251,8 +2250,9 @@ CREATE TABLE `temployeechildrens` (
 --
 
 INSERT INTO `temployeechildrens` (`ID`, `EmployeeID`, `Name`, `Birthday`) VALUES
-(19, '64', '2', '2018-04-07'),
-(20, '64', '1', '2018-04-06');
+(27, '[64]', '1', '2018-04-07'),
+(28, '64', '12', '2018-04-06'),
+(29, '64', '3', '2018-04-13');
 
 -- --------------------------------------------------------
 
@@ -2276,24 +2276,16 @@ CREATE TABLE `temployeecseligibilities` (
 --
 
 INSERT INTO `temployeecseligibilities` (`ID`, `EmployeeID`, `CareerService`, `Rating`, `DateOfExamination`, `PlaceOfExamination`, `LicenseNumber`, `DateValidity`) VALUES
-(74, 64, NULL, NULL, NULL, NULL, '5', NULL),
-(75, 64, NULL, '5', NULL, NULL, NULL, NULL),
-(76, 64, NULL, '2', NULL, NULL, NULL, NULL),
-(77, 64, NULL, '4', NULL, NULL, NULL, NULL),
-(78, 64, NULL, NULL, NULL, '5', NULL, NULL),
-(79, 64, NULL, '2', NULL, NULL, NULL, NULL),
-(80, 64, NULL, '2', NULL, '4', NULL, NULL),
-(81, 64, NULL, NULL, NULL, '2', NULL, NULL),
-(82, 64, NULL, NULL, NULL, '6', NULL, NULL),
-(83, 64, NULL, '2', NULL, '5', NULL, NULL),
-(84, 64, '3', '2', NULL, '5', NULL, NULL),
-(85, 64, NULL, '4', NULL, NULL, NULL, NULL),
-(86, 64, NULL, NULL, NULL, '5', '5', NULL),
-(87, 64, NULL, '5', NULL, NULL, NULL, NULL),
-(88, 64, NULL, NULL, NULL, NULL, '5', NULL),
-(89, 64, NULL, NULL, NULL, '5', '5', NULL),
-(90, 64, NULL, NULL, NULL, NULL, '5', NULL),
-(91, 64, NULL, NULL, NULL, '5', NULL, NULL);
+(109, NULL, '5', '5', NULL, '5', NULL, NULL),
+(110, NULL, '5', '5', NULL, '5', NULL, NULL),
+(111, NULL, '1', '1', NULL, '1', '1', NULL),
+(112, NULL, '1', '1', NULL, '1', '1', NULL),
+(113, NULL, 'r', NULL, NULL, NULL, NULL, NULL),
+(114, NULL, 'r', NULL, NULL, NULL, NULL, NULL),
+(116, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(117, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(118, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(120, 64, '1', NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -2341,7 +2333,7 @@ INSERT INTO `temployees` (`ID`, `EmployeeID`, `Salutation`, `LastName`, `FirstNa
 (62, 'CICS-0013', 'Ms.', 'DAYAG', 'CHRISSA', 'P.', 53, 26, 'FEMALE', 9, 3, 1, '-', 'TUGUEGARAO CITY, CAGAYAN', 2, 2),
 (63, 'CICS-0014', 'Ms.', 'ELIZAGA', 'JENNELYN', 'BALISI', 53, 26, 'FEMALE', 9, 5, 1, '-', 'SOLANA, CAGAYAN', 2, 2),
 (64, '123', 'Mr.', 'Egipto', 'J Sephel Eliphaz', 'Baptista', 53, 26, 'MALE', 9, 5, 1, '-', 'TUGUEGARAO CITY, CAGYAN', 2, 2),
-(65, 'CICS-0016', 'Mr.', 'JAMINOLA', 'FERNANDO JR.', 'M.', 53, 26, 'MALE', 9, 5, 1, '-', 'TUGUEGARAO CITY, CAGAYAN', 2, 2),
+(65, 'CICS-0016', 'Mr.', 'Egipto123123asd', 'J Sephel Eliphaz', 'Baptista', 53, 26, 'MALE', 9, 5, 1, '-', 'TUGUEGARAO CITY, CAGAYAN', 2, 2),
 (66, 'CICS-0017', 'Ms.', 'GUZMAN', 'DANNIVER', 'RAFUL', 53, 26, 'FEMALE', 9, 5, 1, '-', 'TUGUEGARAO CITY, CAGAYAN', 2, 2),
 (67, 'CICS-0018', 'Ms.', 'FURIFGAY', 'PRINCESS VANEZZA', 'M.', 53, 26, 'FEMALE', 9, 5, 1, '-', 'PEÑABLANCA, CAGAYAN', 2, 2),
 (68, 'CICS-0019', 'Ms.', 'GUIYAB', 'ROVINA', 'S.', 53, 26, 'FEMALE', 9, 3, 1, '-', 'TUGUEGARAO CITY, CAGAYAN', 2, 2),
@@ -2468,6 +2460,22 @@ INSERT INTO `temployeesfamilybackground` (`id`, `EmployeeID`, `sSurname`, `sFirs
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `temployeeslearningandevelopment`
+--
+
+CREATE TABLE `temployeeslearningandevelopment` (
+  `ID` int(11) NOT NULL,
+  `Title` varchar(45) DEFAULT NULL,
+  `AttendanceFrom` varchar(45) DEFAULT NULL,
+  `AttendanceTo` varchar(45) DEFAULT NULL,
+  `NoOfHours` varchar(45) DEFAULT NULL,
+  `TypeOfLD` varchar(45) DEFAULT NULL,
+  `SponsoredBy` varchar(45) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `temployeesotherquestions`
 --
 
@@ -2525,7 +2533,8 @@ CREATE TABLE `temployeespersonalinformation` (
 --
 
 INSERT INTO `temployeespersonalinformation` (`id`, `EmployeeID`, `ExtensionName`, `DOB`, `POB`, `Email`, `PhoneNumber`, `Telephone`, `CivilStatus`, `Height`, `Weight`, `BloodType`, `GSIS`, `PAGIBIG`, `PHILHEALTH`, `SSS`, `TIN`, `AGENCYEMPLOYEENO`, `ResZipCode`, `PermZipCode`, `ResHouseBlockLotNo`, `ResStreet`, `ResSubDiv`, `ResBrngy`, `ResCity`, `ResProvince`, `PermHouseBlockLotNo`, `PermStreet`, `PermSubDiv`, `PermBrngy`, `PermCity`, `PermProvince`, `temployeespersonalinformationcol`) VALUES
-(4, '64', NULL, '1994-01-08', 'Tuguegarao City', 'Sephelegipto@gmail.com', '09759556027', NULL, 'Single', '11.70688', '50', 'A+', NULL, NULL, NULL, NULL, NULL, 'PT-CICS-708', '3500', '3500', '166', 'E', 'Balzain West', '12', 'Tuguegarao', 'Cagayan Valley', '166', 'E', 'Balzain West', '12', 'Tuguegarao', 'Cagayan Valley', NULL);
+(4, '64', NULL, '1994-01-08', 'Tuguegarao City', 'Sephelegipto@gmail.com', '09759556027', NULL, 'Single', '11.70688', '50', 'A+', '7', NULL, NULL, NULL, NULL, 'PT-CICS-708', '3500', '3500', '166', 'E', 'Balzain West', '12', 'Tuguegarao', 'Cagayan Valley', '166', 'E', 'Balzain West', '12', 'Tuguegarao', 'Cagayan Valley', NULL),
+(5, '65', NULL, '1994-01-08', 'Tuguegarao City', 'Sephelegipto@gmail.com', '09759556027', NULL, 'Single', '11.70688', '50', 'A+', '7', NULL, NULL, NULL, NULL, 'PT-CICS-708', '3500', '3500', '166', 'E', 'Balzain West', '12', 'Tuguegarao', 'Cagayan Valley', '166', 'E', 'Balzain West', '12', 'Tuguegarao', 'Cagayan Valley', NULL);
 
 -- --------------------------------------------------------
 
@@ -2562,6 +2571,22 @@ INSERT INTO `temployeesreferences` (`ID`, `EmployeeID`, `Name`, `Address`, `Cont
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `temployeesvoluntarywork`
+--
+
+CREATE TABLE `temployeesvoluntarywork` (
+  `ID` int(11) NOT NULL,
+  `EmployeeID` int(11) DEFAULT NULL,
+  `NameOfOrg` varchar(150) DEFAULT NULL,
+  `InclusiveDateFrom` varchar(45) DEFAULT NULL,
+  `InclusiveDateTo` varchar(45) DEFAULT NULL,
+  `NoOfHours` varchar(45) DEFAULT NULL,
+  `Position` varchar(45) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `temployeesworkexperiences`
 --
 
@@ -2583,39 +2608,8 @@ CREATE TABLE `temployeesworkexperiences` (
 --
 
 INSERT INTO `temployeesworkexperiences` (`ID`, `EmployeeID`, `InclusiveDateFrom`, `InclusiveDateTo`, `Position`, `Department`, `MonthlySalary`, `JobPay`, `StatusAppointment`, `GovernmentService`) VALUES
-(1, '64', '2018-04-07', '2018-04-07', '1', '1', '1', '1', '1', '1'),
-(2, '64', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(3, '64', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(4, '64', '2018-04-07', NULL, '1', '1', NULL, NULL, NULL, NULL),
-(5, '64', '2018-04-06', '2018-04-21', NULL, NULL, NULL, NULL, NULL, NULL);
-
--- --------------------------------------------------------
-
---
--- Stand-in structure for view `test`
--- (See below for the actual view)
---
-CREATE TABLE `test` (
-`ID` int(11)
-,`CurriculumID` int(11)
-,`SubjectID` int(11)
-,`StudentID` varchar(45)
-,`SubjectCode` varchar(45)
-,`SubjectDescription` varchar(100)
-,`Units` int(11)
-,`LabUnits` varchar(45)
-,`LecUnits` varchar(45)
-,`LabHours` varchar(45)
-,`LecHours` varchar(45)
-,`SubjectYearDescription` varchar(45)
-,`TermDescription` varchar(50)
-,`SubjectYearID` int(11)
-,`TermID` int(11)
-,`PreRequisiteID` varchar(341)
-,`PreRequisiteCODE` bigint(21)
-,`SubjectType` varchar(50)
-,`Grade` int(11)
-);
+(14, NULL, NULL, NULL, NULL, 'l', NULL, 'l', NULL, NULL),
+(15, NULL, NULL, NULL, 'hkl', 'jhl', NULL, 'k', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -2941,16 +2935,16 @@ CREATE TABLE `tloginverificators` (
 --
 
 INSERT INTO `tloginverificators` (`id`, `UserID`, `Password`, `UserTypeID`, `SecurityQuestionID`, `AnswerID`, `Status`, `remember_token`, `created_at`, `updated_at`) VALUES
-(5, 'CICS-784', '89a0a41364cbd517e8d40696c758fbe4', 1, NULL, NULL, 1, NULL, NULL, NULL),
+(5, 'CICS-784', 'ca661b70b8af7bef24437b6fa878aceb', 1, NULL, NULL, 1, NULL, NULL, NULL),
 (6, 'CICS-0036', 'd911f945ebf16bb1fbd3da52c847d57d', 1, NULL, NULL, 1, NULL, NULL, NULL),
 (8, 'PT-CICS-078', 'd1233b9f1273cab82471f030be294d48', 1, NULL, NULL, 1, NULL, NULL, NULL),
 (10, 'CICS-0036', '4343656205c8e0c6f122249b3b07cfcd', 2, NULL, NULL, 1, NULL, NULL, NULL),
 (17, 'CICS-001', '453e406dcee4d18174d4ff623f52dcd8', 2, NULL, NULL, 1, '7VJngZLmg5pPjvXU6rrUDbrDEZ0fT7ouM9cnLjEbeRJ2vXSraMPwQEVOieAR', NULL, NULL),
 (18, 'PT-CICS-078', '453e406dcee4d18174d4ff623f52dcd8', 2, NULL, NULL, 1, 'A8drpw3w5maB1RBbHie9PO8CDscmF37AjL9WlsPUh5CovLEfRoI6rNciGkew', NULL, NULL),
-(22, 'ABC123', 'secret', 3, 0, 0, 0, 'nlBqGQYj9YntM30HaTXGufQWhCgWcYBrxtXGk7Tcqa9tupH0Tk4dyjHDv6sY', NULL, NULL),
+(22, 'ABC123', '453e406dcee4d18174d4ff623f52dcd8', 3, 0, 0, 0, 'tRno2C4dZ3YjMWMwzrqzTBnPwKxEBmZIDdr74a2UKVq7DWDzdA0DA58AVwlo', NULL, NULL),
 (23, '1', 'secret', 3, 0, 0, 0, NULL, NULL, NULL),
-(24, '123', '453e406dcee4d18174d4ff623f52dcd8', 2, NULL, NULL, 1, '3N48VtmLtPxBuUPFscQZCvJnI9o7iME2spTCJUtUBVo6mJpKGOL7wqazdOlA', NULL, NULL),
-(25, 'PRES-001', '453e406dcee4d18174d4ff623f52dcd8', 1, NULL, NULL, 1, 'JJ27mRUSx03wxttoQ5OiPjhr8JyXL5VD2IHFYlPO1rdjFGf6Hd7fa3joi3wA', NULL, NULL);
+(24, '123', '453e406dcee4d18174d4ff623f52dcd8', 2, NULL, NULL, 1, 'PCczklKtl7gRsn3rLRCfcXr2eXP5CN73bJ7ZABVnYNxGDrytZvVGsJ40PvPr', NULL, NULL),
+(25, 'PRES-001', '453e406dcee4d18174d4ff623f52dcd8', 1, NULL, NULL, 1, 'FkZSztEHmJZyivnBbY8j2a2DgrQ7UyEqhiljKfRLRjWG4R4HMI9dXdBTwMeT', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -3126,7 +3120,7 @@ CREATE TABLE `tperiods` (
 --
 
 INSERT INTO `tperiods` (`ID`, `PeriodCode`, `TermID`, `StartDate`, `EndDate`, `EnrollmentStartDate`, `EnrollmentEndDate`, `PrelimDate`, `MidtermDate`, `FinalsDate`, `GradeInputStart`, `GradeInputEnd`, `StartYear`, `EndYear`) VALUES
-(22, '1-42018-82018', 1, '2018-04-12', '2018-08-12', '2018-03-29', '2018-04-12', '2018-05-12', '2018-06-12', '2018-07-12', '2018-07-12', '2018-09-12', 2018, 2019),
+(22, '2-18-19', 2, '2018-04-12', '2018-08-12', '2018-03-29', '2018-04-12', '2018-05-12', '2018-06-12', '2018-07-12', '2018-07-12', '2018-09-12', 2018, 2019),
 (23, '1-18-19', 1, '2018-04-20', '2018-08-20', '2018-04-06', '2018-04-20', '2018-05-20', '2018-06-20', '2018-07-20', '2018-07-20', '2018-09-20', 2018, 2019);
 
 -- --------------------------------------------------------
@@ -3242,35 +3236,35 @@ CREATE TABLE `tperiodsubjects` (
 --
 
 INSERT INTO `tperiodsubjects` (`ID`, `PeriodSectionID`, `ClassCode`, `SubjectID`, `TeacherID`) VALUES
-(1, 1, 'I1A14', 174, 49),
-(2, 1, 'I1A17', 176, 54),
+(1, 1, 'I1A14', 174, 51),
+(2, 1, 'I1A17', 176, 0),
 (3, 1, 'I1A11', 180, 42),
-(4, 1, 'I1A13', 175, 48),
-(5, 1, 'I1A18', 179, 56),
+(4, 1, 'I1A13', 175, 54),
+(5, 1, 'I1A18', 179, 53),
 (6, 1, 'I1A12', 181, 47),
-(7, 1, 'I1A15', 221, 51),
+(7, 1, 'I1A15', 221, 54),
 (8, 1, 'I1A16', 232, 53),
-(16, 2, 'I2B14', 189, 60),
-(17, 2, 'I2B13', 192, 59),
-(18, 2, 'I2B19', 194, 65),
-(19, 2, 'I2B12', 196, 58),
-(20, 2, 'I2B16', 191, 62),
-(21, 2, 'I2B15', 193, 61),
-(22, 2, 'I2B11', 212, 57),
-(23, 2, 'I2B17', 195, 63),
-(24, 2, 'I2B18', 197, 64),
-(31, 3, 'I3C11', 217, 66),
-(32, 3, 'I3C17', 219, 72),
-(33, 3, 'I3C12', 230, 67),
-(34, 3, 'I3C15', 210, 70),
-(35, 3, 'I3C14', 216, 69),
-(36, 3, 'I3C16', 218, 71),
-(37, 3, 'I3C13', 229, 68),
-(38, 4, 'I4D11', 199, 74),
-(39, 4, 'I4D12', 201, 75),
-(40, 4, 'I4D15', 203, 78),
-(41, 4, 'I4D13', 200, 76),
-(42, 4, 'I4D14', 202, 77),
+(16, 2, 'I2B14', 189, 0),
+(17, 2, 'I2B13', 192, 53),
+(18, 2, 'I2B19', 194, 0),
+(19, 2, 'I2B12', 196, 0),
+(20, 2, 'I2B16', 191, 0),
+(21, 2, 'I2B15', 193, 0),
+(22, 2, 'I2B11', 212, 0),
+(23, 2, 'I2B17', 195, 53),
+(24, 2, 'I2B18', 197, 0),
+(31, 3, 'I3C11', 217, 0),
+(32, 3, 'I3C17', 219, 0),
+(33, 3, 'I3C12', 230, 0),
+(34, 3, 'I3C15', 210, 0),
+(35, 3, 'I3C14', 216, 0),
+(36, 3, 'I3C16', 218, 0),
+(37, 3, 'I3C13', 229, 0),
+(38, 4, 'I4D11', 199, 0),
+(39, 4, 'I4D12', 201, 0),
+(40, 4, 'I4D15', 203, 0),
+(41, 4, 'I4D13', 200, 0),
+(42, 4, 'I4D14', 202, 0),
 (45, 5, 'P-I1PET11', 174, 0),
 (46, NULL, 'I4A13', NULL, 132),
 (47, NULL, NULL, NULL, 0);
@@ -4245,33 +4239,6 @@ INSERT INTO `tsubjectyears` (`ID`, `SubjectYearDescription`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tusers`
---
-
-CREATE TABLE `tusers` (
-  `id` int(10) UNSIGNED NOT NULL,
-  `UserID` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `LoginID` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `UserTypeID` int(11) NOT NULL,
-  `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `tusers`
---
-
-INSERT INTO `tusers` (`id`, `UserID`, `LoginID`, `password`, `UserTypeID`, `remember_token`, `created_at`, `updated_at`) VALUES
-(1, 'admin', 'admin', 'secret', 1, 'KOfeFjBes0HSh2sVl6dEtqxAHH5chtSQlsChR0QAwuUg6ilkapLF3yqvzT9F', NULL, NULL),
-(2, '11-13826', '11-13826', 'secret', 2, '4pN0XoNQsIj9PWtnqnHkNJtEVhOpnXMFBa54k8p7fbocGDDr28QTzKKa5SLX', NULL, NULL),
-(3, 'ABC123', 'ABC123', 'secret', 3, 'nlBqGQYj9YntM30HaTXGufQWhCgWcYBrxtXGk7Tcqa9tupH0Tk4dyjHDv6sY', NULL, NULL),
-(4, '1', '1', 'secret', 3, NULL, NULL, NULL);
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `tusertypes`
 --
 
@@ -4876,15 +4843,6 @@ CREATE TABLE `vstudents` (
 -- --------------------------------------------------------
 
 --
--- Structure for view `test`
---
-DROP TABLE IF EXISTS `test`;
-
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`192.168.1.254` SQL SECURITY DEFINER VIEW `test`  AS  select `tchecklists`.`ID` AS `ID`,`tchecklists`.`CurriculumID` AS `CurriculumID`,`tchecklists`.`SubjectID` AS `SubjectID`,`subj`.`StudentID` AS `StudentID`,`tsubjects`.`SubjectCode` AS `SubjectCode`,`tsubjects`.`SubjectDescription` AS `SubjectDescription`,`tsubjects`.`Units` AS `Units`,`tchecklists`.`LabUnits` AS `LabUnits`,`tchecklists`.`LecUnits` AS `LecUnits`,`tchecklists`.`LabHours` AS `LabHours`,`tchecklists`.`LecHours` AS `LecHours`,`tsubjectyears`.`SubjectYearDescription` AS `SubjectYearDescription`,`tsubjectterm`.`TermDescription` AS `TermDescription`,`tsubjectyears`.`ID` AS `SubjectYearID`,`tsubjectterm`.`ID` AS `TermID`,(select group_concat(`tchecklistprerequisite`.`SubjectID` separator ', ') from `tchecklistprerequisite` where (`tchecklistprerequisite`.`ChecklistID` = `tchecklists`.`ID`) group by `tchecklistprerequisite`.`ChecklistID`) AS `PreRequisiteID`,(select count(`a`.`SubjectCode`) from (`tchecklistprerequisite` join `tsubjects` `a` on((`a`.`ID` = `tchecklistprerequisite`.`SubjectID`))) where (`tchecklistprerequisite`.`ChecklistID` = `tchecklists`.`ID`)) AS `PreRequisiteCODE`,`tchecklists`.`SubjectType` AS `SubjectType`,`subj`.`Grade` AS `Grade` from ((((((`tchecklists` left join (select `tstudentgrades`.`ID` AS `ID`,`tstudentgrades`.`StudentID` AS `StudentID`,`tstudentgrades`.`SubjectID` AS `SubjectID`,`tstudentgrades`.`Grade` AS `Grade`,`tstudentgrades`.`remarks` AS `remarks` from `tstudentgrades` where (`tstudentgrades`.`StudentID` = 'ABC123')) `subj` on((`tchecklists`.`SubjectID` = `subj`.`SubjectID`))) join `vcurriculums` on((`tchecklists`.`CurriculumID` = `vcurriculums`.`ID`))) join `tsubjects` on((`tchecklists`.`SubjectID` = `tsubjects`.`ID`))) join `tsubjectyears` on((`tchecklists`.`SubjectYearID` = `tsubjectyears`.`ID`))) left join `tsubjectterm` on((`tchecklists`.`SubjectTermID` = `tsubjectterm`.`ID`))) left join `tsubjects` `tsubjects1` on((`tchecklists`.`ID` = `tsubjects1`.`ID`))) where (`tchecklists`.`CurriculumID` = 15) ;
-
--- --------------------------------------------------------
-
---
 -- Structure for view `vchecklists`
 --
 DROP TABLE IF EXISTS `vchecklists`;
@@ -5097,7 +5055,9 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`192.168.1.177` SQL SECURITY DEFINER V
 -- Indexes for table `samle`
 --
 ALTER TABLE `samle`
-  ADD PRIMARY KEY (`idsamle`);
+  ADD PRIMARY KEY (`idsamle`),
+  ADD KEY `tperiodSections` (`asd`),
+  ADD KEY `asd` (`asd`);
 
 --
 -- Indexes for table `tanswers`
@@ -5220,6 +5180,12 @@ ALTER TABLE `temployeesfamilybackground`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `temployeeslearningandevelopment`
+--
+ALTER TABLE `temployeeslearningandevelopment`
+  ADD PRIMARY KEY (`ID`);
+
+--
 -- Indexes for table `temployeesotherquestions`
 --
 ALTER TABLE `temployeesotherquestions`
@@ -5235,6 +5201,12 @@ ALTER TABLE `temployeespersonalinformation`
 -- Indexes for table `temployeesreferences`
 --
 ALTER TABLE `temployeesreferences`
+  ADD PRIMARY KEY (`ID`);
+
+--
+-- Indexes for table `temployeesvoluntarywork`
+--
+ALTER TABLE `temployeesvoluntarywork`
   ADD PRIMARY KEY (`ID`);
 
 --
@@ -5307,19 +5279,22 @@ ALTER TABLE `tperiods`
 -- Indexes for table `tperiodschedules`
 --
 ALTER TABLE `tperiodschedules`
-  ADD PRIMARY KEY (`ID`);
+  ADD PRIMARY KEY (`ID`),
+  ADD KEY `idxPeriodSubjectID` (`PeriodSubjectID`);
 
 --
 -- Indexes for table `tperiodsections`
 --
 ALTER TABLE `tperiodsections`
-  ADD PRIMARY KEY (`ID`);
+  ADD PRIMARY KEY (`ID`),
+  ADD KEY `idxPeriodCourseID` (`PeriodCourseID`);
 
 --
 -- Indexes for table `tperiodsubjects`
 --
 ALTER TABLE `tperiodsubjects`
-  ADD PRIMARY KEY (`ID`);
+  ADD PRIMARY KEY (`ID`),
+  ADD KEY `idxPeriodSectionID` (`PeriodSectionID`);
 
 --
 -- Indexes for table `tpositions`
@@ -5422,12 +5397,6 @@ ALTER TABLE `tsubjectterm`
 --
 ALTER TABLE `tsubjectyears`
   ADD PRIMARY KEY (`ID`);
-
---
--- Indexes for table `tusers`
---
-ALTER TABLE `tusers`
-  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `tusertypes`
@@ -5533,19 +5502,19 @@ ALTER TABLE `tdesignations`
 -- AUTO_INCREMENT for table `temployeechildrens`
 --
 ALTER TABLE `temployeechildrens`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT for table `temployeecseligibilities`
 --
 ALTER TABLE `temployeecseligibilities`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=92;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=121;
 
 --
 -- AUTO_INCREMENT for table `temployees`
 --
 ALTER TABLE `temployees`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=132;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=133;
 
 --
 -- AUTO_INCREMENT for table `temployeeseducationbackground`
@@ -5560,6 +5529,12 @@ ALTER TABLE `temployeesfamilybackground`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
+-- AUTO_INCREMENT for table `temployeeslearningandevelopment`
+--
+ALTER TABLE `temployeeslearningandevelopment`
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `temployeesotherquestions`
 --
 ALTER TABLE `temployeesotherquestions`
@@ -5569,7 +5544,7 @@ ALTER TABLE `temployeesotherquestions`
 -- AUTO_INCREMENT for table `temployeespersonalinformation`
 --
 ALTER TABLE `temployeespersonalinformation`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `temployeesreferences`
@@ -5578,10 +5553,16 @@ ALTER TABLE `temployeesreferences`
   MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
+-- AUTO_INCREMENT for table `temployeesvoluntarywork`
+--
+ALTER TABLE `temployeesvoluntarywork`
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+
+--
 -- AUTO_INCREMENT for table `temployeesworkexperiences`
 --
 ALTER TABLE `temployeesworkexperiences`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `tfacultyranks`
@@ -5605,7 +5586,7 @@ ALTER TABLE `tgenders`
 -- AUTO_INCREMENT for table `timages`
 --
 ALTER TABLE `timages`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=97;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=98;
 
 --
 -- AUTO_INCREMENT for table `tloginverificators`
@@ -5762,12 +5743,6 @@ ALTER TABLE `tsubjectterm`
 --
 ALTER TABLE `tsubjectyears`
   MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
-
---
--- AUTO_INCREMENT for table `tusers`
---
-ALTER TABLE `tusers`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `tusertypes`
