@@ -55,7 +55,16 @@ Route::group(['middleware'=>['authen','roles'],'roles'=>['FACULTY']],function(){
 	Route::post('EditVoluntarilyWork', ['as'=>'EditVoluntarilyWork', 'uses'=>'EmployeeController@EditVoluntarilyWork']);
 	Route::post('DeleteVoluntaryWork', ['as'=>'DeleteVoluntaryWork', 'uses'=>'EmployeeController@DeleteVoluntaryWork']);
 
+	Route::post('AddLearningDevelopment', ['as'=>'AddLearningDevelopment', 'uses'=>'EmployeeController@AddLearningDevelopment']);
+	Route::post('EditLearningDevelopment', ['as'=>'EditLearningDevelopment', 'uses'=>'EmployeeController@EditLearningDevelopment']);
+	Route::post('EditLearningDevelopment', ['as'=>'EditLearningDevelopment', 'uses'=>'EmployeeController@EditLearningDevelopment']);
+
+	Route::post('AddOtherInformation', ['as'=>'AddOtherInformation', 'uses'=>'EmployeeController@AddOtherInformation']);
+	Route::post('EditOtherInformation', ['as'=>'EditOtherInformation', 'uses'=>'EmployeeController@EditOtherInformation']);
+	Route::post('DeleteOtherInformation', ['as'=>'DeleteOtherInformation', 'uses'=>'EmployeeController@DeleteOtherInformation']);
+	
 	Route::post('UpdateReferences', ['as'=>'UpdateReferences', 'uses'=>'EmployeeController@UpdateReferences']);
+	Route::post('DeleteLearningAndDevelopment', ['as'=>'DeleteLearningAndDevelopment', 'uses'=>'EmployeeController@DeleteLearningAndDevelopment']);
 
 
 });

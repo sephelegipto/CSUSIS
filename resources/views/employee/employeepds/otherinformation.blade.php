@@ -1,32 +1,32 @@
-    <div class="tab-pane" id="tab8">
-            <table class="table table-striped table-hover">
-              <tbody><tr>
-                <th class="success  text-center col-lg-3">Special Skill and Hobbies</th>
-                <th class="success  text-center col-lg-3">Non-Academic Distinction/ Recognition</th>
-                <th class="success  text-center col-lg-3">Membership in Association/ Organization</th>
-                <th colspan="2" class="text-center success  col-lg-1">Action</th>
-              </tr>
-              <tr class="">
-               <td class="col-lg-2 ">N/n</td>
-               <td class="col-lg-2 ">N/n</td>
-               <td class="col-lg-2 ">N/n</td>
-               <td class="text-center"> <a class="btn btn-info btn-xs"> <span class="glyphicon glyphicon-pencil" href="include/editother.php?id=1" data-toggle="modal" data-target="#otherinfo"></span></a></td>
+    <div class="tab-pane content content table-responsive " id="tab8">
+      <table class="table table-striped table-hover" id="othinfo-table">
+        <tbody><tr>
+          <th class="success  text-center col-lg-3">Special Skill and Hobbies</th>
+          <th class="success  text-center col-lg-3">Non-Academic Distinction/ Recognition</th>
+          <th class="success  text-center col-lg-3">Membership in Association/ Organization</th>
+          <th colspan="2" class="text-center success  col-lg-1">Action</th>
+        </tr>
+        @foreach($otherinfo as $info)
+        <tr class="empotherinfo{{$info->ID}}">
+         <td class="col-lg-2 ">{{$info->Skills}}</td>
+         <td class="col-lg-2 ">{{$info->Recognition}}</td>
+         <td class="col-lg-2 ">{{$info->Organization}}</td>
+         <td>
+          <button class="edit-otherinformation-button btn btn-info" data-id="{{$info}}">
+            <span class="glyphicon glyphicon-edit"></span> 
+          </button>
+        </td>
+        <td>
+          <button id="delete-otherinformation-button" class="delete-modal btn btn-danger" data-id="{{$info}}">
+            <span class="glyphicon glyphicon-trash"></span> 
+          </button>
+        </td>
 
 
-               <td><a href="include/deleteother.php?id=1" class="btn btn-danger btn-xs"> <span class="glyphicon glyphicon-trash" aria-hidden="true" name="Delete" value="Delete"></span></a></td>
-
-
-             </tr>
-             <tr class="">
-               <td class="col-lg-2 ">N/ns</td>
-               <td class="col-lg-2 ">N/ns</td>
-               <td class="col-lg-2 ">N/ns</td>
-               <td class="text-center"> <a class="btn btn-info btn-xs"> <span class="glyphicon glyphicon-pencil" href="include/editother.php?id=2" data-toggle="modal" data-target="#otherinfo"></span></a></td>
-
-
-               <td><a href="include/deleteother.php?id=2" class="btn btn-danger btn-xs"> <span class="glyphicon glyphicon-trash" aria-hidden="true" name="Delete" value="Delete"></span></a></td>
-
-
-             </tr>
-           </tbody></table>
-         </div>
+      </tr>
+      @endforeach
+    </tbody></table>
+    <button type="button" class="btn btn-primary pull-right" id="add-otherinformation-button">
+      Add
+    </button>
+  </div>

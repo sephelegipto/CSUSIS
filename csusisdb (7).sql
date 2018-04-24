@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 23, 2018 at 12:12 PM
+-- Generation Time: Apr 24, 2018 at 10:56 AM
 -- Server version: 5.7.21-log
 -- PHP Version: 7.2.2
 
@@ -951,7 +951,7 @@ CREATE DEFINER=`root`@`192.168.1.177` PROCEDURE `spPeriodsViewAllORSearch` (`Lib
             or Teacher LIKE  CONCAT('%',SearchText , '%'))
             ORDER BY ClassCode;
 		WHEN 'SCHEDULES' THEN
-			SELECT ID,PeriodSubjectId,ClassCode,SubjectCode,SubjectDescription/*,Day,StartTime,EndTime,RoomID,RoomCode,Building,College,SessionType,TeacherId,Teacher*/ FROM VPERIODSCHEDULES WHERE PeriodSubjectID IN (SELECT ID from VperiodSubjects WHERE PeriodSectionID=PeriodToLoad); 
+			SELECT ID,PeriodSubjectId,ClassCode,SubjectCode,SubjectDescription,Day,StartTime,EndTime,RoomID,RoomCode,Building,College,SessionType,TeacherId,Teacher FROM VPERIODSCHEDULES WHERE PeriodSubjectID IN (SELECT ID from vPeriodSubjects WHERE PeriodSectionID=1); 
 	END CASE;
 		
 END$$
@@ -1166,29 +1166,6 @@ INSERT INTO tperiodsubjects (PeriodSectionID, SubjectID)
 END$$
 
 DELIMITER ;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `samle`
---
-
-CREATE TABLE `samle` (
-  `idsamle` int(11) NOT NULL,
-  `asd` varchar(45) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `samle`
---
-
-INSERT INTO `samle` (`idsamle`, `asd`) VALUES
-(2, 'asd'),
-(3, 'asd'),
-(4, 'asd'),
-(1, 'asda'),
-(6, 'h'),
-(5, 'vsdg');
 
 -- --------------------------------------------------------
 
@@ -2250,9 +2227,7 @@ CREATE TABLE `temployeechildrens` (
 --
 
 INSERT INTO `temployeechildrens` (`ID`, `EmployeeID`, `Name`, `Birthday`) VALUES
-(27, '[64]', '1', '2018-04-07'),
-(28, '64', '12', '2018-04-06'),
-(29, '64', '3', '2018-04-13');
+(27, '[64]', '1', '2018-04-07');
 
 -- --------------------------------------------------------
 
@@ -2284,8 +2259,53 @@ INSERT INTO `temployeecseligibilities` (`ID`, `EmployeeID`, `CareerService`, `Ra
 (114, NULL, 'r', NULL, NULL, NULL, NULL, NULL),
 (116, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (117, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(118, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(120, 64, '1', NULL, NULL, NULL, NULL, NULL);
+(118, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `temployeelearningdevelopment`
+--
+
+CREATE TABLE `temployeelearningdevelopment` (
+  `ID` int(11) NOT NULL,
+  `EmployeeID` varchar(45) DEFAULT NULL,
+  `Title` varchar(45) DEFAULT NULL,
+  `InclusiveDateFrom` varchar(30) DEFAULT NULL,
+  `InclusiveDateTo` varchar(30) DEFAULT NULL,
+  `NoOfHours` varchar(20) DEFAULT NULL,
+  `TypeOfLD` varchar(45) DEFAULT NULL,
+  `ConductedBy` varchar(45) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `temployeelearningdevelopment`
+--
+
+INSERT INTO `temployeelearningdevelopment` (`ID`, `EmployeeID`, `Title`, `InclusiveDateFrom`, `InclusiveDateTo`, `NoOfHours`, `TypeOfLD`, `ConductedBy`) VALUES
+(1, '64', NULL, NULL, '1', NULL, NULL, NULL),
+(2, '64', NULL, NULL, NULL, '5', NULL, NULL),
+(3, '64', NULL, NULL, '7', NULL, NULL, NULL),
+(4, '64', NULL, NULL, NULL, '4', NULL, NULL),
+(5, '64', '2018-04-01', '2018-04-06', '1', '2', '3', '4'),
+(6, '64', '2018-04-06', '2018-04-07', '1', '2', '3', '4'),
+(7, '64', '1', '2018-04-05', '2018-04-21', '1', '2', '3'),
+(8, '64', '3', '2018-04-18', '2018-04-07', '8', '3', '3'),
+(9, '64', '1', '2018-04-14', '2018-04-28', '2', '2', '2');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `temployeeotherinformation`
+--
+
+CREATE TABLE `temployeeotherinformation` (
+  `ID` int(11) NOT NULL,
+  `EmployeeID` varchar(45) DEFAULT NULL,
+  `Skills` varchar(100) DEFAULT NULL,
+  `Recognition` varchar(100) DEFAULT NULL,
+  `Organization` varchar(100) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2466,12 +2486,20 @@ INSERT INTO `temployeesfamilybackground` (`id`, `EmployeeID`, `sSurname`, `sFirs
 CREATE TABLE `temployeeslearningandevelopment` (
   `ID` int(11) NOT NULL,
   `Title` varchar(45) DEFAULT NULL,
-  `AttendanceFrom` varchar(45) DEFAULT NULL,
-  `AttendanceTo` varchar(45) DEFAULT NULL,
+  `InclusiveDateFrom` varchar(45) DEFAULT NULL,
+  `InclusiveDateTo` varchar(45) DEFAULT NULL,
   `NoOfHours` varchar(45) DEFAULT NULL,
   `TypeOfLD` varchar(45) DEFAULT NULL,
-  `SponsoredBy` varchar(45) DEFAULT NULL
+  `ConductedBy` varchar(45) DEFAULT NULL,
+  `EmployeeID` varchar(45) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `temployeeslearningandevelopment`
+--
+
+INSERT INTO `temployeeslearningandevelopment` (`ID`, `Title`, `InclusiveDateFrom`, `InclusiveDateTo`, `NoOfHours`, `TypeOfLD`, `ConductedBy`, `EmployeeID`) VALUES
+(1, 'Title of Learning and Development', '2018-04-06', '2018-04-14', 'Title of Learning and Development', 'Title of Learning and Development', 'Title of Learning and Development', '64');
 
 -- --------------------------------------------------------
 
@@ -2525,16 +2553,19 @@ CREATE TABLE `temployeespersonalinformation` (
   `PermBrngy` varchar(100) DEFAULT NULL,
   `PermCity` varchar(100) DEFAULT NULL,
   `PermProvince` varchar(100) DEFAULT NULL,
-  `temployeespersonalinformationcol` varchar(45) DEFAULT NULL
+  `Filipino` int(11) DEFAULT '0',
+  `DualCitizenship` int(11) DEFAULT '0',
+  `ByBirth` int(11) DEFAULT '0',
+  `ByNaturalization` int(11) DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `temployeespersonalinformation`
 --
 
-INSERT INTO `temployeespersonalinformation` (`id`, `EmployeeID`, `ExtensionName`, `DOB`, `POB`, `Email`, `PhoneNumber`, `Telephone`, `CivilStatus`, `Height`, `Weight`, `BloodType`, `GSIS`, `PAGIBIG`, `PHILHEALTH`, `SSS`, `TIN`, `AGENCYEMPLOYEENO`, `ResZipCode`, `PermZipCode`, `ResHouseBlockLotNo`, `ResStreet`, `ResSubDiv`, `ResBrngy`, `ResCity`, `ResProvince`, `PermHouseBlockLotNo`, `PermStreet`, `PermSubDiv`, `PermBrngy`, `PermCity`, `PermProvince`, `temployeespersonalinformationcol`) VALUES
-(4, '64', NULL, '1994-01-08', 'Tuguegarao City', 'Sephelegipto@gmail.com', '09759556027', NULL, 'Single', '11.70688', '50', 'A+', '7', NULL, NULL, NULL, NULL, 'PT-CICS-708', '3500', '3500', '166', 'E', 'Balzain West', '12', 'Tuguegarao', 'Cagayan Valley', '166', 'E', 'Balzain West', '12', 'Tuguegarao', 'Cagayan Valley', NULL),
-(5, '65', NULL, '1994-01-08', 'Tuguegarao City', 'Sephelegipto@gmail.com', '09759556027', NULL, 'Single', '11.70688', '50', 'A+', '7', NULL, NULL, NULL, NULL, 'PT-CICS-708', '3500', '3500', '166', 'E', 'Balzain West', '12', 'Tuguegarao', 'Cagayan Valley', '166', 'E', 'Balzain West', '12', 'Tuguegarao', 'Cagayan Valley', NULL);
+INSERT INTO `temployeespersonalinformation` (`id`, `EmployeeID`, `ExtensionName`, `DOB`, `POB`, `Email`, `PhoneNumber`, `Telephone`, `CivilStatus`, `Height`, `Weight`, `BloodType`, `GSIS`, `PAGIBIG`, `PHILHEALTH`, `SSS`, `TIN`, `AGENCYEMPLOYEENO`, `ResZipCode`, `PermZipCode`, `ResHouseBlockLotNo`, `ResStreet`, `ResSubDiv`, `ResBrngy`, `ResCity`, `ResProvince`, `PermHouseBlockLotNo`, `PermStreet`, `PermSubDiv`, `PermBrngy`, `PermCity`, `PermProvince`, `Filipino`, `DualCitizenship`, `ByBirth`, `ByNaturalization`) VALUES
+(4, '64', NULL, '1994-01-08', 'Tuguegarao City', 'Sephelegipto@gmail.com', '09759556027', NULL, 'Single', '11.70688', '50', 'B+', '7', NULL, NULL, NULL, NULL, 'PT-CICS-708', '3500', '3500', '166', 'E', 'Balzain West', '12', 'Tuguegarao', 'Cagayan Valley', '166', 'E', 'Balzain West', '12', 'Tuguegarao', 'Cagayan Valley', 1, 1, 0, 0),
+(5, '65', NULL, '1994-01-08', 'Tuguegarao City', 'Sephelegipto@gmail.com', '09759556027', NULL, 'Single', '11.70688', '50', 'A+', '7', NULL, NULL, NULL, NULL, 'PT-CICS-708', '3500', '3500', '166', 'E', 'Balzain West', '12', 'Tuguegarao', 'Cagayan Valley', '166', 'E', 'Balzain West', '12', 'Tuguegarao', 'Cagayan Valley', NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -2555,18 +2586,9 @@ CREATE TABLE `temployeesreferences` (
 --
 
 INSERT INTO `temployeesreferences` (`ID`, `EmployeeID`, `Name`, `Address`, `ContactNumber`) VALUES
-(4, '64', NULL, NULL, NULL),
-(5, '64', NULL, NULL, NULL),
-(6, '64', NULL, NULL, NULL),
-(7, '64', '4', NULL, NULL),
-(8, '64', NULL, NULL, NULL),
-(9, '64', NULL, NULL, NULL),
-(10, '64', '22', '2', '2'),
-(11, '64', NULL, NULL, NULL),
-(12, '64', NULL, NULL, NULL),
-(13, '64', '1', '1', '1'),
-(14, '64', NULL, NULL, NULL),
-(15, '64', NULL, NULL, NULL);
+(19, '64', 'test', NULL, '5'),
+(20, '64', NULL, NULL, NULL),
+(21, '64', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -2583,6 +2605,14 @@ CREATE TABLE `temployeesvoluntarywork` (
   `NoOfHours` varchar(45) DEFAULT NULL,
   `Position` varchar(45) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `temployeesvoluntarywork`
+--
+
+INSERT INTO `temployeesvoluntarywork` (`ID`, `EmployeeID`, `NameOfOrg`, `InclusiveDateFrom`, `InclusiveDateTo`, `NoOfHours`, `Position`) VALUES
+(3, NULL, '1', '2018-04-18', '2018-04-07', '3', NULL),
+(4, NULL, NULL, '2018-04-18', '2018-04-07', '3', '2');
 
 -- --------------------------------------------------------
 
@@ -2602,14 +2632,6 @@ CREATE TABLE `temployeesworkexperiences` (
   `StatusAppointment` varchar(45) DEFAULT NULL,
   `GovernmentService` varchar(45) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `temployeesworkexperiences`
---
-
-INSERT INTO `temployeesworkexperiences` (`ID`, `EmployeeID`, `InclusiveDateFrom`, `InclusiveDateTo`, `Position`, `Department`, `MonthlySalary`, `JobPay`, `StatusAppointment`, `GovernmentService`) VALUES
-(14, NULL, NULL, NULL, NULL, 'l', NULL, 'l', NULL, NULL),
-(15, NULL, NULL, NULL, 'hkl', 'jhl', NULL, 'k', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -5052,14 +5074,6 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`192.168.1.177` SQL SECURITY DEFINER V
 --
 
 --
--- Indexes for table `samle`
---
-ALTER TABLE `samle`
-  ADD PRIMARY KEY (`idsamle`),
-  ADD KEY `tperiodSections` (`asd`),
-  ADD KEY `asd` (`asd`);
-
---
 -- Indexes for table `tanswers`
 --
 ALTER TABLE `tanswers`
@@ -5159,6 +5173,18 @@ ALTER TABLE `temployeechildrens`
 -- Indexes for table `temployeecseligibilities`
 --
 ALTER TABLE `temployeecseligibilities`
+  ADD PRIMARY KEY (`ID`);
+
+--
+-- Indexes for table `temployeelearningdevelopment`
+--
+ALTER TABLE `temployeelearningdevelopment`
+  ADD PRIMARY KEY (`ID`);
+
+--
+-- Indexes for table `temployeeotherinformation`
+--
+ALTER TABLE `temployeeotherinformation`
   ADD PRIMARY KEY (`ID`);
 
 --
@@ -5409,12 +5435,6 @@ ALTER TABLE `tusertypes`
 --
 
 --
--- AUTO_INCREMENT for table `samle`
---
-ALTER TABLE `samle`
-  MODIFY `idsamle` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
-
---
 -- AUTO_INCREMENT for table `tappliedto`
 --
 ALTER TABLE `tappliedto`
@@ -5502,19 +5522,31 @@ ALTER TABLE `tdesignations`
 -- AUTO_INCREMENT for table `temployeechildrens`
 --
 ALTER TABLE `temployeechildrens`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `temployeecseligibilities`
 --
 ALTER TABLE `temployeecseligibilities`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=121;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=119;
+
+--
+-- AUTO_INCREMENT for table `temployeelearningdevelopment`
+--
+ALTER TABLE `temployeelearningdevelopment`
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
+-- AUTO_INCREMENT for table `temployeeotherinformation`
+--
+ALTER TABLE `temployeeotherinformation`
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `temployees`
 --
 ALTER TABLE `temployees`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=133;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=132;
 
 --
 -- AUTO_INCREMENT for table `temployeeseducationbackground`
@@ -5532,7 +5564,7 @@ ALTER TABLE `temployeesfamilybackground`
 -- AUTO_INCREMENT for table `temployeeslearningandevelopment`
 --
 ALTER TABLE `temployeeslearningandevelopment`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `temployeesotherquestions`
@@ -5550,19 +5582,19 @@ ALTER TABLE `temployeespersonalinformation`
 -- AUTO_INCREMENT for table `temployeesreferences`
 --
 ALTER TABLE `temployeesreferences`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `temployeesvoluntarywork`
 --
 ALTER TABLE `temployeesvoluntarywork`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `temployeesworkexperiences`
 --
 ALTER TABLE `temployeesworkexperiences`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `tfacultyranks`
@@ -5586,7 +5618,7 @@ ALTER TABLE `tgenders`
 -- AUTO_INCREMENT for table `timages`
 --
 ALTER TABLE `timages`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=98;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=97;
 
 --
 -- AUTO_INCREMENT for table `tloginverificators`
