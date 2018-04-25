@@ -49,8 +49,8 @@
               var data = $(this).serialize();
               var url = $(this).attr('action');
               $.post(url,data,function(data){
-
-               
+            
+                
                 $('#civilserviceelegibility-table').append(
                   "<tr class='CSEligibility" + data.ID + "'>" +
                   "<td>" + (data.CareerService || '') + "</td> " +

@@ -1,22 +1,38 @@
         <div class="tab-pane" id="tab9">
-          <table class="table table-bordered">
-            <tbody><tr>
-              <td scope="row" class="col-lg-8">
-               Are you related by consanguinity or affinity to the appointing orrecommending authority, or to the chief of bureau or office or to the person who has immediate supervision over you in the office, Bureau or Department where you will be appointed,<br><br>
-               a. within the third degree?<br>
-               b. within the fourth degree (for Local Government Unit- Career Employees)?
-             </td>
-             <td scope="row" class="col-lg-1">
-              <br><br><br><span class="icons"><span class="first-icon fa fa-circle-o fa-base"></span><span class="second-icon fa fa-dot-circle-o fa-base"></span></span><input type="radio" checked="" name="34a" value="YES"><label>YES</label><br>  
-              <span class="icons"><span class="first-icon fa fa-circle-o fa-base"></span><span class="second-icon fa fa-dot-circle-o fa-base"></span></span><input type="radio" onclick="myFunction()" checked="" name="34b" value="YES"><label>YES</label>  <br>  
+          <form class="form-signin" id="frm-a-otherquestions" method="POST" action="{{ route('AddUpdateOtherQuestion') }}">
+            <table class="table table-bordered">
+              <tbody>
+                <tr>
+                  <td scope="row" class="col-lg-8">
+                   Are you related by consanguinity or affinity to the appointing orrecommending authority, or to the chief of bureau or office or to the person who has immediate supervision over you in the office, Bureau or Department where you will be appointed,<br><br>
+                   a. within the third degree?<br>
+                   b. within the fourth degree (for Local Government Unit- Career Employees)?
+                 </td>
+                 <td scope="row" class="col-lg-1">
+                  <br><br><br>
+
+
+                </span>
+              </span>
+              <input type="radio" name="Question1" value="1"  {{ $answers[0]->Question1 ? 'CHECKED' : '' }}>
+              <label>YES</label>
+              <br>  
+
+              <input type="radio" name="Question2" value="1" {{ $answers[0]->Question2 ? 'CHECKED' : '' }}>
+              <label>YES</label> 
+              <br>  
             </td>
             <td scope="row" class="col-lg-1"> 
-              <br><br><br><span class="icons"><span class="first-icon fa fa-circle-o fa-base"></span><span class="second-icon fa fa-dot-circle-o fa-base"></span></span><input type="radio" name="34a" value="NO"><label>NO</label><br> 
-              <span class="icons"><span class="first-icon fa fa-circle-o fa-base"></span><span class="second-icon fa fa-dot-circle-o fa-base"></span></span><input type="radio" onclick="myFunction1()" name="34b" value="NO"><label>NO</label> <br>            
+              <br><br><br><span class="icons"><span class="first-icon fa fa-circle-o fa-base"></span><span class="second-icon fa fa-dot-circle-o fa-base"></span></span>
+              <input type="radio" name="Question1" value="0" {{ $answers[0]->Question1 ? '' : 'CHECKED' }}>
+              <label>NO</label><br> 
+              <span class="icons"><span class="first-icon fa fa-circle-o fa-base"></span><span class="second-icon fa fa-dot-circle-o fa-base"></span></span>
+              <input type="radio" name="Question2" value="0" {{ $answers[0]->Question2 ? '' : 'CHECKED' }}>
+              <label>NO</label> <br>            
             </td>
             <td scope="row" class="col-lg-3">
               <br><br>If YES, give details:<br>
-              <input type="text" value="N/n" id="34detail" name="34detail" class="form-control">   
+              <input type="text" value="{{ $answers[0]->Remark1}}"  name="Remark1" class="form-control">   
             </td>
           </tr>
           <tr>
@@ -25,14 +41,14 @@
             </td>
 
             <td>
-              <br><input type="radio" name="35a" onclick="myFunction2()" value="YES"><label>YES</label><br> 
+              <br><input type="radio" name="Question3" value="1" {{ $answers[0]->Question3 ? 'CHECKED' : '' }}><label>YES</label><br> 
             </td>
             <td>
-              <br><input type="radio" name="35a" onclick="myFunction3()" checked="" value="NO"><label>NO</label><br>
+              <br><input type="radio" name="Question3" value="0" {{ $answers[0]->Question3 ? '' : 'CHECKED' }}><label>NO</label><br>
             </td>     
             <td>
               If YES, give details:<br>
-              <input type="text" value="" id="35detail" name="35detail" class="form-control">
+              <input type="text" value="{{ $answers[0]->Remark2}}"  name="Remark2" class="form-control">
             </td> 
           </tr>
 
@@ -42,18 +58,18 @@
             </td>
 
             <td>
-              <br><br><input type="radio" name="35b" onclick="myFunction02()" value="YES"><label>YES</label>
+              <br><br><input type="radio" name="Question4" value="1" {{ $answers[0]->Question4 ? 'CHECKED' : '' }}><label>YES</label>
             </td>
             <td>
-              <br><br><input type="radio" name="35b" onclick="myFunction03()" checked="" value="NO"><label>NO</label><br>
+              <br><br><input type="radio" name="Question4"  value="0" {{ $answers[0]->Question4 ? '' : 'CHECKED' }}><label>NO</label><br>
             </td>
 
             <td>          
               If YES, give details:<br>
               Date Filed:
-              <input type="date" value="" id="35bdate" name="35bdate" class="form-control">
+              <input type="date" value="{{ $answers[0]->Remark3}}"  name="Remark3" class="form-control">
               Status of Case/s:
-              <input type="text" value="" id="35bstat" dis="" name="35bstat" class="form-control"> 
+              <input type="text" value="{{ $answers[0]->Remark4}}" name="Remark4" class="form-control"> 
             </td>
           </tr>
 
@@ -63,15 +79,15 @@
             </td>
 
             <td>
-              <input type="radio" name="36a" onclick="myFunction4()" checked="" value="YES"><label>YES</label>
+              <input type="radio" name="Question5"  value="1" {{ $answers[0]->Question5 ? 'CHECKED' : '' }}><label>YES</label>
             </td> 
             <td>
-              <input type="radio" name="36a" onclick="myFunction5()" value="NO"><label>NO</label><br>
+              <input type="radio" name="Question5" value="0" {{ $answers[0]->Question5 ? '' : 'CHECKED' }}><label>NO</label><br>
             </td>
 
             <td>
               If YES, give details:<br>
-              <input type="text" value="N/n" id="36detail" name="36detail" class="form-control">
+              <input type="text" value="{{ $answers[0]->Remark5}}"  name="Remark5" class="form-control">
             </td>           
           </tr>
 
@@ -81,16 +97,16 @@
            </td>
 
            <td>
-            <br><input type="radio" name="37a" onclick="myFunction6()" checked="" value="YES"><label>YES</label> 
+            <br><input type="radio" name="Question6" value="1" {{ $answers[0]->Question6 ? 'CHECKED' : '' }}><label>YES</label> 
           </td>
 
           <td>
-            <br><input type="radio" name="37a" onclick="myFunction7()" value="NO"><label>NO</label>
+            <br><input type="radio" name="Question6" value="0" {{ $answers[0]->Question6 ? '' : 'CHECKED' }}><label>NO</label>
           </td> 
 
           <td>
             If YES, give details:<br>
-            <input type="text" value="N/n" id="37detail" name="37detail" class="form-control">   
+            <input type="text" value="{{ $answers[0]->Remark6}}"  name="Remark6" class="form-control">   
           </td>                   
         </tr>
 
@@ -100,15 +116,15 @@
           </td> 
 
           <td>
-            <br><input type="radio" name="38a" onclick="myFunction8()" checked="" value="YES"><label>YES</label><br>
+            <br><input type="radio" name="Question7"  value="1" {{ $answers[0]->Question7 ? 'CHECKED' : '' }}><label>YES</label><br>
           </td>
           <td>
-            <br><input type="radio" name="38a" onclick="myFunction9()" value="NO"><label>NO</label><br>
+            <br><input type="radio" name="Question7"  value="0" {{ $answers[0]->Question7 ? '' : 'CHECKED' }}><label>NO</label><br>
           </td>
 
           <td>
             If YES, give details:<br>
-            <input type="text" value="N/n" id="38detail" name="38detail" class="form-control">   
+            <input type="text" value="{{ $answers[0]->Remark7}}"  name="Remark7" class="form-control">   
           </td>
         </tr> 
         <tr>
@@ -117,15 +133,15 @@
           </td>
 
           <td>
-            <br><input type="radio" name="38b" onclick="myFunction10()" checked="" value="YES"><label>YES</label><br>
+            <br><input type="radio" name="Question8"  value="1" {{ $answers[0]->Question8 ? 'CHECKED' : '' }}><label>YES</label><br>
           </td> 
 
           <td>
-            <br><input type="radio" name="38b" onclick="myFunction11()" value="NO"><label>NO</label><br>
+            <br><input type="radio" name="Question8"  value="0" {{ $answers[0]->Question8 ? '' : 'CHECKED' }}><label>NO</label><br>
           </td> 
           <td>
             If YES, give details:<br>
-            <input type="text" value="N/n" id="38bdetail" name="38bdetail" class="form-control">
+            <input type="text" value="{{ $answers[0]->Remark8}}"  name="Remark8" class="form-control">
           </td>     
         </tr> 
 
@@ -134,14 +150,14 @@
             <br> Have you acquired the status of an immigrant or permanent resident of another country?<br>
           </td>
           <td>
-            <br><input type="radio" name="39a" onclick="myFunction12()" checked="" value="YES"><label>YES</label><br>
+            <br><input type="radio" name="Question9"  value="1" {{ $answers[0]->Question9 ? 'CHECKED' : '' }}><label>YES</label><br>
           </td>
           <td>
-            <br><input type="radio" name="39a" onclick="myFunction13()" value="NO"><label>NO</label><br>
+            <br><input type="radio" name="Question9"  value="0" {{ $answers[0]->Question9 ? '' : 'CHECKED' }}><label>NO</label><br>
           </td>
           <td>
             If YES, give details(country):<br>
-            <input type="text" value="N/n" name="39detail" id="39detail" class="form-control">   
+            <input type="text" value="{{ $answers[0]->Remark9}}" name="Remark9"  class="form-control">   
           </td>
         </tr> 
 
@@ -152,16 +168,16 @@
           </td>
 
           <td>
-            <br><br><br><br><input type="radio" name="40a" onclick="myFunction14()" checked="" value="YES"><label>YES</label><br>    
+            <br><br><br><br><input type="radio" name="Question10"  value="1" {{ $answers[0]->Question10 ? 'CHECKED' : '' }}><label>YES</label><br>    
           </td>     
 
           <td>
-            <br><br><br><br><input type="radio" name="40a" onclick="myFunction15()" value="NO"><label>NO</label><br>
+            <br><br><br><br><input type="radio" name="Question10"  value="0" {{ $answers[0]->Question10 ? '' : 'CHECKED' }}><label>NO</label><br>
           </td>
 
           <td>
             <br><br>If YES, please specify:<br>
-            <input type="text" value="N/n" id="40adetail" name="40adetail" class="form-control"> 
+            <input type="text" value="{{ $answers[0]->Remark10}}"  name="Remark10" class="form-control"> 
           </td>
         </tr>
 
@@ -170,14 +186,14 @@
             <br>b.Are you a person with disability?
           </td>
           <td>
-            <br><input type="radio" name="40b" onclick="myFunction16()" checked="" value="YES"><label>YES</label><br>
+            <br><input type="radio" name="Question11"  value="1" {{ $answers[0]->Question11 ? 'CHECKED' : '' }}><label>YES</label><br>
           </td>
           <td>
-            <br><input type="radio" name="40b" onclick="myFunction17()" value="NO"><label>NO</label><br>
+            <br><input type="radio" name="Question11"  value="0" {{ $answers[0]->Question11 ? '' : 'CHECKED' }}><label>NO</label><br>
           </td>
           <td>
             If YES, please specify ID No.:<br>
-            <input type="text" value="N/n" id="40bdetail" name="40bdetail" class="form-control">
+            <input type="text" value="{{ $answers[0]->Remark11}}"  name="Remark11" class="form-control">
           </td>
         </tr>     
 
@@ -186,18 +202,19 @@
             <br>c. Are you a solo parent?
           </td>
           <td>
-            <br><input type="radio" name="40b" onclick="myFunction16()" checked="" value="YES"><label>YES</label><br>
+            <br><input type="radio" name="Question12"  value="1" {{ $answers[0]->Question12 ? 'CHECKED' : '' }}><label>YES</label><br>
           </td>
           <td>
-            <br><input type="radio" name="40b" onclick="myFunction17()" value="NO"><label>NO</label><br>
+            <br><input type="radio" name="Question12"  value="0" {{ $answers[0]->Question12 ? '' : 'CHECKED' }}><label>NO</label><br>
           </td>
           <td>
             If YES, please specify ID No.:<br>
-            <input type="text" value="N/n" id="40cdetail" name="40cdetail" class="form-control">
+            <input type="text" value="{{ $answers[0]->Remark12}}"  name="Remark12" class="form-control">
           </td>
         </tr>
       </tbody></table>
-      <button type="button" class="btn btn-primary pull-right" id="add-otherinformation-button">
+      <button type="submit" class="btn btn-primary pull-right">
         Save
       </button>
-    </div>
+    </form>
+  </div>

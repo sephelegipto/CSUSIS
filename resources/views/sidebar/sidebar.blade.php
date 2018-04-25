@@ -70,18 +70,7 @@
                 <p>Personal Data Sheet</p>
             </a>
         </li>
-        <li id="employee">
-            <a  href="{{ route('employee/pds') }}">
-                <i class="ti-user"></i>
-                <p>Daily Time Record</p>
-            </a>
-        </li>
-        <li id="employee">
-            <a  href="{{ route('employee/pds') }}">
-                <i class="ti-user"></i>
-                <p>Subjects</p>
-            </a>
-        </li>
+    
     </ul>
 
     @elseif (Auth::user()->UserTypeID === 3)

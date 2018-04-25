@@ -65,7 +65,7 @@ Route::group(['middleware'=>['authen','roles'],'roles'=>['FACULTY']],function(){
 	
 	Route::post('UpdateReferences', ['as'=>'UpdateReferences', 'uses'=>'EmployeeController@UpdateReferences']);
 	Route::post('DeleteLearningAndDevelopment', ['as'=>'DeleteLearningAndDevelopment', 'uses'=>'EmployeeController@DeleteLearningAndDevelopment']);
-
+	Route::post('AddUpdateOtherQuestion', ['as'=>'AddUpdateOtherQuestion', 'uses'=>'EmployeeController@AddUpdateOtherQuestion']);
 
 });
 

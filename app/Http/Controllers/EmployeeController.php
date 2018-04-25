@@ -17,11 +17,22 @@ use App\EmployeeWorkExperience;
 use App\EmployeeVoluntarywork;
 use App\EmployeeLearningDevelopments;
 use App\EmployeeOtherinformations;
-
+use App\EmployeeOtherQuestions;
 
 
 class EmployeeController extends Controller
 {
+
+
+	public function AddUpdateOtherQuestion(Request $request){
+		if ($request->ajax())
+		{
+			$UserID = Auth::user()->UserID;
+			$EmployeeID = DB::table('temployees')->where('EmployeeID', '=', $UserID)->pluck('ID');	
+			return response(EmployeeOtherQuestions::updateOrCreate(['EmployeeID'=>$EmployeeID],$request->all()));
+		}
+	}
+
 	public function ViewPds(){
 		$UserID = Auth::user()->UserID;
 		$UserID = DB::table('temployees')->where('EmployeeID', '=', $UserID)->pluck('ID');
@@ -31,10 +42,10 @@ class EmployeeController extends Controller
 		->select('temployees.*', 'temployees.*', 'temployeespersonalinformation.*', 'temployeesfamilybackground.*')
 		->where('temployees.ID', $UserID[0])
 		->get();
-
+		$countries = DB::table('tcountries')->get();
 		$childrens = DB::table('temployeeChildrens')->where('EmployeeID', $UserID)->get();
 		$references = DB::table('temployeesreferences')->where('EmployeeID', $UserID)->get();
-
+		$answers = DB::table('temployeesotherquestions')->where('EmployeeID', $UserID)->get();
 		$ELEMENTARY = DB::table('temployeeseducationbackground')->where('EmployeeID', $UserID)->where('EBLevelID', 1)->get();
 		$SECONDARY = DB::table('temployeeseducationbackground')->where('EmployeeID', $UserID)->where('EBLevelID', 2)->get();
 		$VOCATIONAL = DB::table('temployeeseducationbackground')->where('EmployeeID', $UserID)->where('EBLevelID', 3)->get();
@@ -46,7 +57,7 @@ class EmployeeController extends Controller
 		$learningdev =EmployeeLearningDevelopments::where('EmployeeID', '=' ,$UserID)->get();
 		$otherinfo = EmployeeOtherinformations::where('EmployeeID', '=' ,$UserID)->get();
 
-		return view('employee/employeepds',compact('empDetails', 'ELEMENTARY', 'SECONDARY', 'VOCATIONAL', 'COLLEGE', 'GRADUATE', 'childrens', 'references', 'UserID', 'CSEligibilities', 'workexperiences', 'voluntarywork', 'learningdev', 'otherinfo'));
+		return view('employee/employeepds',compact('empDetails', 'ELEMENTARY', 'SECONDARY', 'VOCATIONAL', 'COLLEGE', 'GRADUATE', 'childrens', 'references', 'UserID', 'CSEligibilities', 'workexperiences', 'voluntarywork', 'learningdev', 'otherinfo', 'countries', 'answers'));
 	}
 
 	public function UpdatePersonalInformation(Request $request){

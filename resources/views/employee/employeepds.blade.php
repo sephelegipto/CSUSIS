@@ -4,12 +4,12 @@
 @section('content')
 <div class="container-fluid ">
   <div class="row">
-    <div class="col-md-2">
-      <div class="card">
+   <div class="col-sm-12">
+         <div class="card md-form">
 
-        <div class="content table-responsive "">
+    <div class="tab-content">
 
-         <ul id="tabs" class="nav nav-pills nav-stacked">
+         <ul id="tabs" class="nav nav-pills">
           <li class="active"><a href="#tab1" data-toggle="tab">Personal Information</a></li>
           <li><a href="#tab2" data-toggle="tab">Family Background</a></li>
           <li><a href="#tab3" data-toggle="tab">Educational Background</a></li>
@@ -31,7 +31,7 @@
     </div>
   </div>
   <div class="row" >
-    <div class="col-sm-9">
+    <div class="col-sm-12">
       <div class="card md-form">
         <div class="tab-content">
 
@@ -87,15 +87,42 @@
 @yield('scriptfamilybackground')
 @yield('scriptcivilserviceeligibility')
 <script>
- $(document).on('click', '#add-otherinformation-button', function() {
+
+  $('#frm-a-otherquestions').on('submit', function(e){
+    e.preventDefault();
+
+    var data = $(this).serialize();
+    var url = $(this).attr('action');
+
+    $.post(url,data,function(data){
+     $("div").scrollTop(100)
+     $.notify({
+      icon: 'ti-success',
+      message: "You have successfully updated your other questions."
+
+    },{
+      type: 'success',
+      timer: 4000
+    });
+   })
+  })
+//================================================================================================
+//================================================================================================
+//================================================================================================
+//================================================================================================
+//================================================================================================
+//================================================================================================
+//================================================================================================
+//================================================================================================
+$(document).on('click', '#add-otherinformation-button', function() {
   $('#add-otherinformation').modal('show');
 });
 
 
- $(document).on('click', '#add-workexperience-button', function() {
+$(document).on('click', '#add-workexperience-button', function() {
   $('#add-workexperience').modal('show');
 });
- $(document).on('click', '#add-learningdevelopment-button', function() {
+$(document).on('click', '#add-learningdevelopment-button', function() {
   $('#add-learningdevelopment').modal('show');
 });
 //================================================================================================
@@ -159,7 +186,7 @@ $('#frm-edit-otherinformation').on('submit', function(e){
      "<td>" + ( data.Skills || '') + "</td><td> " +
      ( data.Recognition || '') + "</td><td>" +
      ( data.Organization || '') + "</td><td>" +
-   
+
      "<button class='edit-otherinformation-button btn btn-info' data-id='" + JSON.stringify(data) + "'><span class='glyphicon glyphicon-edit'></span></button></td><td> <button id='delete-otherinformation-button' class='delete-modal btn btn-danger' data-id='" + JSON.stringify(data) + "'><span class='glyphicon glyphicon-trash'></span></button></td></tr>");
 
     $.notify({
@@ -210,7 +237,7 @@ $('#frm-del-otherinformation').on('submit', function(e){
   $.post(url,data,function(data){
 
 
-  
+
     $.notify({
       icon: 'ti-success',
       message: "You have successfully removed " + data.Skills
@@ -220,7 +247,7 @@ $('#frm-del-otherinformation').on('submit', function(e){
       timer: 4000
     });
 
-  $(".empotherinfo" + data.ID).remove();
+    $(".empotherinfo" + data.ID).remove();
   })
 
 

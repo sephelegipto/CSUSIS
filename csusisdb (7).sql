@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 24, 2018 at 10:56 AM
+-- Generation Time: Apr 25, 2018 at 10:59 AM
 -- Server version: 5.7.21-log
 -- PHP Version: 7.2.2
 
@@ -285,22 +285,33 @@ ELSE
 END IF;
 END$$
 
-CREATE DEFINER=`root`@`192.168.1.176` PROCEDURE `spGenerateSubjectsAndClassCodes` (`Step` INT(2), `PCI` INT(11), `SEC` VARCHAR(5), `CC` VARCHAR(20), `SID` INT(11))  BEGIN
-	CASE Step
-    When 1 then
-		INSERT INTO tperiodsubjects (PeriodSectionID, SubjectID)
-			Select (SELECT ID FROM vPeriodSections WHERE PeriodCourseID=PCI AND SECTION=SEC) as PeriodSectionID, ID from vCheckLists 
-			where CurriculumCode=(SELECT ActiveCurriculum FROM vperiodmashedup WHERE vPeriodSectionsID=(SELECT ID FROM vPeriodSections WHERE PeriodCourseID=PCI AND SECTION=SEC))
-			AND SubjectYearDescription=(SELECT StudentYear FROM vperiodmashedup WHERE vPeriodSectionsID=(SELECT ID FROM vPeriodSections WHERE PeriodCourseID=PCI AND SECTION=SEC)) 
-			AND TermDescription=(SELECT Term FROM vperiodmashedup WHERE vPeriodSectionsID=(SELECT ID FROM vPeriodSections WHERE PeriodCourseID=PCI AND SECTION=SEC));			
-    WHEN 2 then
-		SELECT ID,SubjectDescription,Section,ClassCode FROM vPeriodSubjects Where PeriodSectionID=(SELECT ID FROM vPeriodSections WHERE PeriodCourseID=PCI AND SECTION=SEC) ORDER BY SubjectDescription;
-	WHEN 3 then
-		SELECT ClassCodePrefix, StudentYear, Section, Term
-		FROM vperiodmashedup WHERE vPeriodSectionsID=(SELECT ID FROM vPeriodSections WHERE PeriodCourseID=PCI AND SECTION=SEC);
-	WHEN 4 then
-		UPDATE tPeriodSubjects set ClassCode=CC Where ID=SID;
-    END Case;
+CREATE DEFINER=`root`@`192.168.1.176` PROCEDURE `SPGENERATESUBJECTSANDCLASSCODES` (`STEP` INT(2), `PCI` INT(11), `SEC` VARCHAR(5), `CC` VARCHAR(20), `SID` INT(11))  BEGIN
+	CASE STEP
+		WHEN 1 THEN
+			INSERT INTO TPERIODSUBJECTS (PERIODSECTIONID, SUBJECTID)
+				SELECT (SELECT ID FROM VPERIODSECTIONS WHERE PERIODCOURSEID=PCI AND SECTION=SEC) AS PERIODSECTIONID, ID FROM VCHECKLISTS 
+				WHERE CURRICULUMCODE=(SELECT ACTIVECURRICULUM FROM VPERIODMASHEDUP WHERE VPERIODSECTIONSID=(SELECT ID FROM VPERIODSECTIONS WHERE PERIODCOURSEID=PCI AND SECTION=SEC))
+				AND SUBJECTYEARDESCRIPTION=(SELECT STUDENTYEAR FROM VPERIODMASHEDUP WHERE VPERIODSECTIONSID=(SELECT ID FROM VPERIODSECTIONS WHERE PERIODCOURSEID=PCI AND SECTION=SEC)) 
+				AND TERMDESCRIPTION=(SELECT TERM FROM VPERIODMASHEDUP WHERE VPERIODSECTIONSID=(SELECT ID FROM VPERIODSECTIONS WHERE PERIODCOURSEID=PCI AND SECTION=SEC));			
+		WHEN 2 THEN
+			SELECT ID,SUBJECTDESCRIPTION,SECTION,CLASSCODE FROM VPERIODSUBJECTS WHERE PERIODSECTIONID=(SELECT ID FROM VPERIODSECTIONS WHERE PERIODCOURSEID=PCI AND SECTION=SEC) ORDER BY SUBJECTDESCRIPTION;
+		WHEN 3 THEN
+			SELECT CLASSCODEPREFIX, STUDENTYEAR, SECTION, TERM
+			FROM VPERIODMASHEDUP WHERE VPERIODSECTIONSID=(SELECT ID FROM VPERIODSECTIONS WHERE PERIODCOURSEID=PCI AND SECTION=SEC);
+		WHEN 4 THEN
+			UPDATE TPERIODSUBJECTS SET CLASSCODE=CC WHERE ID=SID;
+		WHEN 5 THEN
+			IF SEC='0' THEN
+				IF (SELECT COUNT(ID) FROM TPERIODSUBJECTS WHERE PERIODSECTIONID=PCI AND SUBJECTID=ID) = 0 THEN
+					INSERT INTO TPERIODSUBJECTS(PERIODSECTIONID,CLASSCODE,SUBJECTID) VALUES (PCI,CC,SID);
+				END IF;
+			ELSE
+				IF (SELECT COUNT(ID) FROM TPERIODSUBJECTS WHERE PERIODSECTIONID=PCI AND SUBJECTID=ID AND CLASSCODE=CC) = 0 THEN
+					UPDATE TPERIODSUBJECTS SET PERIODSECTIONID=PCI,CLASSCODE=CC,SUBJECTID=SID WHERE ID=SEC;
+				END IF;
+			END IF;
+		
+    END CASE;
 END$$
 
 CREATE DEFINER=`root`@`192.168.1.177` PROCEDURE `spLibraryAddOREdit` (`AESwitch` INT(50), `LibraryToAddEdit` VARCHAR(50), `ParamCode` VARCHAR(50), `ParamDescription` VARCHAR(100))  BEGIN
@@ -472,6 +483,9 @@ CREATE DEFINER=`root`@`192.168.1.177` PROCEDURE `spLibraryDeletebyID` (`IDToDele
 			DELETE from tPeriodSchedules WHERE PeriodSubjectID=ANY(Select ID from tPeriodSubjects WHERE PeriodSectionID=IDToDelete);
 			DELETE from tPeriodSubjects WHERE PeriodSectionID=IDToDelete;
 			DELETE from tPeriodSections WHERE ID = IDToDelete;
+		WHEN 'Period Subjects' THEN
+			DELETE from tPeriodSchedules WHERE PeriodSubjectID=ANY(Select ID from tPeriodSubjects WHERE ID=IDToDelete);
+			DELETE from tPeriodSubjects WHERE ID=IDToDelete;
 		WHEN 'ADMIN' OR 'FACULTY' OR 'STUDENT' OR 'PARENT' THEN
 			DELETE from tloginverificators WHERE ID = IDToDelete;
 END CASE;
@@ -951,7 +965,7 @@ CREATE DEFINER=`root`@`192.168.1.177` PROCEDURE `spPeriodsViewAllORSearch` (`Lib
             or Teacher LIKE  CONCAT('%',SearchText , '%'))
             ORDER BY ClassCode;
 		WHEN 'SCHEDULES' THEN
-			SELECT ID,PeriodSubjectId,ClassCode,SubjectCode,SubjectDescription,Day,StartTime,EndTime,RoomID,RoomCode,Building,College,SessionType,TeacherId,Teacher FROM VPERIODSCHEDULES WHERE PeriodSubjectID IN (SELECT ID from vPeriodSubjects WHERE PeriodSectionID=1); 
+			SELECT ID,PeriodSubjectId,ClassCode,SubjectCode,SubjectDescription,Day,StartTime,EndTime,RoomID,RoomCode,Building,College,SessionType,TeacherId,Teacher FROM VPERIODSCHEDULES WHERE PeriodSubjectID IN (SELECT ID from vPeriodSubjects WHERE PeriodSectionID=PeriodToLoad); 
 	END CASE;
 		
 END$$
@@ -2257,7 +2271,6 @@ INSERT INTO `temployeecseligibilities` (`ID`, `EmployeeID`, `CareerService`, `Ra
 (112, NULL, '1', '1', NULL, '1', '1', NULL),
 (113, NULL, 'r', NULL, NULL, NULL, NULL, NULL),
 (114, NULL, 'r', NULL, NULL, NULL, NULL, NULL),
-(116, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (117, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (118, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
@@ -2352,7 +2365,7 @@ INSERT INTO `temployees` (`ID`, `EmployeeID`, `Salutation`, `LastName`, `FirstNa
 (61, 'CICS-0012', 'Mr.', 'BRAVO', 'EDISON', 'D.', 53, 26, 'MALE', 9, 5, 1, '-', 'TUGUEGARAO CITY, CAGAYAN', 2, 2),
 (62, 'CICS-0013', 'Ms.', 'DAYAG', 'CHRISSA', 'P.', 53, 26, 'FEMALE', 9, 3, 1, '-', 'TUGUEGARAO CITY, CAGAYAN', 2, 2),
 (63, 'CICS-0014', 'Ms.', 'ELIZAGA', 'JENNELYN', 'BALISI', 53, 26, 'FEMALE', 9, 5, 1, '-', 'SOLANA, CAGAYAN', 2, 2),
-(64, '123', 'Mr.', 'Egipto', 'J Sephel Eliphaz', 'Baptista', 53, 26, 'MALE', 9, 5, 1, '-', 'TUGUEGARAO CITY, CAGYAN', 2, 2),
+(64, '123', 'Mr.', 'Egipto', 'J Sephel Eliphaz', 'Baptista1', 53, 26, 'MALE', 9, 5, 1, '-', 'TUGUEGARAO CITY, CAGYAN', 2, 2),
 (65, 'CICS-0016', 'Mr.', 'Egipto123123asd', 'J Sephel Eliphaz', 'Baptista', 53, 26, 'MALE', 9, 5, 1, '-', 'TUGUEGARAO CITY, CAGAYAN', 2, 2),
 (66, 'CICS-0017', 'Ms.', 'GUZMAN', 'DANNIVER', 'RAFUL', 53, 26, 'FEMALE', 9, 5, 1, '-', 'TUGUEGARAO CITY, CAGAYAN', 2, 2),
 (67, 'CICS-0018', 'Ms.', 'FURIFGAY', 'PRINCESS VANEZZA', 'M.', 53, 26, 'FEMALE', 9, 5, 1, '-', 'PEÑABLANCA, CAGAYAN', 2, 2),
@@ -2436,11 +2449,11 @@ CREATE TABLE `temployeeseducationbackground` (
 --
 
 INSERT INTO `temployeeseducationbackground` (`id`, `EmployeeID`, `NameOfSchool`, `EducationDegreeCourse`, `From`, `To`, `UnitsEarned`, `YearGraduated`, `AcademicHonors`, `EBLevelID`) VALUES
-(1, '123', 'test', 'test', 'test', 'test', 3, 'test', 'test', 1),
-(3, '', '11-13826', '11-13826', '11-13826', '11-13826', 3, '11-13826', '11-13826', 2),
-(4, '11-13826', '11-13826', '11-13826', '11-13826', '11-13826', 3, '11-13826', '11-13826', 3),
-(5, '11-13826', '11-13826', '11-13826', '11-13826', '11-13826', 3, '11-13826', '11-13826', 4),
-(6, '11-13826', 'test', NULL, NULL, NULL, NULL, NULL, NULL, 5);
+(1, '64', '11-13826', 'test', 'test', 'test', 3, 'test', 'test', 1),
+(3, '64', '11-13826', '11-13826', '11-13826', '11-13826', 3, '11-13826', '11-13826', 2),
+(4, '64', '11-13826', '11-13826', '11-13826', '11-13826', 3, '11-13826', '11-13826', 3),
+(5, '64', '11-13826', '11-13826', '11-13826', '11-13826', 3, '11-13826', '11-13826', 4),
+(6, '64', 'test', NULL, NULL, NULL, NULL, NULL, NULL, 5);
 
 -- --------------------------------------------------------
 
@@ -2510,9 +2523,38 @@ INSERT INTO `temployeeslearningandevelopment` (`ID`, `Title`, `InclusiveDateFrom
 CREATE TABLE `temployeesotherquestions` (
   `ID` int(11) NOT NULL,
   `EmployeeID` varchar(50) NOT NULL,
-  `Answer` int(20) NOT NULL,
-  `Remark` varchar(80) NOT NULL
+  `Question1` int(20) DEFAULT NULL,
+  `Question2` int(11) DEFAULT NULL,
+  `Question3` int(11) DEFAULT NULL,
+  `Question4` int(11) DEFAULT NULL,
+  `Question5` int(11) DEFAULT NULL,
+  `Question6` int(11) DEFAULT NULL,
+  `Question7` int(11) DEFAULT NULL,
+  `Question8` int(11) DEFAULT NULL,
+  `Question9` int(11) DEFAULT NULL,
+  `Question10` int(11) DEFAULT NULL,
+  `Question11` int(11) DEFAULT NULL,
+  `Question12` int(11) DEFAULT NULL,
+  `Remark1` varchar(45) DEFAULT NULL,
+  `Remark2` varchar(100) DEFAULT NULL,
+  `Remark3` varchar(100) DEFAULT NULL,
+  `Remark4` varchar(100) DEFAULT NULL,
+  `Remark5` varchar(100) DEFAULT NULL,
+  `Remark6` varchar(100) DEFAULT NULL,
+  `Remark7` varchar(100) DEFAULT NULL,
+  `Remark8` varchar(100) DEFAULT NULL,
+  `Remark9` varchar(100) DEFAULT NULL,
+  `Remark10` varchar(100) DEFAULT NULL,
+  `Remark11` varchar(100) DEFAULT NULL,
+  `Remark12` varchar(45) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `temployeesotherquestions`
+--
+
+INSERT INTO `temployeesotherquestions` (`ID`, `EmployeeID`, `Question1`, `Question2`, `Question3`, `Question4`, `Question5`, `Question6`, `Question7`, `Question8`, `Question9`, `Question10`, `Question11`, `Question12`, `Remark1`, `Remark2`, `Remark3`, `Remark4`, `Remark5`, `Remark6`, `Remark7`, `Remark8`, `Remark9`, `Remark10`, `Remark11`, `Remark12`) VALUES
+(2, '64', 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, '1', '2', '2018-04-10', '4', '5', '6', '7', '8', '9', '10', '11', '12');
 
 -- --------------------------------------------------------
 
@@ -2556,16 +2598,17 @@ CREATE TABLE `temployeespersonalinformation` (
   `Filipino` int(11) DEFAULT '0',
   `DualCitizenship` int(11) DEFAULT '0',
   `ByBirth` int(11) DEFAULT '0',
-  `ByNaturalization` int(11) DEFAULT '0'
+  `ByNaturalization` int(11) DEFAULT '0',
+  `CountryID` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `temployeespersonalinformation`
 --
 
-INSERT INTO `temployeespersonalinformation` (`id`, `EmployeeID`, `ExtensionName`, `DOB`, `POB`, `Email`, `PhoneNumber`, `Telephone`, `CivilStatus`, `Height`, `Weight`, `BloodType`, `GSIS`, `PAGIBIG`, `PHILHEALTH`, `SSS`, `TIN`, `AGENCYEMPLOYEENO`, `ResZipCode`, `PermZipCode`, `ResHouseBlockLotNo`, `ResStreet`, `ResSubDiv`, `ResBrngy`, `ResCity`, `ResProvince`, `PermHouseBlockLotNo`, `PermStreet`, `PermSubDiv`, `PermBrngy`, `PermCity`, `PermProvince`, `Filipino`, `DualCitizenship`, `ByBirth`, `ByNaturalization`) VALUES
-(4, '64', NULL, '1994-01-08', 'Tuguegarao City', 'Sephelegipto@gmail.com', '09759556027', NULL, 'Single', '11.70688', '50', 'B+', '7', NULL, NULL, NULL, NULL, 'PT-CICS-708', '3500', '3500', '166', 'E', 'Balzain West', '12', 'Tuguegarao', 'Cagayan Valley', '166', 'E', 'Balzain West', '12', 'Tuguegarao', 'Cagayan Valley', 1, 1, 0, 0),
-(5, '65', NULL, '1994-01-08', 'Tuguegarao City', 'Sephelegipto@gmail.com', '09759556027', NULL, 'Single', '11.70688', '50', 'A+', '7', NULL, NULL, NULL, NULL, 'PT-CICS-708', '3500', '3500', '166', 'E', 'Balzain West', '12', 'Tuguegarao', 'Cagayan Valley', '166', 'E', 'Balzain West', '12', 'Tuguegarao', 'Cagayan Valley', NULL, NULL, NULL, NULL);
+INSERT INTO `temployeespersonalinformation` (`id`, `EmployeeID`, `ExtensionName`, `DOB`, `POB`, `Email`, `PhoneNumber`, `Telephone`, `CivilStatus`, `Height`, `Weight`, `BloodType`, `GSIS`, `PAGIBIG`, `PHILHEALTH`, `SSS`, `TIN`, `AGENCYEMPLOYEENO`, `ResZipCode`, `PermZipCode`, `ResHouseBlockLotNo`, `ResStreet`, `ResSubDiv`, `ResBrngy`, `ResCity`, `ResProvince`, `PermHouseBlockLotNo`, `PermStreet`, `PermSubDiv`, `PermBrngy`, `PermCity`, `PermProvince`, `Filipino`, `DualCitizenship`, `ByBirth`, `ByNaturalization`, `CountryID`) VALUES
+(4, '64', NULL, '1994-01-08', 'Tuguegarao City', 'Sephelegipto@gmail.com', '09759556027', NULL, 'Seperated', '11.70688', '50', 'B+', '7', NULL, NULL, NULL, NULL, 'PT-CICS-708', '3500', '3500', '166', 'E', 'Balzain West', '12', 'Tuguegarao', 'Cagayan Valley', '166', 'E', 'Balzain West', '12', 'Tuguegarao', 'Cagayan Valley', 1, 0, 0, 1, 173),
+(5, '65', NULL, '1994-01-08', 'Tuguegarao City', 'Sephelegipto@gmail.com', '09759556027', NULL, 'Single', '11.70688', '50', 'A+', '7', NULL, NULL, NULL, NULL, 'PT-CICS-708', '3500', '3500', '166', 'E', 'Balzain West', '12', 'Tuguegarao', 'Cagayan Valley', '166', 'E', 'Balzain West', '12', 'Tuguegarao', 'Cagayan Valley', NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -2586,7 +2629,7 @@ CREATE TABLE `temployeesreferences` (
 --
 
 INSERT INTO `temployeesreferences` (`ID`, `EmployeeID`, `Name`, `Address`, `ContactNumber`) VALUES
-(19, '64', 'test', NULL, '5'),
+(19, '64', NULL, NULL, NULL),
 (20, '64', NULL, NULL, NULL),
 (21, '64', NULL, NULL, NULL);
 
@@ -2965,8 +3008,8 @@ INSERT INTO `tloginverificators` (`id`, `UserID`, `Password`, `UserTypeID`, `Sec
 (18, 'PT-CICS-078', '453e406dcee4d18174d4ff623f52dcd8', 2, NULL, NULL, 1, 'A8drpw3w5maB1RBbHie9PO8CDscmF37AjL9WlsPUh5CovLEfRoI6rNciGkew', NULL, NULL),
 (22, 'ABC123', '453e406dcee4d18174d4ff623f52dcd8', 3, 0, 0, 0, 'tRno2C4dZ3YjMWMwzrqzTBnPwKxEBmZIDdr74a2UKVq7DWDzdA0DA58AVwlo', NULL, NULL),
 (23, '1', 'secret', 3, 0, 0, 0, NULL, NULL, NULL),
-(24, '123', '453e406dcee4d18174d4ff623f52dcd8', 2, NULL, NULL, 1, 'PCczklKtl7gRsn3rLRCfcXr2eXP5CN73bJ7ZABVnYNxGDrytZvVGsJ40PvPr', NULL, NULL),
-(25, 'PRES-001', '453e406dcee4d18174d4ff623f52dcd8', 1, NULL, NULL, 1, 'FkZSztEHmJZyivnBbY8j2a2DgrQ7UyEqhiljKfRLRjWG4R4HMI9dXdBTwMeT', NULL, NULL);
+(24, '123', '453e406dcee4d18174d4ff623f52dcd8', 2, NULL, NULL, 1, 'eklTRqOJACljLPygGeS9t5O7QJEWnCFgy9JZYWmKBNNeVPiVYahbqt52VhPb', NULL, NULL),
+(25, 'PRES-001', '453e406dcee4d18174d4ff623f52dcd8', 1, NULL, NULL, 1, '2nOa9urOv7qKAYaoBSyVS84Cs3U3slyN1Jj6JUY2GyziGbx7KHmsMGZxPSHH', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -3074,12 +3117,16 @@ CREATE TABLE `tperiodcourses` (
 --
 
 INSERT INTO `tperiodcourses` (`ID`, `PeriodID`, `CourseID`, `StudentYear`, `CostPerUnit`, `ActiveCurriculumID`, `Petition`) VALUES
-(1, 22, 68, 1, '0.00', 15, 0),
-(2, 22, 68, 2, '0.00', 15, 0),
-(3, 22, 68, 3, '0.00', 15, 0),
-(4, 22, 68, 4, '0.00', 15, 0),
-(5, 22, 68, 1, '200.00', 15, 1),
-(6, 22, 68, 1, '0.00', 22, 0);
+(9, 22, 70, 1, '0.00', 20, 0),
+(10, 22, 70, 2, '0.00', 20, 0),
+(11, 22, 70, 3, '0.00', 20, 0),
+(12, 22, 70, 4, '0.00', 20, 0),
+(13, 23, 70, 1, '0.00', 20, 0),
+(14, 23, 70, 2, '0.00', 20, 0),
+(15, 23, 70, 3, '0.00', 20, 0),
+(16, 23, 70, 4, '0.00', 20, 0),
+(17, 24, 70, 1, '0.00', 20, 0),
+(19, 24, 70, 3, '0.00', 20, 0);
 
 -- --------------------------------------------------------
 
@@ -3094,25 +3141,6 @@ CREATE TABLE `tperiodfees` (
   `Amount` decimal(10,2) DEFAULT NULL,
   `AppliedToID` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `tperiodfees`
---
-
-INSERT INTO `tperiodfees` (`ID`, `PeriodCourseID`, `FeeID`, `Amount`, `AppliedToID`) VALUES
-(1, 1, 5, '300.00', 1),
-(2, 1, 31, '30.00', 1),
-(3, 1, 12, '80.00', 1),
-(4, 1, 30, '180.00', 1),
-(5, 1, 2, '120.00', 1),
-(6, 1, 61, '185.00', 1),
-(7, 1, 41, '300.00', 1),
-(8, 1, 3, '100.00', 1),
-(9, 1, 4, '60.00', 1),
-(10, 1, 77, '800.00', 1),
-(11, 1, 78, '200.00', 1),
-(12, 1, 79, '35.00', 1),
-(14, 1, 6, '15.00', 1);
 
 -- --------------------------------------------------------
 
@@ -3143,7 +3171,8 @@ CREATE TABLE `tperiods` (
 
 INSERT INTO `tperiods` (`ID`, `PeriodCode`, `TermID`, `StartDate`, `EndDate`, `EnrollmentStartDate`, `EnrollmentEndDate`, `PrelimDate`, `MidtermDate`, `FinalsDate`, `GradeInputStart`, `GradeInputEnd`, `StartYear`, `EndYear`) VALUES
 (22, '2-18-19', 2, '2018-04-12', '2018-08-12', '2018-03-29', '2018-04-12', '2018-05-12', '2018-06-12', '2018-07-12', '2018-07-12', '2018-09-12', 2018, 2019),
-(23, '1-18-19', 1, '2018-04-20', '2018-08-20', '2018-04-06', '2018-04-20', '2018-05-20', '2018-06-20', '2018-07-20', '2018-07-20', '2018-09-20', 2018, 2019);
+(23, '1-18-19', 1, '2018-04-20', '2018-08-20', '2018-04-06', '2018-04-20', '2018-05-20', '2018-06-20', '2018-07-20', '2018-07-20', '2018-09-20', 2018, 2019),
+(24, 'S-18-19', 3, '2018-04-25', '2018-08-25', '2018-04-11', '2018-04-25', '2018-05-25', '2018-06-25', '2018-07-25', '2018-07-25', '2018-09-25', 2018, 2019);
 
 -- --------------------------------------------------------
 
@@ -3160,59 +3189,6 @@ CREATE TABLE `tperiodschedules` (
   `RoomID` int(11) DEFAULT NULL,
   `SessionType` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `tperiodschedules`
---
-
-INSERT INTO `tperiodschedules` (`ID`, `PeriodSubjectID`, `Day`, `Start`, `End`, `RoomID`, `SessionType`) VALUES
-(53, 3, 'W', '2', '4', 128, 0),
-(54, 6, 'M', '130', '3', 128, 0),
-(55, 4, 'F', '1030', '12', 128, 0),
-(56, 4, 'T', '10', '1', 138, 1),
-(57, 1, 'MW', '12', '130', 128, 0),
-(58, 1, 'Th', '10', '1', 138, 1),
-(59, 7, 'M', '330', '530', 128, 0),
-(60, 8, 'MW', '730', '9', 128, 0),
-(61, 2, 'MW', '9', '1030', 128, 0),
-(62, 5, 'TTh', '130', '3', 128, 0),
-(63, 22, 'TTh', '3', '430', 128, 0),
-(64, 19, 'S', '1', '4', 129, 0),
-(65, 17, 'T', '1130', '130', 118, 0),
-(66, 16, 'W', '130', '330', 120, 0),
-(67, 21, 'M', '930', '1130', 118, 0),
-(68, 20, 'MW', '730', '9', 113, 0),
-(69, 23, 'TTh', '730', '9', 116, 0),
-(70, 24, 'TTh', '3', '430', 115, 0),
-(71, 18, 'Th', '1130', '130', 120, 0),
-(72, 18, 'W', '1', '4', 134, 1),
-(73, 31, 'M', '730', '930', 119, 0),
-(74, 31, 'W', '7', '10', 135, 1),
-(75, 33, 'T', '1130', '130', 119, 0),
-(76, 37, 'TTh', '9', '1030', 116, 0),
-(77, 35, 'TTh', '3', '430', 112, 0),
-(78, 34, 'MW', '1030', '12', 115, 0),
-(79, 36, 'F', '130', '330', 119, 0),
-(80, 32, 'T', '730', '930', 119, 0),
-(81, 32, 'M', '1', '4', 135, 1),
-(82, 38, 'M', '430', '630', 119, 0),
-(83, 38, 'W', '4', '7', 133, 1),
-(84, 39, 'MW', '9', '1030', 113, 0),
-(85, 39, 'W', '10', '1', 133, 1),
-(86, 41, 'TTh', '12', '130', 115, 0),
-(87, 41, 'M', '7', '10', 137, 1),
-(88, 42, 'TTh', '1030', '12', 116, 0),
-(89, 42, 'T', '10', '1', 133, 1),
-(90, 40, 'Th', '1', '3', 121, 0),
-(91, 40, 'F', '1', '4', 136, 1),
-(92, 3, 'T', '10', '1', 138, 1),
-(93, 6, 'T', '10', '1', 138, 1),
-(94, 7, 'Th', '10', '1', 138, 1),
-(95, 17, 'M', '1', '4', 134, 1),
-(96, 16, 'Th', '10', '1', 134, 1),
-(97, 21, 'W', '10', '1', 133, 1),
-(98, 33, 'M', '1', '4', 133, 1),
-(99, 36, 'F', '10', '1', 134, 1);
 
 -- --------------------------------------------------------
 
@@ -3233,11 +3209,40 @@ CREATE TABLE `tperiodsections` (
 --
 
 INSERT INTO `tperiodsections` (`ID`, `PeriodCourseID`, `Section`, `AdviserID`, `ClassSize`) VALUES
-(1, 1, 'A', 0, 50),
-(2, 2, 'B', 0, 50),
-(3, 3, 'C', 0, 50),
-(4, 4, 'D', 0, 50),
-(5, 5, 'PET', 0, 50);
+(9, 9, 'A', 0, 50),
+(10, 9, 'B', 0, 50),
+(11, 9, 'C', 0, 50),
+(12, 9, 'D', 0, 50),
+(13, 10, 'A', 0, 50),
+(14, 10, 'B', 0, 50),
+(15, 10, 'C', 0, 50),
+(16, 10, 'D', 0, 50),
+(17, 11, 'A', 0, 50),
+(18, 11, 'B', 0, 50),
+(19, 11, 'C', 0, 50),
+(20, 11, 'D', 0, 50),
+(21, 12, 'A', 0, 50),
+(22, 12, 'B', 0, 50),
+(23, 12, 'C', 0, 50),
+(24, 12, 'D', 0, 50),
+(25, 13, 'A', 0, 50),
+(26, 13, 'B', 0, 50),
+(27, 13, 'C', 0, 50),
+(28, 13, 'D', 0, 50),
+(29, 14, 'A', 0, 50),
+(30, 14, 'B', 0, 50),
+(31, 14, 'C', 0, 50),
+(32, 14, 'D', 0, 50),
+(33, 15, 'A', 0, 50),
+(34, 15, 'B', 0, 50),
+(35, 15, 'C', 0, 50),
+(36, 15, 'D', 0, 50),
+(37, 16, 'A', 0, 50),
+(38, 16, 'B', 0, 50),
+(39, 16, 'C', 0, 50),
+(40, 16, 'D', 0, 50),
+(41, 17, 'A', 0, 50),
+(43, 19, 'A', 0, 50);
 
 -- --------------------------------------------------------
 
@@ -3258,38 +3263,219 @@ CREATE TABLE `tperiodsubjects` (
 --
 
 INSERT INTO `tperiodsubjects` (`ID`, `PeriodSectionID`, `ClassCode`, `SubjectID`, `TeacherID`) VALUES
-(1, 1, 'I1A14', 174, 51),
-(2, 1, 'I1A17', 176, 0),
-(3, 1, 'I1A11', 180, 42),
-(4, 1, 'I1A13', 175, 54),
-(5, 1, 'I1A18', 179, 53),
-(6, 1, 'I1A12', 181, 47),
-(7, 1, 'I1A15', 221, 54),
-(8, 1, 'I1A16', 232, 53),
-(16, 2, 'I2B14', 189, 0),
-(17, 2, 'I2B13', 192, 53),
-(18, 2, 'I2B19', 194, 0),
-(19, 2, 'I2B12', 196, 0),
-(20, 2, 'I2B16', 191, 0),
-(21, 2, 'I2B15', 193, 0),
-(22, 2, 'I2B11', 212, 0),
-(23, 2, 'I2B17', 195, 53),
-(24, 2, 'I2B18', 197, 0),
-(31, 3, 'I3C11', 217, 0),
-(32, 3, 'I3C17', 219, 0),
-(33, 3, 'I3C12', 230, 0),
-(34, 3, 'I3C15', 210, 0),
-(35, 3, 'I3C14', 216, 0),
-(36, 3, 'I3C16', 218, 0),
-(37, 3, 'I3C13', 229, 0),
-(38, 4, 'I4D11', 199, 0),
-(39, 4, 'I4D12', 201, 0),
-(40, 4, 'I4D15', 203, 0),
-(41, 4, 'I4D13', 200, 0),
-(42, 4, 'I4D14', 202, 0),
-(45, 5, 'P-I1PET11', 174, 0),
-(46, NULL, 'I4A13', NULL, 132),
-(47, NULL, NULL, NULL, 0);
+(72, 9, 'C1A25', 355, NULL),
+(73, 9, 'C1A27', 358, NULL),
+(74, 9, 'C1A23', 350, NULL),
+(75, 9, 'C1A21', 352, NULL),
+(76, 9, 'C1A28', 354, NULL),
+(77, 9, 'C1A24', 357, NULL),
+(78, 9, 'C1A22', 351, NULL),
+(79, 9, 'C1A26', 353, NULL),
+(87, 10, 'C1B22', 351, NULL),
+(88, 10, 'C1B26', 353, NULL),
+(89, 10, 'C1B25', 355, NULL),
+(90, 10, 'C1B27', 358, NULL),
+(91, 10, 'C1B23', 350, NULL),
+(92, 10, 'C1B21', 352, NULL),
+(93, 10, 'C1B28', 354, NULL),
+(94, 10, 'C1B24', 357, NULL),
+(102, 11, 'C1C22', 351, NULL),
+(103, 11, 'C1C26', 353, NULL),
+(104, 11, 'C1C25', 355, NULL),
+(105, 11, 'C1C27', 358, NULL),
+(106, 11, 'C1C23', 350, NULL),
+(107, 11, 'C1C21', 352, NULL),
+(108, 11, 'C1C28', 354, NULL),
+(109, 11, 'C1C24', 357, NULL),
+(117, 12, 'C1D22', 351, NULL),
+(118, 12, 'C1D26', 353, NULL),
+(119, 12, 'C1D25', 355, NULL),
+(120, 12, 'C1D27', 358, NULL),
+(121, 12, 'C1D23', 350, NULL),
+(122, 12, 'C1D21', 352, NULL),
+(123, 12, 'C1D28', 354, NULL),
+(124, 12, 'C1D24', 357, NULL),
+(132, 13, 'C2A22', 368, NULL),
+(133, 13, 'C2A26', 371, NULL),
+(134, 13, 'C2A23', 373, NULL),
+(135, 13, 'C2A21', 367, NULL),
+(136, 13, 'C2A24', 369, NULL),
+(137, 13, 'C2A25', 372, NULL),
+(139, 14, 'C2B22', 368, NULL),
+(140, 14, 'C2B26', 371, NULL),
+(141, 14, 'C2B23', 373, NULL),
+(142, 14, 'C2B21', 367, NULL),
+(143, 14, 'C2B24', 369, NULL),
+(144, 14, 'C2B25', 372, NULL),
+(146, 15, 'C2C22', 368, NULL),
+(147, 15, 'C2C26', 371, NULL),
+(148, 15, 'C2C23', 373, NULL),
+(149, 15, 'C2C21', 367, NULL),
+(150, 15, 'C2C24', 369, NULL),
+(151, 15, 'C2C25', 372, NULL),
+(153, 16, 'C2D23', 373, NULL),
+(154, 16, 'C2D21', 367, NULL),
+(155, 16, 'C2D24', 369, NULL),
+(156, 16, 'C2D25', 372, NULL),
+(157, 16, 'C2D22', 368, NULL),
+(158, 16, 'C2D26', 371, NULL),
+(160, 17, 'C3A22', 383, NULL),
+(161, 17, 'C3A24', 385, NULL),
+(162, 17, 'C3A21', 382, NULL),
+(163, 17, 'C3A23', 384, NULL),
+(164, 17, 'C3A26', 386, NULL),
+(165, 17, 'C3A25', 387, NULL),
+(167, 18, 'C3B22', 383, NULL),
+(168, 18, 'C3B24', 385, NULL),
+(169, 18, 'C3B25', 387, NULL),
+(170, 18, 'C3B21', 382, NULL),
+(171, 18, 'C3B23', 384, NULL),
+(172, 18, 'C3B26', 386, NULL),
+(174, 19, 'C3C22', 383, NULL),
+(175, 19, 'C3C24', 385, NULL),
+(176, 19, 'C3C25', 387, NULL),
+(177, 19, 'C3C21', 382, NULL),
+(178, 19, 'C3C23', 384, NULL),
+(179, 19, 'C3C26', 386, NULL),
+(181, 20, 'C3D22', 383, NULL),
+(182, 20, 'C3D24', 385, NULL),
+(183, 20, 'C3D25', 387, NULL),
+(184, 20, 'C3D21', 382, NULL),
+(185, 20, 'C3D23', 384, NULL),
+(186, 20, 'C3D26', 386, NULL),
+(188, 21, 'C4A22', 410, NULL),
+(189, 21, 'C4A24', 413, NULL),
+(190, 21, 'C4A21', 409, NULL),
+(191, 21, 'C4A23', 411, NULL),
+(192, 21, 'C4A25', 414, NULL),
+(195, 22, 'C4B21', 409, NULL),
+(196, 22, 'C4B23', 411, NULL),
+(197, 22, 'C4B25', 414, NULL),
+(198, 22, 'C4B22', 410, NULL),
+(199, 22, 'C4B24', 413, NULL),
+(202, 23, 'C4C21', 409, NULL),
+(203, 23, 'C4C23', 411, NULL),
+(204, 23, 'C4C25', 414, NULL),
+(205, 23, 'C4C22', 410, NULL),
+(206, 23, 'C4C24', 413, NULL),
+(209, 24, 'C4D21', 409, NULL),
+(210, 24, 'C4D23', 411, NULL),
+(211, 24, 'C4D25', 414, NULL),
+(212, 24, 'C4D22', 410, NULL),
+(213, 24, 'C4D24', 413, NULL),
+(216, 25, 'C1A14', 332, NULL),
+(217, 25, 'C1A12', 345, NULL),
+(218, 25, 'C1A15', 347, NULL),
+(219, 25, 'C1A17', 349, NULL),
+(220, 25, 'C1A13', 331, NULL),
+(221, 25, 'C1A16', 344, NULL),
+(222, 25, 'C1A11', 346, NULL),
+(223, 25, 'C1A18', 348, NULL),
+(231, 26, 'C1B14', 332, NULL),
+(232, 26, 'C1B12', 345, NULL),
+(233, 26, 'C1B15', 347, NULL),
+(234, 26, 'C1B17', 349, NULL),
+(235, 26, 'C1B13', 331, NULL),
+(236, 26, 'C1B16', 344, NULL),
+(237, 26, 'C1B11', 346, NULL),
+(238, 26, 'C1B18', 348, NULL),
+(246, 27, 'C1C14', 332, NULL),
+(247, 27, 'C1C12', 345, NULL),
+(248, 27, 'C1C15', 347, NULL),
+(249, 27, 'C1C17', 349, NULL),
+(250, 27, 'C1C13', 331, NULL),
+(251, 27, 'C1C16', 344, NULL),
+(252, 27, 'C1C11', 346, NULL),
+(253, 27, 'C1C18', 348, NULL),
+(261, 28, 'C1D14', 332, NULL),
+(262, 28, 'C1D12', 345, NULL),
+(263, 28, 'C1D15', 347, NULL),
+(264, 28, 'C1D17', 349, NULL),
+(265, 28, 'C1D13', 331, NULL),
+(266, 28, 'C1D16', 344, NULL),
+(267, 28, 'C1D11', 346, NULL),
+(268, 28, 'C1D18', 348, NULL),
+(276, 29, 'C2A13', 360, NULL),
+(277, 29, 'C2A14', 362, NULL),
+(278, 29, 'C2A18', 364, NULL),
+(279, 29, 'C2A17', 366, NULL),
+(280, 29, 'C2A12', 359, NULL),
+(281, 29, 'C2A15', 361, NULL),
+(282, 29, 'C2A11', 363, NULL),
+(283, 29, 'C2A16', 365, NULL),
+(291, 30, 'C2B12', 359, NULL),
+(292, 30, 'C2B15', 361, NULL),
+(293, 30, 'C2B11', 363, NULL),
+(294, 30, 'C2B16', 365, NULL),
+(295, 30, 'C2B13', 360, NULL),
+(296, 30, 'C2B14', 362, NULL),
+(297, 30, 'C2B18', 364, NULL),
+(298, 30, 'C2B17', 366, NULL),
+(306, 31, 'C2C13', 360, NULL),
+(307, 31, 'C2C14', 362, NULL),
+(308, 31, 'C2C18', 364, NULL),
+(309, 31, 'C2C17', 366, NULL),
+(310, 31, 'C2C12', 359, NULL),
+(311, 31, 'C2C15', 361, NULL),
+(312, 31, 'C2C11', 363, NULL),
+(313, 31, 'C2C16', 365, NULL),
+(321, 32, 'C2D13', 360, NULL),
+(322, 32, 'C2D14', 362, NULL),
+(323, 32, 'C2D18', 364, NULL),
+(324, 32, 'C2D17', 366, NULL),
+(325, 32, 'C2D12', 359, NULL),
+(326, 32, 'C2D15', 361, NULL),
+(327, 32, 'C2D11', 363, NULL),
+(328, 32, 'C2D16', 365, NULL),
+(336, 33, 'C3A13', 377, NULL),
+(337, 33, 'C3A16', 379, NULL),
+(338, 33, 'C3A15', 381, NULL),
+(339, 33, 'C3A11', 376, NULL),
+(340, 33, 'C3A14', 378, NULL),
+(341, 33, 'C3A12', 380, NULL),
+(343, 34, 'C3B13', 377, NULL),
+(344, 34, 'C3B16', 379, NULL),
+(345, 34, 'C3B15', 381, NULL),
+(346, 34, 'C3B11', 376, NULL),
+(347, 34, 'C3B14', 378, NULL),
+(348, 34, 'C3B12', 380, NULL),
+(350, 35, 'C3C13', 377, NULL),
+(351, 35, 'C3C16', 379, NULL),
+(352, 35, 'C3C15', 381, NULL),
+(353, 35, 'C3C11', 376, NULL),
+(354, 35, 'C3C14', 378, NULL),
+(355, 35, 'C3C12', 380, NULL),
+(357, 36, 'C3D13', 377, NULL),
+(358, 36, 'C3D16', 379, NULL),
+(359, 36, 'C3D15', 381, NULL),
+(360, 36, 'C3D11', 376, NULL),
+(361, 36, 'C3D14', 378, NULL),
+(362, 36, 'C3D12', 380, NULL),
+(364, 37, 'C4A13', 401, NULL),
+(365, 37, 'C4A11', 403, NULL),
+(366, 37, 'C4A12', 405, NULL),
+(367, 37, 'C4A15', 402, NULL),
+(368, 37, 'C4A16', 404, NULL),
+(369, 37, 'C4A14', 408, NULL),
+(371, 38, 'C4B13', 401, NULL),
+(372, 38, 'C4B11', 403, NULL),
+(373, 38, 'C4B12', 405, NULL),
+(374, 38, 'C4B15', 402, NULL),
+(375, 38, 'C4B16', 404, NULL),
+(376, 38, 'C4B14', 408, NULL),
+(378, 39, 'C4C13', 401, NULL),
+(379, 39, 'C4C11', 403, NULL),
+(380, 39, 'C4C12', 405, NULL),
+(381, 39, 'C4C15', 402, NULL),
+(382, 39, 'C4C16', 404, NULL),
+(383, 39, 'C4C14', 408, NULL),
+(385, 40, 'C4D13', 401, NULL),
+(386, 40, 'C4D11', 403, NULL),
+(387, 40, 'C4D12', 405, NULL),
+(388, 40, 'C4D15', 402, NULL),
+(389, 40, 'C4D16', 404, NULL),
+(390, 40, 'C4D14', 408, NULL),
+(393, 43, NULL, 388, NULL);
 
 -- --------------------------------------------------------
 
@@ -5528,7 +5714,7 @@ ALTER TABLE `temployeechildrens`
 -- AUTO_INCREMENT for table `temployeecseligibilities`
 --
 ALTER TABLE `temployeecseligibilities`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=119;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=125;
 
 --
 -- AUTO_INCREMENT for table `temployeelearningdevelopment`
@@ -5540,7 +5726,7 @@ ALTER TABLE `temployeelearningdevelopment`
 -- AUTO_INCREMENT for table `temployeeotherinformation`
 --
 ALTER TABLE `temployeeotherinformation`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `temployees`
@@ -5570,7 +5756,7 @@ ALTER TABLE `temployeeslearningandevelopment`
 -- AUTO_INCREMENT for table `temployeesotherquestions`
 --
 ALTER TABLE `temployeesotherquestions`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `temployeespersonalinformation`
@@ -5582,19 +5768,19 @@ ALTER TABLE `temployeespersonalinformation`
 -- AUTO_INCREMENT for table `temployeesreferences`
 --
 ALTER TABLE `temployeesreferences`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `temployeesvoluntarywork`
 --
 ALTER TABLE `temployeesvoluntarywork`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `temployeesworkexperiences`
 --
 ALTER TABLE `temployeesworkexperiences`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `tfacultyranks`
@@ -5642,19 +5828,19 @@ ALTER TABLE `tnationalities`
 -- AUTO_INCREMENT for table `tperiodcourses`
 --
 ALTER TABLE `tperiodcourses`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `tperiodfees`
 --
 ALTER TABLE `tperiodfees`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `tperiods`
 --
 ALTER TABLE `tperiods`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT for table `tperiodschedules`
@@ -5666,13 +5852,13 @@ ALTER TABLE `tperiodschedules`
 -- AUTO_INCREMENT for table `tperiodsections`
 --
 ALTER TABLE `tperiodsections`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT for table `tperiodsubjects`
 --
 ALTER TABLE `tperiodsubjects`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=394;
 
 --
 -- AUTO_INCREMENT for table `tpositions`

@@ -1,5 +1,5 @@
         <div class="tab-pane active table-responsive"  id="tab1">
-          <form class="form-signin" id="frm-personal-information" method="POST" action="{{ route('UpdatePersonalInfo') }}">
+          <form class="form-signin" id="frm-addupdate-otherquestions" method="POST" action="{{ route('UpdatePersonalInfo') }}">
             <input type="hidden" value="{{ $UserID[0] }}" name="EmployeeID" id="EmployeeID">
             <table class="table table-bordered table-responsive">
              <tbody>
@@ -49,120 +49,148 @@
                 </td>
                 <td rowspan="3" colspan="3">
                  <div class="row text-center"> 
-                  <input type="hidden" name="Filipino" value="0"/>
-                  <input  type="checkbox" value="" {{ $empDetails[0]->Filipino ? 'CHECKED' : '' }} name="Filipino">Filipino
-                  <input type="hidden" name="DualCitizenship" value="0" />
-                  <input  type="checkbox" value="" {{ $empDetails[0]->DualCitizenship ? 'CHECKED' : '' }} name="DualCitizenship">Dual Citizenship
+                  <input type="hidden" id="check-a" name="Filipino" value="0" {{ $empDetails[0]->Filipino ? '' : 'CHECKED' }}/>
+                  <input  type="checkbox"  value="1" {{ $empDetails[0]->Filipino ? 'CHECKED' : '' }} name="Filipino" onclick="toggleA()">Filipino
+                  <input type="hidden" id="check-b" name="DualCitizenship" value="0" {{ $empDetails[0]->DualCitizenship ? '' : 'CHECKED' }}/>
+                  <input  type="checkbox" value="1" {{ $empDetails[0]->DualCitizenship ? 'CHECKED' : '' }} name="DualCitizenship" onclick="toggleB()">Dual Citizenship
 
-<script>
+                  <script>
+                   function toggleA() {
 
-</script>
+                    var elm = document.getElementById('check-a');
+                    elm.checked = !elm.checked;
+                  }
+                  function toggleB() {
 
-                </div>
-                <div class="row text-center"> 
-                 <input type="hidden" name="ByBirth" value="0" {{$empDetails[0]->ByBirth ? '' : 'CHECKED'}}/>
-                 <input  type="checkbox" value="{{ $empDetails[0]->ByBirth ? '0' : '1' }} " {{ $empDetails[0]->ByBirth ? 'CHECKED' : '' }} name="ByBirth">Dual Citizenship
+                    var elm = document.getElementById('check-b');
+                    elm.checked = !elm.checked;
+                  }
+                  function toggleC() {
 
-                 <input type="hidden" name="ByNaturalization" value="0" {{$empDetails[0]->Filipino ? '' : 'CHECKED'}}/>
-                 <input  type="checkbox" value="{{ $empDetails[0]->ByNaturalization ? '0' : '1' }} " {{ $empDetails[0]->ByNaturalization ? 'CHECKED' : '' }} name="ByNaturalization">By naturalization
+                    var elm = document.getElementById('check-c');
+                    elm.checked = !elm.checked;
+                  }
+                  function toggleD() {
 
-               </div>
-               <br> <br><br> <br><br>
+                    var elm = document.getElementById('check-d');
+                    elm.checked = !elm.checked;
+                  }
+                </script>
 
-               <p>Pls. indicate country</p>
-               <select name="country" class="form-control">
+              </div>
+              <div class="row text-center"> 
+               <input type="hidden" id="check-c" name="ByBirth" value="0" {{$empDetails[0]->ByBirth ? '' : 'CHECKED'}}/>
+               <input  type="checkbox" value="1"  {{ $empDetails[0]->ByBirth ? 'CHECKED' : '' }} name="ByBirth" onclick="toggleC()">By Birth
+
+               <input type="hidden" id="check-d" name="ByNaturalization" value="0" {{$empDetails[0]->Filipino ? '' : 'CHECKED'}}/>
+               <input  type="checkbox" value="1"  {{ $empDetails[0]->ByNaturalization ? 'CHECKED' : '' }} name="ByNaturalization" onclick="toggleD()">By naturalization
+
+             </div>
+             <br> <br><br> <br><br>
+
+             <p>Pls. indicate country</p>
+             <select name="CountryID" class="form-control">
+
+              <option value="">--------------------</option>
+              @foreach($countries as $key => $c)
+              <option value="{{ $c->ID }}" {{ $c->ID == $empDetails[0]->CountryID ? 'selected' : null }}>
+                {{ $c->CountryDescription }}
+              </option>
+              @endforeach
 
 
-               </select>
-             </td>
-           </tr>
-           <tr>
-            <td scope="row" class="col-lg-2">
-              <label for="">PLACE OF BIRTH:</label>
-            </td>
-            <td colspan="2"> 
-              <input type="text" name="POB" value="{{ $empDetails[0]->POB }}" class="form-control " >
-            </td>
-          </tr>
-          <tr>
-           <td scope="row" class="col-lg-2"> <label for="">SEX:</label></td>
-           <td colspan="2">
-            <select class="form-control col-lg-2" name="Gender">                                 
-             <option {{  $empDetails[0]->Gender == 'MALE'  ? 'SELECTED' : '' }} value="MALE">Male</option>                              
-             <option {{ $empDetails[0]->Gender == 'FEMALE'  ? 'SELECTED' : '' }} value="FEMALE">Female</option>
-           </select>
-         </td>
-       </tr>
-       <tr>
-         <td scope="row" class="col-lg-2">
-          <label for="">CIVIL STATUS:</label>
-        </td>
-        <td colspan="2"> 
-         <select class="form-control col-lg-2" name="CivilStatus">
+            </select>
 
-          <option {{  $empDetails[0]->CivilStatus == 'Single'  ? 'SELECTED' : '' }} value="Single">Single</option>                  
-          <option {{  $empDetails[0]->CivilStatus == 'Married'  ? 'SELECTED' : '' }} value="Married">Married</option>                                       
-          <option {{  $empDetails[0]->CivilStatus == 'Widowed'  ? 'SELECTED' : '' }} value="Widowed">Widowed</option>
-          <option {{  $empDetails[0]->CivilStatus == 'Seperated'  ? 'SELECTED' : '' }} value="Seperated">Seperated</option>
-        </select>
+
+          </td>
+        </tr>
+        <tr>
+          <td scope="row" class="col-lg-2">
+            <label for="">PLACE OF BIRTH:</label>
+          </td>
+          <td colspan="2"> 
+            <input type="text" name="POB" value="{{ $empDetails[0]->POB }}" class="form-control " >
+          </td>
+        </tr>
+        <tr>
+         <td scope="row" class="col-lg-2"> <label for="">SEX:</label></td>
+         <td colspan="2">
+          <select class="form-control col-lg-2" name="Gender">                                 
+           <option {{  $empDetails[0]->Gender == 'MALE'  ? 'SELECTED' : '' }} value="MALE">Male</option>                              
+           <option {{ $empDetails[0]->Gender == 'FEMALE'  ? 'SELECTED' : '' }} value="FEMALE">Female</option>
+         </select>
+       </td>
+     </tr>
+     <tr>
+       <td scope="row" class="col-lg-2">
+        <label for="">CIVIL STATUS:</label>
       </td>
-      <td rowspan="3">
-        <label for="">RESIDENTIAL ADDRESS:</label>
-        <br><br><br><br><br>
-        <input type="text" name="ResZipCode" value="{{ $empDetails[0]->ResZipCode }}" class="form-control" >
-        <center>
-          <label for="" style="font-size:12px; text-align:center">ZIP CODE</label>
-        </center>
-      </td>
-      <td> 
-        <input type="text" name="ResHouseBlockLotNo" value="{{ $empDetails[0]->ResHouseBlockLotNo }}" class="form-control " >
-        <label for="" style="font-size:12px; text-align:center">HOUSE/BLOCK/LOT NO.</label>
-      </td>
-      <td>
-        <input type="text" name="ResStreet" value="{{ $empDetails[0]->ResStreet }}" class="form-control  " >
-        <center>
-          <label for="" style="font-size:12px; text-align:center">STREET</label>
-        </center>
-      </td>
-    </tr>
-    <tr>
-     <td scope="row" class="col-lg-2"> <label for="">HEIGHT (m):</label></td>
-     <td colspan="2">  
-      <input type="text" name="Height" value="{{ $empDetails[0]->Height }}" class="form-control" > 
+      <td colspan="2"> 
+       <select class="form-control col-lg-2" name="CivilStatus">
+
+        <option {{  $empDetails[0]->CivilStatus == 'Single'  ? 'SELECTED' : '' }} value="Single">Single</option>                  
+        <option {{  $empDetails[0]->CivilStatus == 'Married'  ? 'SELECTED' : '' }} value="Married">Married</option>                                       
+        <option {{  $empDetails[0]->CivilStatus == 'Widowed'  ? 'SELECTED' : '' }} value="Widowed">Widowed</option>
+        <option {{  $empDetails[0]->CivilStatus == 'Seperated'  ? 'SELECTED' : '' }} value="Seperated">Seperated</option>
+      </select>
     </td>
-    <td>
-      <input type="text" name="ResSubDiv" value="{{ $empDetails[0]->ResSubDiv }}" class="form-control  " >
+    <td rowspan="3">
+      <label for="">RESIDENTIAL ADDRESS:</label>
+      <br><br><br><br><br>
+      <input type="text" name="ResZipCode" value="{{ $empDetails[0]->ResZipCode }}" class="form-control" >
       <center>
-        <label for="" style="font-size:12px; text-align:center">SUBDIVISION/VILLAGE</label>
+        <label for="" style="font-size:12px; text-align:center">ZIP CODE</label>
       </center>
     </td>
+    <td> 
+      <input type="text" name="ResHouseBlockLotNo" value="{{ $empDetails[0]->ResHouseBlockLotNo }}" class="form-control " >
+      <label for="" style="font-size:12px; text-align:center">HOUSE/BLOCK/LOT NO.</label>
+    </td>
     <td>
-      <input type="text" name="ResBrngy" value="{{ $empDetails[0]->ResBrngy }}" class="form-control  " >
+      <input type="text" name="ResStreet" value="{{ $empDetails[0]->ResStreet }}" class="form-control  " >
       <center>
-        <label for="" style="font-size:12px; text-align:center">BARANGAY</label>
+        <label for="" style="font-size:12px; text-align:center">STREET</label>
       </center>
     </td>
   </tr>
   <tr>
-   <td scope="row" class="col-lg-2">
-    <label for="">WEIGHT (kg):</label>
-  </td>
-  <td colspan="2"> 
-    <input type="text" name="Weight" value="{{ $empDetails[0]->Weight }}" class="form-control">
+   <td scope="row" class="col-lg-2"> <label for="">HEIGHT (m):</label></td>
+   <td colspan="2">  
+    <input type="text" name="Height" value="{{ $empDetails[0]->Height }}" class="form-control" > 
   </td>
   <td>
-    <input type="text" name="ResCity" value="{{ $empDetails[0]->ResCity }}" class="form-control">
+    <input type="text" name="ResSubDiv" value="{{ $empDetails[0]->ResSubDiv }}" class="form-control  " >
     <center>
-      <label for="" style="font-size:12px; text-align:center">CITY/MUNICIPALITY
-      </label>
+      <label for="" style="font-size:12px; text-align:center">SUBDIVISION/VILLAGE</label>
     </center>
   </td>
   <td>
-    <input type="text" name="ResProvince" value="{{ $empDetails[0]->ResProvince }}" class="form-control">
+    <input type="text" name="ResBrngy" value="{{ $empDetails[0]->ResBrngy }}" class="form-control  " >
     <center>
-      <label for="" style="font-size:12px; text-align:center">PROVINCE</label>
+      <label for="" style="font-size:12px; text-align:center">BARANGAY</label>
     </center>
   </td>
+</tr>
+<tr>
+ <td scope="row" class="col-lg-2">
+  <label for="">WEIGHT (kg):</label>
+</td>
+<td colspan="2"> 
+  <input type="text" name="Weight" value="{{ $empDetails[0]->Weight }}" class="form-control">
+</td>
+<td>
+  <input type="text" name="ResCity" value="{{ $empDetails[0]->ResCity }}" class="form-control">
+  <center>
+    <label for="" style="font-size:12px; text-align:center">CITY/MUNICIPALITY
+    </label>
+  </center>
+</td>
+<td>
+  <input type="text" name="ResProvince" value="{{ $empDetails[0]->ResProvince }}" class="form-control">
+  <center>
+    <label for="" style="font-size:12px; text-align:center">PROVINCE</label>
+  </center>
+</td>
 </tr>
 <tr>
   <td scope="row" class="col-lg-2"> 
